@@ -32,7 +32,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)SDK\Header\third-party;$(SolutionDir)SDK\Header;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)LiteLoaderSDK\Header\third-party;$(SolutionDir)LiteLoaderSDK\Header;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -46,6 +46,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PreprocessorDefinitions>NDEBUG;TEMPLATE_EXPORTS;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;_WINDOWS;_USRDLL;_AMD64_;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -56,12 +57,12 @@
       <DelayLoadDLLs>bedrock_server.dll</DelayLoadDLLs>
     </Link>
     <PreBuildEvent>
-      <Command>if not exist $(SolutionDir)SDK\Lib\bedrock_server_api.lib goto process
-if not exist $(SolutionDir)SDK\Lib\bedrock_server_var.lib goto process
+      <Command>if not exist $(SolutionDir)LiteLoaderSDK\Lib\bedrock_server_api.lib goto process
+if not exist $(SolutionDir)LiteLoaderSDK\Lib\bedrock_server_var.lib goto process
 goto end
 
 :process
-cd /d $(SolutionDir)\SDK\Tools\
+cd /d $(SolutionDir)\LiteLoaderSDK\Tools\
 if exist $(LocalDebuggerWorkingDirectory)\bedrock_server.pdb (
 LibraryBuilder.exe -o ..\Lib\ $(LocalDebuggerWorkingDirectory)
 ) else (
@@ -78,21 +79,21 @@ copy /Y $(TargetPath) $(LocalDebuggerWorkingDirectory)\plugins\
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="DataHeleper.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="JsonHelper.h" />
+    <ClInclude Include="Config.h" />
+    <ClInclude Include="CheckBagManager.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="SymHelp.h" />
+    <ClInclude Include="PlayerDataHelper.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DataHeleper.cpp" />
     <ClCompile Include="dllmain.cpp" />
-    <ClCompile Include="JsonHelper.cpp" />
+    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="CheckBagManager.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Plugin.cpp" />
-    <ClCompile Include="SymHelp.cpp" />
+    <ClCompile Include="PlayerDataHelper.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -22,14 +22,7 @@
 #include <MC/ServerPlayer.hpp>
 #include <MC/ItemStack.hpp>
 #include <RegCommandAPI.h>
-#include <MC/CommandOrigin.hpp>
-#include <MC/CommandOutput.hpp>
-#include <MC/CommandPosition.hpp>
-#include <MC/CommandRegistry.hpp>
-#include <MC/PlayerDataSystem.hpp>
-#include <MC/CompoundTag.hpp>
-#include <MC/LevelStorage.hpp>
-#include <MC/ServerNetworkEventHandler.hpp>
 #include <LLAPI.h>
+#include "Config.h"
 
 #endif //PCH_H

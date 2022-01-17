@@ -27,13 +27,13 @@
     <ClInclude Include="pch.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="JsonHelper.h">
+    <ClInclude Include="Config.h">
       <Filter>Base\header</Filter>
     </ClInclude>
-    <ClInclude Include="DataHeleper.h">
+    <ClInclude Include="PlayerDataHelper.h">
       <Filter>Base\header</Filter>
     </ClInclude>
-    <ClInclude Include="SymHelp.h">
+    <ClInclude Include="CheckBagManager.h">
       <Filter>Base\header</Filter>
     </ClInclude>
   </ItemGroup>
@@ -47,13 +47,13 @@
     <ClCompile Include="Plugin.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="DataHeleper.cpp">
+    <ClCompile Include="Config.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="JsonHelper.cpp">
+    <ClCompile Include="PlayerDataHelper.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="SymHelp.cpp">
+    <ClCompile Include="CheckBagManager.cpp">
       <Filter>Base</Filter>
     </ClCompile>
   </ItemGroup>
