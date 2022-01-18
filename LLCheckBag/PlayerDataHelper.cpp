@@ -65,8 +65,8 @@ namespace PlayerDataHelper {
     std::vector<string> getAllUuid(bool includeSelfSignedId)
     {
         std::vector<std::string> uuids;
-        std::vector<std::string> serverIds;
-        forEachUuid(includeSelfSignedId, [&uuids,&serverIds](std::string_view uuid) {
+        //std::vector<std::string> serverIds;
+        forEachUuid(includeSelfSignedId, [&uuids](std::string_view uuid) {
             //auto u = mce::UUID::fromString(std::string(uuid));
             //auto sid = getServerId(u);
             //if (std::find(serverIds.begin(), serverIds.end(), sid) != serverIds.end())
@@ -147,5 +147,34 @@ namespace PlayerDataHelper {
         auto playerTag = getPlayerData(uuid);
         changeBagTag(*playerTag, data);
         return writePlayerData(uuid, *playerTag);
+    }
+
+    std::string serializeNbt(std::unique_ptr<CompoundTag> tag, NbtDataType type) {
+        switch (type)
+        {
+        case NbtDataType::Snbt:
+            return tag->toSNBT();
+        case NbtDataType::Binary:
+            return tag->toBinaryNBT();
+        case NbtDataType::Json:
+            return tag->toJson(4);
+        case NbtDataType::Unknown:
+        default:
+            return tag->toString();
+            break;
+        }
+    }
+    std::unique_ptr<CompoundTag> deserializeNbt(std::string const& data, NbtDataType type) {
+        switch (type)
+        {
+        case NbtDataType::Snbt:
+            return CompoundTag::fromSNBT(data);
+        case NbtDataType::Binary:
+            return CompoundTag::fromBinaryNBT((void*)data.c_str(), data.size());
+        case NbtDataType::Json:
+        case NbtDataType::Unknown:
+        default:
+            return {};
+        }
     }
 }

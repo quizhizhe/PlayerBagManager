@@ -12,4 +12,6 @@ namespace PlayerDataHelper {
     void changeBagTag(CompoundTag& dst, CompoundTag& src);
     bool setPlayerBag(Player* player, CompoundTag& data);
     bool writePlayerBag(mce::UUID const& uuid, CompoundTag& data);
+    std::string serializeNbt(std::unique_ptr<CompoundTag> tag, NbtDataType type = NbtDataType::Binary);
+    std::unique_ptr<CompoundTag> deserializeNbt(std::string const& data, NbtDataType type = NbtDataType::Binary);
 }

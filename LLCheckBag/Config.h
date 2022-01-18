@@ -20,6 +20,27 @@
 extern Logger logger;
 
 #define PLUGIN_CONFIG_PATH "plugins/LLCheckBag/config.json"
+
+enum class NbtDataType :int {
+    Snbt,
+    Binary,
+    Json,
+    Unknown,
+};
+
+enum class ScreenCategory :int {
+    Check,
+    Menu,
+    Import,
+    Export,
+    Delete,
+};
+
+inline std::string toString(NbtDataType type);
+inline std::string toString(ScreenCategory type);
+template <typename T>
+inline T fromString(std::string const& name);
+
 namespace Config {
     static bool PacketMode = false;
     static bool MsaIdOnly = false;
@@ -27,7 +48,8 @@ namespace Config {
     static std::string BackupDirectory = "plugins/LLCheckBag/Backup/";
     static std::string ExportDirectory = "plugins/LLCheckBag/Export/";
     //static bool CheckLLFakePlayer = true;
-    //static CheckBagManager::DataType BackupDataType = CheckBagManager::DataType::Binary;
+    static NbtDataType BackupDataType = NbtDataType::Binary;
+    static ScreenCategory DefaultScreen = ScreenCategory::Check;
 
     bool initConfig();
 }

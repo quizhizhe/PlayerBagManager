@@ -36,6 +36,9 @@
     <ClInclude Include="CheckBagManager.h">
       <Filter>Base\header</Filter>
     </ClInclude>
+    <ClInclude Include="FormHelper.h">
+      <Filter>Base\header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -54,6 +57,9 @@
       <Filter>Base</Filter>
     </ClCompile>
     <ClCompile Include="CheckBagManager.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="FormHelper.cpp">
       <Filter>Base</Filter>
     </ClCompile>
   </ItemGroup>

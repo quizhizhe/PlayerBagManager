@@ -79,6 +79,7 @@ copy /Y $(TargetPath) $(LocalDebuggerWorkingDirectory)\plugins\
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="FormHelper.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Config.h" />
     <ClInclude Include="CheckBagManager.h" />
@@ -89,6 +90,7 @@ copy /Y $(TargetPath) $(LocalDebuggerWorkingDirectory)\plugins\
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Config.cpp" />
     <ClCompile Include="CheckBagManager.cpp" />
+    <ClCompile Include="FormHelper.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>

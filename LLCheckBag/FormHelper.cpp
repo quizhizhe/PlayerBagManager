@@ -2,85 +2,108 @@
 #include <map>
 #include "FormHelper.h"
 #include <MC/Packet.hpp>
-
-std::map<unsigned, std::function<void(string)>> formCallbacks;
-
-
-// ===== sendForm =====
-Packet* createPacket(MinecraftPacketIds type)
-{
-	unsigned long long packet[2] = { 0 };
-	SymCall("?createPacket@MinecraftPackets@@SA?AV?$shared_ptr@VPacket@@@std@@W4MinecraftPacketIds@@@Z",
-		void*, void*, MinecraftPacketIds)(packet, type);
-	return (Packet*)*packet;
-}
-
-int sendForm(Player* player, const string& data) {
-	unsigned formId = (unsigned)((rand() << 16) + rand());
-	Packet* packet = createPacket(MinecraftPacketIds::ModalFormRequest);   //表单数据包
-	dAccess<unsigned>(packet, 48) = formId;
-	dAccess<string>(packet, 56) = data;
-	((ServerPlayer*)player)->sendNetworkPacket(*(Packet*)packet);
-	std::cout << formId << ": " << data << std::endl;
-	return formId;
-}
-
-int sendSimpleForm(Player* player, const string& title, const string& content, const std::vector<string>& buttons)
-{
-	string model = u8R"({"title":"%s","content":"%s","buttons":%s,"type":"form"})";
-	model = model.replace(model.find("%s"), 2, title);
-	model = model.replace(model.find("%s"), 2, content);
-	string strButtons = "[";
-	for (int i = 0; i < buttons.size(); ++i)
-	{
-		strButtons += "{\"text\":\""+buttons[i]+"\"}";
-		if (i != buttons.size() - 1) {
-			strButtons += ",";
-		}
-	}
-	strButtons += "]";
-	model = model.replace(model.find("%s"), 2, strButtons);
-	return sendForm(player, model);
-}
-
-
-bool sendPlayerList(Player* player, const std::vector<string> playerList, std::function<void(string)> callback) {
-	unsigned formId = sendSimpleForm(player, "LL Check Bag", "LL Check Bag", playerList);
-	formCallbacks[formId] = callback;
-	return true;
-}
-
-// ===== handleCallBack =====
-bool callFormCallback(Player* player, unsigned formId, const string& data)
-{
-	auto cb = formCallbacks.find(formId);
-	if (cb != formCallbacks.end()) {
-		cb->second(data);
-		formCallbacks.erase(cb);
-	}
-}
-Player* getPlayerFromPacket(ServerNetworkHandler* handler, NetworkIdentifier* id, Packet* packet)
-{
-	return SymCall("?_getServerPlayer@ServerNetworkHandler@@AEAAPEAVServerPlayer@@AEBVNetworkIdentifier@@E@Z",
-		Player*, ServerNetworkHandler*, NetworkIdentifier*, char)(handler, id, dAccess<char>(packet, 16));
-}
-
-THook(void, "?handle@?$PacketHandlerDispatcherInstance@VModalFormResponsePacket@@$0A@@@UEBAXAEBVNetworkIdentifier@@AEAVNetEventCallback@@AEAV?$shared_ptr@VPacket@@@std@@@Z",
-    void* _this, NetworkIdentifier* id, ServerNetworkHandler* handler, void* pPacket)
-{
-        Packet* packet = *(Packet**)pPacket;
-        Player* player = getPlayerFromPacket(handler, id, packet);
-
-        if (player)
-        {
-            unsigned formId = dAccess<unsigned>(packet, 48);
-            string data = dAccess<string>(packet, 56);
-
-            if (data.back() == '\n')
-                data.pop_back();
-
-            callFormCallback(player, formId, data);
+namespace FormHelper {
+    bool sendPlayerListForm(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, mce::UUID const& uuid)>&& callback) {
+        Form::SimpleForm form(title, content);
+        auto playerList = CheckBagMgr.getPlayerList();
+        for (auto& name : playerList) {
+            auto btn = Form::Button(name);
+            form.append(btn);
         }
+        return form.sendTo((ServerPlayer*)player, [player, playerList = std::move(playerList), callback](int index) {
+            if (index < 0)
+                return;
+            auto& target = playerList[index];
+            auto uuid = mce::UUID::fromString(target);
+            if (!uuid) {
+                auto suuid = PlayerInfo::getUUID(target);
+                uuid = mce::UUID::fromString(suuid);
+            }
+            callback(player, uuid);
+        });
+    }
+    bool sendDataTypeForm(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, NbtDataType type)>&& callback)
+    {
+        Form::SimpleForm form(title, content);
+        form.append(Form::Button("Snbt")).append(Form::Button("Binary")).append(Form::Button("Json"));
+        return form.sendTo((ServerPlayer*)player, [player, callback](int index) {
+            if (index < 0)
+                return;
+            callback(player, (NbtDataType)index);
+            });
+    }
 
-    original(_this, id, handler, pPacket);
+    bool openRemoveDataScreen(Player* player) {
+        return sendPlayerListForm(player, "移除玩家数据", "请选择要移除数据的玩家",
+            [](Player* player, mce::UUID const& uuid) {
+                auto result = CheckBagMgr.removePlayerData(uuid);
+                CheckResultSend(result, "移除玩家数据");
+            });
+    }
+
+    bool openCheckBagScreen(Player* player) {
+        return sendPlayerListForm(player, "检查玩家背包", "请选择要检查背包的玩家",
+            [](Player* player, mce::UUID const& uuid) {
+                auto result = CheckBagMgr.startCheckBag(player, uuid);
+                CheckResultSend(result, "开始检查玩家背包");
+            });
+    }
+
+    bool openExportScreen(Player* player) {
+        return sendPlayerListForm(player, "导出玩家数据", "请选择要导出数据的玩家",
+            [](Player* player, mce::UUID const& uuid) {
+                sendDataTypeForm(player, "导出的数据类型", "",
+                    [uuid](Player* player, NbtDataType dataType) {
+                        auto result = CheckBagMgr.exportData(uuid, dataType);
+                        CheckResultSend(result, "导出玩家数据");
+                    });
+            });
+    }
+
+    bool openImportScreen(Player* player) {
+        return false;
+        return sendPlayerListForm(player, "导入玩家数据", "请选择要导出数据的玩家",
+            [](Player* player, mce::UUID const& uuid) {
+                sendDataTypeForm(player, "导入的数据类型", "",
+                    [uuid](Player* player, NbtDataType dataType) {
+                        //auto result = importData(uuid, dataType);
+                        //CheckResultSendGUI(result, "导入玩家数据");
+                    });
+            });
+    }
+
+    bool openMenuScreen(Player* player) {
+        auto& manager = CheckBagMgr;
+        Form::SimpleForm form("LLCheckBag", "请选择要执行的操作");
+        form.append(Form::Button(toString(ScreenCategory::Check)));
+        form.append(Form::Button(toString(ScreenCategory::Menu)));
+        form.append(Form::Button(toString(ScreenCategory::Import)));
+        form.append(Form::Button(toString(ScreenCategory::Export)));
+        form.append(Form::Button(toString(ScreenCategory::Delete)));
+
+        return form.sendTo((ServerPlayer*)player, [player](int index) {
+            if (index < 0)
+                return;
+            switch ((ScreenCategory)index)
+            {
+            case ScreenCategory::Check:
+                openCheckBagScreen(player);
+                break;
+            case ScreenCategory::Menu:
+                openMenuScreen(player);
+                break;
+            case ScreenCategory::Import:
+                openImportScreen(player);
+                break;
+            case ScreenCategory::Export:
+                openExportScreen(player);
+                break;
+            case ScreenCategory::Delete:
+                openRemoveDataScreen(player);
+                break;
+            default:
+                break;
+            }
+            });
+    }
 }
