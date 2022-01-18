@@ -20,6 +20,7 @@
 extern Logger logger;
 
 #define PLUGIN_CONFIG_PATH "plugins/LLCheckBag/config.json"
+#define PLUGIN_LOG_PATH "plugins/logs/LLCheckBag.log"
 
 enum class NbtDataType :int {
     Snbt,

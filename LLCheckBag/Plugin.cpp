@@ -212,6 +212,7 @@ public:
 
 void PluginInit()
 {
+	logger.setFile(PLUGIN_LOG_PATH);
 	Config::initConfig();
 
 	Event::RegCmdEvent::subscribe([](Event::RegCmdEvent ev) { // Register commands Event
