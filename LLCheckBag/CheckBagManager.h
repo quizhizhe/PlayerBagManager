@@ -40,7 +40,8 @@ public:
         Request,
         NotStart,
         BackupError,
-        BackupNotFound
+        BackupNotFound,
+        TargetNotExist,
     };
 
     static bool mIsFree;
@@ -63,6 +64,8 @@ public:
             return "备份失败";
         case CheckBagManager::Result::BackupNotFound:
             return "未找到备份";
+        case CheckBagManager::Result::TargetNotExist:
+            return "目标不存在";
         default:
             return "未知错误";
         }

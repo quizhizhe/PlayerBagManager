@@ -97,6 +97,10 @@ namespace PlayerDataHelper {
             auto idTag = const_cast<CompoundTagVariant&>(idTagVariant).asStringTag();
             std::string id = idTag->value();
             id = key == PLAYER_KEY_SERVER_ID ? id : "player_" + id;
+            if (!dbStorage.hasKey(id, playerCategory)) {
+                logger.warn("Failed to find key {} when deleting player({})'s data", id, uuid.asString());
+                continue;
+            }
             auto res = dbStorage.deleteData(id, playerCategory);
             //res->addOnComplete([id](Bedrock::Threading::IAsyncResult<void> const& result) {
             //    if (result.getStatus() == 1)
@@ -121,6 +125,8 @@ namespace PlayerDataHelper {
         auto serverId = getServerId(uuid);
         if (serverId.empty())
             return {};
+        if (!Global<DBStorage>->hasKey(serverId, playerCategory))
+            return {};
         return Global<DBStorage>->getCompoundTag(serverId, playerCategory);
     }
     bool writePlayerData(mce::UUID const& uuid, CompoundTag& data) {
@@ -130,26 +136,37 @@ namespace PlayerDataHelper {
         Global<DBStorage>->saveData(serverId, data.toBinaryNBT(), playerCategory);
         return true;
     }
-    void changeBagTag(CompoundTag& dst, CompoundTag& src) {
-        dst.put("Armor", src.get("Armor")->copy());
-        dst.put("EnderChestInventory", src.get("EnderChestInventory")->copy());
-        dst.put("Inventory", src.get("Inventory")->copy());
-        dst.put("Mainhand", src.get("Mainhand")->copy());
-        dst.put("Offhand", src.get("Offhand")->copy());
+    bool changeBagTag(CompoundTag& dst, CompoundTag& src) {
+        if (!&dst || !&src)
+            return false;
+        auto res = true;
+        res = res && dst.put("Armor", src.get("Armor")->copy());
+        res = res && dst.put("EnderChestInventory", src.get("EnderChestInventory")->copy());
+        res = res && dst.put("Inventory", src.get("Inventory")->copy());
+        res = res && dst.put("Mainhand", src.get("Mainhand")->copy());
+        res = res && dst.put("Offhand", src.get("Offhand")->copy());
+        return res;
     }
     bool setPlayerBag(Player* player, CompoundTag& data) {
+        auto res = true;
         auto playerTag = player->getNbt();
-        changeBagTag(*playerTag, data);
-        return player->setNbt(playerTag.get());
-        player->refreshInventory();
+        res = res && changeBagTag(*playerTag, data);
+        res = res && player->setNbt(playerTag.get());
+        res = res && player->refreshInventory();
+        return res;
     }
     bool writePlayerBag(mce::UUID const& uuid, CompoundTag& data) {
+        auto res = true;
         auto playerTag = getPlayerData(uuid);
-        changeBagTag(*playerTag, data);
-        return writePlayerData(uuid, *playerTag);
+        if (!playerTag)
+            res = false;
+        res = res && changeBagTag(*playerTag, data);
+        return res && writePlayerData(uuid, *playerTag);
     }
 
     std::string serializeNbt(std::unique_ptr<CompoundTag> tag, NbtDataType type) {
+        if (!tag)
+            return "";
         switch (type)
         {
         case NbtDataType::Snbt:
@@ -160,7 +177,7 @@ namespace PlayerDataHelper {
             return tag->toJson(4);
         case NbtDataType::Unknown:
         default:
-            return tag->toString();
+            return "";
             break;
         }
     }

@@ -209,10 +209,12 @@ CheckBagManager::Result CheckBagManager::setBagData(Player* player, mce::UUID co
         auto res = backupData(player, uuid, *playerTag);
 
         if (res == Result::Success) {
-            PlayerDataHelper::changeBagTag(*playerTag, *targetTag);
-            player->setNbt(playerTag.get());
-            player->refreshInventory();
-            return Result::Success;
+            auto res = PlayerDataHelper::changeBagTag(*playerTag, *targetTag);
+            res = res && player->setNbt(playerTag.get());
+            res = res && player->refreshInventory();
+            if(res)
+                return Result::Success;
+            return Result::Error;
         };
         return res;
     }
@@ -241,7 +243,10 @@ CheckBagManager::Result CheckBagManager::startCheckBag(Player* player, mce::UUID
     mIsFree = false;
     if (auto target = getPlayer(uuid))
         return startCheckBag(player, target);
-    return setBagData(player, uuid, PlayerDataHelper::getPlayerData(uuid));
+    auto targetTag = PlayerDataHelper::getPlayerData(uuid);
+    if (!targetTag)
+        return Result::TargetNotExist;
+    return setBagData(player, uuid, std::move(targetTag));
 }
 
 CheckBagManager::Result CheckBagManager::overwriteData(Player* player)
