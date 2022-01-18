@@ -180,14 +180,7 @@ public:
 
 void PluginInit()
 {
-	auto&& version = LL::Version(
-		PLUGIN_VERSION_MAJOR,
-		PLUGIN_VERSION_MINOR,
-		PLUGIN_VERSION_REVISION,
-		PLUGIN_VERSION_IS_BETA ? LL::Version::Beta : LL::Version::Release
-	);
 	Config::initConfig();
-	LL::registerPlugin("LLCheckBag", "Introduction", version);
 
 	Event::RegCmdEvent::subscribe([](Event::RegCmdEvent ev) { // Register commands Event
 		LLCheckBagCommand::setup(ev.mCommandRegistry);

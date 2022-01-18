@@ -20,14 +20,14 @@
 extern Logger logger;
 
 #define PLUGIN_CONFIG_PATH "plugins/LLCheckBag/config.json"
-
 namespace Config {
     static bool PacketMode = false;
     static bool MsaIdOnly = false;
     static std::string CommandAlias = "llcb";
     static std::string BackupDirectory = "plugins/LLCheckBag/Backup/";
     static std::string ExportDirectory = "plugins/LLCheckBag/Export/";
-    static bool CheckLLFakePlayer = true;
+    //static bool CheckLLFakePlayer = true;
+    //static CheckBagManager::DataType BackupDataType = CheckBagManager::DataType::Binary;
 
     bool initConfig();
 }

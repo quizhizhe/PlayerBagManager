@@ -21,7 +21,8 @@ namespace Config {
         SerializeVaule(CommandAlias);
         SerializeVaule(BackupDirectory);
         SerializeVaule(ExportDirectory);
-        SerializeVaule(CheckLLFakePlayer);
+        //SerializeVaule(CheckLLFakePlayer);
+        //SerializeVaule(BackupDataType);
 
         return json.dump(4);
     }
@@ -34,7 +35,8 @@ namespace Config {
         DeserializeVaule(CommandAlias);
         DeserializeVaule(BackupDirectory);
         DeserializeVaule(ExportDirectory);
-        DeserializeVaule(CheckLLFakePlayer);
+        //DeserializeVaule(CheckLLFakePlayer);
+        //DeserializeVaule(BackupDataType);
 
         if (needUpdate) {
             WriteAllFile(PLUGIN_CONFIG_PATH, serialize(), false);
