@@ -23,10 +23,25 @@ bool stringSortFunc(std::string const& left, std::string const& right) {
 
 bool CheckBagManager::mIsFree = true;
 
+void CheckBagManager::initUuidNameMap() {
+    auto allUuid = PlayerDataHelper::getAllUuid(!Config::MsaIdOnly);
+    mUuidNameMap.clear();
+    std::unordered_map<std::string, std::string> uuidNameMap = {};
+    for (auto& uuid : allUuid) {
+        uuidNameMap.emplace(uuid, uuid);
+    }
+    PlayerInfo::forEachInfo([&uuidNameMap](std::string_view name, std::string_view xuid, std::string_view uuid) ->bool {
+        uuidNameMap[std::string(uuid)] = name;
+        return true;
+        });
+    mUuidNameMap = UuidNameMap(std::move(uuidNameMap));
+}
+
 CheckBagManager::CheckBagManager() {
     TestFuncTime(PlayerDataHelper::getAllUuid, !Config::MsaIdOnly);
     TestFuncTime(PlayerDataHelper::getAllUuid, !Config::MsaIdOnly);
-    mUuidList = PlayerDataHelper::getAllUuid(!Config::MsaIdOnly);
+    TestFuncTime(initUuidNameMap);
+    initUuidNameMap();
 };
 
 CheckBagManager& CheckBagManager::getManager()
@@ -63,7 +78,9 @@ NbtDataType CheckBagManager::fromSuffix(std::string_view suffix)
 
 void CheckBagManager::beforePlayerLeave(ServerPlayer* player)
 {
-
+    if (isCheckingBag(player)) {
+        stopCheckBag(player);
+    }
 }
 
 void CheckBagManager::afterPlayerLeave(ServerPlayer* player)
@@ -71,9 +88,9 @@ void CheckBagManager::afterPlayerLeave(ServerPlayer* player)
 {
     if (mRemoveRequsets.empty())
         return;
-    auto uuidStr = player->getUuid();
-    auto uuid = mce::UUID::fromString(uuidStr);
-    auto uuidIter = mRemoveRequsets.find(uuidStr);
+    auto suuid = player->getUuid();
+    auto uuid = mce::UUID::fromString(suuid);
+    auto uuidIter = mRemoveRequsets.find(suuid);
     if (uuidIter == mRemoveRequsets.end())
         return;
     auto res = PlayerDataHelper::removeData(uuid);
@@ -86,6 +103,14 @@ void CheckBagManager::afterPlayerLeave(ServerPlayer* player)
     logger.info(format, player->getRealName());
 
 }
+
+void CheckBagManager::afterPlayerJoin(ServerPlayer* player) {
+    auto uuid = player->getUuid();
+    if (mUuidNameMap.find(uuid) != mUuidNameMap.end()) {
+        mUuidNameMap.emplace(uuid, player->getRealName());
+    }
+}
+
 inline std::string getDisplayString(std::string const& suuid) {
     auto name = PlayerInfo::fromUUID(suuid);
     if (name.empty())
@@ -96,13 +121,12 @@ inline std::string getDisplayString(std::string const& suuid) {
 
 std::vector<std::string> CheckBagManager::getPlayerList() {
     std::vector<std::string> playerList;
-    playerList.resize(mUuidList.size());
+    playerList.resize(mUuidNameMap.size());
     size_t index = 0;
-    size_t rindex = mUuidList.size() - 1;
-    for (auto& uuid : mUuidList) {
-        TestFuncTime(PlayerInfo::fromUUID, uuid);
-        auto name = PlayerInfo::fromUUID(uuid);
-        if (name.empty())
+    size_t rindex = mUuidNameMap.size() - 1;
+    for (auto& [uuid, name] : mUuidNameMap) {
+        //if (name == uuid)
+        if (name.size() == 36)
             playerList[rindex--] = uuid;
         else
             playerList[index++] = name;
@@ -117,32 +141,26 @@ std::vector<std::string> CheckBagManager::getPlayerList(PlayerCategory category)
         return getPlayerList();
     std::vector<std::string> playerList;
     size_t index = 0;
-    size_t rindex = mUuidList.size() - 1;
-    for (auto& suuid : mUuidList) {
-        auto uuid = mce::UUID::fromString(suuid);
-        TestFuncTime(PlayerDataHelper::isFakePlayer_ddf8196, uuid);
-        if (PlayerDataHelper::isFakePlayer_ddf8196(uuid)) {
+    size_t rindex = mUuidNameMap.size() - 1;
+    for (auto& [suuid, name] : mUuidNameMap) {
+        //TestFuncTime(mUuidNameMap.isFakePlayer, suuid); // <=1
+        if (mUuidNameMap.isFakePlayer(suuid)) {
             if (category != PlayerCategory::FakePlayer)
                 continue;
-            auto name = PlayerInfo::fromUUID(suuid);
-            if (name.empty())
-                playerList.push_back(suuid);
-            else
-                playerList.emplace_back(name);
+            playerList.push_back(name);
             continue;
         }
         else {
-            auto name = PlayerInfo::fromUUID(suuid);
-            if (name.empty()) {
+            if (name.size() == 36) {
                 if (category == PlayerCategory::Unnamed)
                     playerList.push_back(suuid);
             }
-            else if(category == PlayerCategory::Normal)
-                playerList.emplace_back(name);
+            else if (category == PlayerCategory::Normal)
+                playerList.push_back(name);
             continue;
         }
     }
-    TestFuncTime(std::sort, playerList.begin(), playerList.end(), stringSortFunc);
+    //TestFuncTime(std::sort, playerList.begin(), playerList.end(), stringSortFunc); //  100 - 200
     std::sort(playerList.begin(), playerList.end(), stringSortFunc);
     return playerList;
 }
@@ -153,22 +171,19 @@ std::vector<std::pair<PlayerCategory, std::vector<std::string>>> CheckBagManager
     std::vector<std::string> fakePlayerList;
     std::vector<std::string> unnamedFakePlayerList;
     std::vector<std::string> unnamedList;
-    for (auto& suuid : mUuidList) {
-        auto uuid = mce::UUID::fromString(suuid);
-        if (PlayerDataHelper::isFakePlayer_ddf8196(uuid)) {
-            auto name = PlayerInfo::fromUUID(suuid);
-            if (name.empty())
+    for (auto& [suuid, name] : mUuidNameMap) {
+        if (mUuidNameMap.isFakePlayer(suuid)) {
+            if (name.size() == 36)
                 fakePlayerList.push_back(suuid);
             else
-                unnamedFakePlayerList.emplace_back(name);
+                unnamedFakePlayerList.push_back(name);
             continue;
         }
         else {
-            auto name = PlayerInfo::fromUUID(suuid);
-            if (name.empty())
+            if (name.size() == 36)
                 unnamedList.push_back(suuid);
             else
-                normalList.emplace_back(name);
+                normalList.push_back(name);
             continue;
 
         }
@@ -190,11 +205,11 @@ std::vector<std::pair<PlayerCategory, std::vector<std::string>>> CheckBagManager
 
 std::unique_ptr<CompoundTag> CheckBagManager::getBackupBag(Player* player)
 {
-    auto tagIter = mCheckBagLog.find(player->getRealName());
-    if (tagIter != mCheckBagLog.end()) {
+    auto tagIter = mCheckBagLogMap.find(player->getRealName());
+    if (tagIter != mCheckBagLogMap.end()) {
         std::unique_ptr<CompoundTag> tag = {};
         tagIter->second.mBackup.swap(tag);
-        mCheckBagLog.erase(tagIter);
+        mCheckBagLogMap.erase(tagIter);
         updateIsFree();
         return tag;
     }
@@ -232,14 +247,14 @@ CheckBagManager::Result CheckBagManager::removePlayerData(mce::UUID const& uuid)
 CheckBagManager::Result CheckBagManager::backupData(Player* player, mce::UUID const& target, CompoundTag& tag)
 {
     auto uuid = player->getUuid();
-    auto logIter = mCheckBagLog.find(uuid);
-    if (logIter != mCheckBagLog.end()) {
+    auto logIter = mCheckBagLogMap.find(uuid);
+    if (logIter != mCheckBagLogMap.end()) {
         logIter->second.mTarget = target;
         //tag.deepCopy(*logIter->second.mBackup);
         return Result::Success;
     }
     if (WriteAllFile(getBackupPath(player), tag.toBinaryNBT(), true)) {
-        mCheckBagLog.emplace(player->getRealName(), CheckBagLog(target, tag.clone()));
+        mCheckBagLogMap.emplace(player->getRealName(), CheckBagLog(target, tag.clone()));
         return Result::Success;
     }
     return Result::BackupError;
@@ -253,7 +268,7 @@ CheckBagManager::Result CheckBagManager::overwriteBagData(Player* player, CheckB
             return Result::Success;
         return Result::Error;
     }
-    if(PlayerDataHelper::writePlayerBag(log.mTarget, *data))
+    if (PlayerDataHelper::writePlayerBag(log.mTarget, *data))
         return Result::Success;
     return Result::Error;
 }
@@ -291,7 +306,7 @@ CheckBagManager::Result CheckBagManager::setBagData(Player* player, mce::UUID co
             auto res = PlayerDataHelper::changeBagTag(*playerTag, *targetTag);
             res = res && player->setNbt(playerTag.get());
             res = res && player->refreshInventory();
-            if(res)
+            if (res)
                 return Result::Success;
             return Result::Error;
         };
@@ -301,7 +316,7 @@ CheckBagManager::Result CheckBagManager::setBagData(Player* player, mce::UUID co
 
 CheckBagManager::Result CheckBagManager::stopCheckBag(Player* player)
 {
-    if (mCheckBagLog.find(player->getRealName()) == mCheckBagLog.end())
+    if (mCheckBagLogMap.find(player->getRealName()) == mCheckBagLogMap.end())
         return Result::NotStart;
     auto rtn = restoreBagData(player);
     updateIsFree();
@@ -322,7 +337,7 @@ CheckBagManager::Result CheckBagManager::startCheckBag(Player* player, mce::UUID
     mIsFree = false;
     if (auto target = getPlayer(uuid))
         return startCheckBag(player, target);
-    auto targetTag = PlayerDataHelper::getPlayerData(uuid);
+    auto targetTag = PlayerDataHelper::getPlayerTag(uuid);
     if (!targetTag)
         return Result::TargetNotExist;
     return setBagData(player, uuid, std::move(targetTag));
@@ -330,21 +345,21 @@ CheckBagManager::Result CheckBagManager::startCheckBag(Player* player, mce::UUID
 
 CheckBagManager::Result CheckBagManager::overwriteData(Player* player)
 {
-    auto logIter = mCheckBagLog.find(player->getUuid());
-    if (logIter == mCheckBagLog.end())
+    auto log = tryGetLog(player);
+    if (!log)
         return Result::NotStart;
-    auto rtn = overwriteBagData(player, logIter->second);
+    auto rtn = overwriteBagData(player, *log);
     restoreBagData(player);
     updateIsFree();
     return rtn;
 }
 
 CheckBagManager::Result CheckBagManager::exportData(mce::UUID const& uuid, NbtDataType type = NbtDataType::Snbt) {
-    if(!uuid)
+    if (!uuid)
         return Result::Error;
     std::string suffix = getSuffix(type);
     auto path = getExportPath(uuid.asString(), suffix);
-    std::unique_ptr<CompoundTag> tag = PlayerDataHelper::getPlayerData(uuid);
+    std::unique_ptr<CompoundTag> tag = PlayerDataHelper::getPlayerTag(uuid);
     nlohmann::json playerInfo;
     auto playerName = PlayerInfo::fromUUID(uuid.asString());
     playerInfo["name"] = playerName;
@@ -363,10 +378,9 @@ CheckBagManager::Result CheckBagManager::exportData(mce::UUID const& uuid, NbtDa
 
 CheckBagManager::Result CheckBagManager::exportData(std::string const& name, NbtDataType type = NbtDataType::Snbt)
 {
-    auto suuid = PlayerInfo::getUUID(name);
-    if (suuid.empty())
-        suuid = name;
-    auto uuid = mce::UUID::fromString(suuid);
+    auto uuid = mce::UUID::fromString(name);
+    if (!uuid)
+        uuid = mce::UUID::fromString(PlayerInfo::getUUID(name));
     if (!uuid)
         return Result::Error;
     return exportData(uuid, type);
@@ -375,7 +389,7 @@ CheckBagManager::Result CheckBagManager::exportData(std::string const& name, Nbt
 TClasslessInstanceHook(void, "?_onPlayerLeft@ServerNetworkHandler@@AEAAXPEAVServerPlayer@@_N@Z",
     ServerPlayer* sp, bool a3)
 {
-    if(!CheckBagManager::mIsFree)
+    if (CheckBagManager::mIsFree)
         return original(this, sp, a3);
 
     auto& manager = CheckBagManager::getManager();
@@ -384,4 +398,33 @@ TClasslessInstanceHook(void, "?_onPlayerLeft@ServerNetworkHandler@@AEAAXPEAVServ
     original(this, sp, a3);
     // 玩家数据保存后
     manager.afterPlayerLeave(sp);
+}
+
+inline CheckBagManager::UuidNameMap::UuidNameMap(std::unordered_map<std::string, std::string>&& uuidNameMap) : mUuidNameMap(uuidNameMap) {
+    for (auto& [uuid, name] : mUuidNameMap) {
+        if (mNameUuidMap.find(name) == mNameUuidMap.end()) {
+            mNameUuidMap.emplace(name, uuid);
+            mFakePlayerMap.emplace(uuid, PlayerDataHelper::isFakePlayer_ddf8196(uuid));
+        }
+        else
+            logger.warn("UuidNameMap - 发现重复玩家名 {}", name);
+    }
+}
+
+inline bool CheckBagManager::UuidNameMap::emplace(std::string const& uuid, std::string const& name) {
+    if (auto iter = mUuidNameMap.find(uuid); iter != mUuidNameMap.end()) {
+        mNameUuidMap.erase(iter->second);
+        mUuidNameMap.erase(iter);
+        mFakePlayerMap.erase(iter->first);
+        ASSERT(false);
+    }
+    else if (auto iter = mNameUuidMap.find(name); iter != mNameUuidMap.end()) {
+        mUuidNameMap.erase(iter->second);
+        mNameUuidMap.erase(iter);
+        ASSERT(false);
+    }
+    mUuidNameMap.emplace(uuid, name);
+    mNameUuidMap.emplace(name, uuid);
+    mFakePlayerMap.emplace(uuid, PlayerDataHelper::isFakePlayer_ddf8196(uuid));
+    return true;
 }

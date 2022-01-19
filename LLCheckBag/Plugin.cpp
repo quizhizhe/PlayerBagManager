@@ -219,5 +219,9 @@ void PluginInit()
 		LLCheckBagCommand::setup(ev.mCommandRegistry);
 		return true;
 		});
+	Event::PlayerJoinEvent::subscribe([](Event::PlayerJoinEvent ev) { // Register commands Event
+		CheckBagMgr.afterPlayerJoin((ServerPlayer*)ev.mPlayer);
+		return true;
+		});
 	logger.info("LLCheckBag Loaded, version: {}", PLUGIN_VERSION_STRING);
 }

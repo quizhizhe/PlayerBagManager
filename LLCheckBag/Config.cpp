@@ -43,9 +43,9 @@ inline std::string toLowerCase(std::string const& name) {
 inline std::string toString(NbtDataType type) {
     switch (type)
     {
-    CaseEnumValue(NbtDataType, Snbt);
-    CaseEnumValue(NbtDataType, Binary);
-    CaseEnumValue(NbtDataType, Json);
+        CaseEnumValue(NbtDataType, Snbt);
+        CaseEnumValue(NbtDataType, Binary);
+        CaseEnumValue(NbtDataType, Json);
     default:
         return "Binary";
     }
@@ -162,7 +162,7 @@ namespace Config {
         if (jsonStr.has_value()) {
             res = deserialize(jsonStr.value());
         }
-        if(!res) {
+        if (!res) {
             logger.warn("Config File \"{}\" Not Found, Use Default Config", PLUGIN_CONFIG_PATH);
             std::filesystem::create_directories(std::filesystem::path(PLUGIN_CONFIG_PATH).remove_filename());
             res = WriteAllFile(PLUGIN_CONFIG_PATH, serialize(), false);

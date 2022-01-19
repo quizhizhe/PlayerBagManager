@@ -32,6 +32,6 @@ inline void _WASSERT(
             (_WASSERT(#expression, __FILE__, (unsigned)(__LINE__)), __debugbreak(), 0) \
         )
 #else
-#define TestLogTime(func, ...) ((void)0)
+#define TestFuncTime(func, ...) ((void)0)
 #define ASSERT(var) ((void)0)
 #endif // PLUGIN_DEV_MODE

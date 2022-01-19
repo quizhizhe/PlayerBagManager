@@ -120,7 +120,7 @@ namespace PlayerDataHelper {
             return "";
         return tag->getString(PLAYER_KEY_SERVER_ID);
     }
-    std::unique_ptr<CompoundTag> getPlayerData(mce::UUID const& uuid)
+    std::unique_ptr<CompoundTag> getPlayerTag(mce::UUID const& uuid)
     {
         auto serverId = getServerId(uuid);
         if (serverId.empty())
@@ -157,7 +157,7 @@ namespace PlayerDataHelper {
     }
     bool writePlayerBag(mce::UUID const& uuid, CompoundTag& data) {
         auto res = true;
-        auto playerTag = getPlayerData(uuid);
+        auto playerTag = getPlayerTag(uuid);
         if (!playerTag)
             res = false;
         res = res && changeBagTag(*playerTag, data);
@@ -200,5 +200,10 @@ namespace PlayerDataHelper {
         if (!tag)
             return false;
         return tag->getString(PLAYER_KEY_MSA_ID) == tag->getString(PLAYER_KEY_SELF_SIGNED_ID);
+    }
+
+    bool isFakePlayer_ddf8196(std::string const& suuid) {
+        auto uuid = mce::UUID::fromString(suuid);
+        return isFakePlayer_ddf8196(uuid);
     }
 }

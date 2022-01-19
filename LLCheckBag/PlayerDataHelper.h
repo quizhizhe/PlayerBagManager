@@ -7,7 +7,7 @@ namespace PlayerDataHelper {
     std::unique_ptr<CompoundTag> getPlayerIdsTag(mce::UUID const& uuid);
     bool removeData(mce::UUID const& uuid);
     std::string getServerId(mce::UUID const& uuid);
-    std::unique_ptr<CompoundTag> getPlayerData(mce::UUID const& uuid);
+    std::unique_ptr<CompoundTag> getPlayerTag(mce::UUID const& uuid);
     bool writePlayerData(mce::UUID const& uuid, CompoundTag& data);
     bool changeBagTag(CompoundTag& dst, CompoundTag& src);
     bool setPlayerBag(Player* player, CompoundTag& data);
@@ -15,4 +15,5 @@ namespace PlayerDataHelper {
     std::string serializeNbt(std::unique_ptr<CompoundTag> tag, NbtDataType type = NbtDataType::Binary);
     std::unique_ptr<CompoundTag> deserializeNbt(std::string const& data, NbtDataType type = NbtDataType::Binary);
     bool isFakePlayer_ddf8196(mce::UUID const& uuid);
+    bool isFakePlayer_ddf8196(std::string const& suuid);
 }

@@ -11,7 +11,8 @@ namespace FormHelper {
         std::function<void(Player* player, mce::UUID const& uuid)>&& callback,
         PlayerCategory category
     ) {
-        Form::SimpleForm form(title, content);
+        Form::SimpleForm form(title, content); 
+        TestFuncTime(CheckBagMgr.getPlayerList, category); // <0.5ms
         auto playerList = CheckBagMgr.getPlayerList(category);
         for (auto& name : playerList) {
             auto btn = Form::Button(name);
@@ -45,7 +46,7 @@ namespace FormHelper {
             callback(player, category);
             });
     }
-    
+
     //bool sendPlayerListFormSlow(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, mce::UUID const& uuid)>&& callback) {
     //    if (Config::GuiWithCategory) {
     //        Form::SimpleForm form(title, "请选择分类");
@@ -126,7 +127,8 @@ namespace FormHelper {
                             CheckResultSend(result, "开始检查玩家背包");
                         }, category);
                 });
-        }else{
+        }
+        else {
             return sendPlayerListForm(player, "检查玩家背包", "请选择要检查背包的玩家",
                 [](Player* player, mce::UUID const& uuid) {
                     auto result = CheckBagMgr.startCheckBag(player, uuid);

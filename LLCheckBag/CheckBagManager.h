@@ -7,9 +7,10 @@ inline class Player* getPlayer(class mce::UUID const& a0) {
     *((void**)&rv) = dlsym("?getPlayer@Level@@UEBAPEAVPlayer@@AEBVUUID@mce@@@Z");
     return (Global<Level>->*rv)(std::forward<class mce::UUID const&>(a0));
 }
-
+// BidirectionalUnorderedMap<UuidString, name>
 class CheckBagManager
 {
+    
     CheckBagManager();
     CheckBagManager(CheckBagManager& manager) = delete;
     struct CheckBagLog {
@@ -30,9 +31,73 @@ class CheckBagManager
         }
 
     };
-    std::vector<std::string> mUuidList;
+    class UuidNameMap {
+        // <UUID, name>
+        std::unordered_map<std::string, std::string> mUuidNameMap;
+        // <name, UUID>
+        std::unordered_map<std::string, std::string> mNameUuidMap;
+        // <UUID, isFakePlayer>
+        std::unordered_map<std::string, bool> mFakePlayerMap;
+    public:
+        UuidNameMap() {};
+        UuidNameMap(std::unordered_map<std::string, std::string>&& uuidNameMap);
+        inline std::string const& tryGetUuid(std::string const& name) {
+            auto iter = mNameUuidMap.find(name);
+            if (iter != mNameUuidMap.end())
+                return iter->second;
+            return "";
+        }
+        inline std::string const& tryGetName(std::string const& uuid) {
+            auto iter = mUuidNameMap.find(uuid);
+            if (iter != mUuidNameMap.end())
+                return iter->second;
+            return "";
+        }
+        inline std::string const& tryGetName(mce::UUID const& uuid) {
+            auto iter = mUuidNameMap.find(uuid.asString());
+            if (iter != mUuidNameMap.end())
+                return iter->second;
+            return "";
+        }
+        bool emplace(std::string const& uuid, std::string const& name);
+        inline void clear() {
+            mUuidNameMap.clear();
+            mNameUuidMap.clear();
+        }
+        inline auto size() {
+            return mUuidNameMap.size();
+        }
+        inline auto begin() {
+            return mUuidNameMap.begin();
+        }
+        inline auto end() {
+            return mUuidNameMap.end();
+        }
+        inline auto find(std::string const& key) {
+            return mNameUuidMap.find(key);
+        }
+        inline bool isFakePlayer(std::string const& uuid) {
+            auto iter = mFakePlayerMap.find(uuid);
+            return iter != mFakePlayerMap.end() && iter->second;
+        }
+    };
+    UuidNameMap mUuidNameMap;
+    // <UuidString, ActorUniqueID>
     std::unordered_map<std::string, __int64> mRemoveRequsets;
-    std::unordered_map<std::string, CheckBagLog> mCheckBagLog;
+    // <UuidString, CheckBagLog>
+    std::unordered_map<std::string, CheckBagLog> mCheckBagLogMap;
+
+    inline CheckBagLog* tryGetLog(std::string const& uuid) {
+        
+        auto logIter = mCheckBagLogMap.find(uuid);
+        if (logIter == mCheckBagLogMap.end())
+            return nullptr;
+        return &logIter->second;
+    }
+    inline CheckBagLog* tryGetLog(Player* player) {
+        return tryGetLog(player->getUuid());
+    }
+    void initUuidNameMap();
 public:
     enum class Result : int {
         Success,
@@ -73,15 +138,16 @@ public:
 
 
     inline void updateIsFree() {
-        mIsFree = mRemoveRequsets.size() + mCheckBagLog.size();
+        mIsFree = mRemoveRequsets.size() + mCheckBagLogMap.size();
     }
 
     void beforePlayerLeave(ServerPlayer* player);
     void afterPlayerLeave(ServerPlayer* player);
+    void afterPlayerJoin(ServerPlayer* player);
 
     inline bool isCheckingBag(Player* player) {
         auto uuid = player->getUuid();
-        return mCheckBagLog.find(uuid) == mCheckBagLog.end();
+        return mCheckBagLogMap.find(uuid) == mCheckBagLogMap.end();
     }
     inline std::string getBackupPath(Player* player) {
         auto realName = player->getRealName();
@@ -113,7 +179,7 @@ public:
     Result exportData(std::string const& name, NbtDataType type);
 
     // Callback will be ignore if player cancel the form
-    bool sendPlayerListForm(Player* player, std::string const& title, std::string const& content, 
+    bool sendPlayerListForm(Player* player, std::string const& title, std::string const& content,
         std::function<void(Player* player, mce::UUID const& uuid)>&& callback);
     // Callback will be ignore if player cancel the form
     bool sendDataTypeForm(Player* player, std::string const& title, std::string const& content,
