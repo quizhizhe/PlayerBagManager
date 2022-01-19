@@ -2,10 +2,17 @@
 #include <map>
 #include "FormHelper.h"
 #include <MC/Packet.hpp>
+
 namespace FormHelper {
-    bool sendPlayerListForm(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, mce::UUID const& uuid)>&& callback) {
+    bool sendPlayerListForm(
+        Player* player,
+        std::string const& title,
+        std::string const& content,
+        std::function<void(Player* player, mce::UUID const& uuid)>&& callback,
+        PlayerCategory category
+    ) {
         Form::SimpleForm form(title, content);
-        auto playerList = CheckBagMgr.getPlayerList();
+        auto playerList = CheckBagMgr.getPlayerList(category);
         for (auto& name : playerList) {
             auto btn = Form::Button(name);
             form.append(btn);
@@ -22,6 +29,74 @@ namespace FormHelper {
             callback(player, uuid);
         });
     }
+
+    bool sendPlayerCategoryForm(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, PlayerCategory category)>&& callback) {
+        Form::SimpleForm form(title, "请选择分类");
+
+        form.append(Form::Button(toString(PlayerCategory::All)));
+        form.append(Form::Button(toString(PlayerCategory::Normal)));
+        form.append(Form::Button(toString(PlayerCategory::FakePlayer)));
+        form.append(Form::Button(toString(PlayerCategory::Unnamed)));
+
+        return form.sendTo((ServerPlayer*)player, [title, content, player, callback](int index) {
+            if (index < 0)
+                return;
+            auto category = (PlayerCategory)index;
+            callback(player, category);
+            });
+    }
+    
+    //bool sendPlayerListFormSlow(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, mce::UUID const& uuid)>&& callback) {
+    //    if (Config::GuiWithCategory) {
+    //        Form::SimpleForm form(title, "请选择分类");
+    //        auto classfiedlayerList = CheckBagMgr.getClassifiedPlayerList();
+    //        for (auto& [category, list] : classfiedlayerList) {
+    //            auto btn = Form::Button(toString(category));
+    //            form.append(btn);
+    //        }
+    //        return form.sendTo((ServerPlayer*)player, [title, content, player, classfiedlayerList = std::move(classfiedlayerList), callback](int index) {
+    //            if (index < 0)
+    //                return;
+    //            Form::SimpleForm form(title, content);
+    //            std::vector<std::string> playerList = classfiedlayerList[index].second;
+    //            for (auto& name : playerList) {
+    //                auto btn = Form::Button(name);
+    //                form.append(btn);
+    //            }
+    //            form.sendTo((ServerPlayer*)player, [player, playerList = std::move(playerList), callback](int index) {
+    //                if (index < 0)
+    //                    return;
+    //                auto& target = playerList[index];
+    //                auto uuid = mce::UUID::fromString(target);
+    //                if (!uuid) {
+    //                    auto suuid = PlayerInfo::getUUID(target);
+    //                    uuid = mce::UUID::fromString(suuid);
+    //                }
+    //                callback(player, uuid);
+    //            });
+    //        });
+    //    }
+    //    else {
+    //        Form::SimpleForm form(title, content);
+    //        auto playerList = CheckBagMgr.getPlayerList();
+    //        for (auto& name : playerList) {
+    //            auto btn = Form::Button(name);
+    //            form.append(btn);
+    //        }
+    //        return form.sendTo((ServerPlayer*)player, [player, playerList = std::move(playerList), callback](int index) {
+    //            if (index < 0)
+    //                return;
+    //            auto& target = playerList[index];
+    //            auto uuid = mce::UUID::fromString(target);
+    //            if (!uuid) {
+    //                auto suuid = PlayerInfo::getUUID(target);
+    //                uuid = mce::UUID::fromString(suuid);
+    //            }
+    //            callback(player, uuid);
+    //        });
+    //    }
+    //}
+
     bool sendDataTypeForm(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, NbtDataType type)>&& callback)
     {
         Form::SimpleForm form(title, content);
@@ -42,11 +117,22 @@ namespace FormHelper {
     }
 
     bool openCheckBagScreen(Player* player) {
-        return sendPlayerListForm(player, "检查玩家背包", "请选择要检查背包的玩家",
-            [](Player* player, mce::UUID const& uuid) {
-                auto result = CheckBagMgr.startCheckBag(player, uuid);
-                CheckResultSend(result, "开始检查玩家背包");
-            });
+        if (Config::GuiWithCategory) {
+            return sendPlayerCategoryForm(player, "检查玩家背包", "选择玩家分类",
+                [](Player* player, PlayerCategory category) {
+                    sendPlayerListForm(player, "检查玩家背包", "请选择要检查背包的玩家",
+                        [](Player* player, mce::UUID const& uuid) {
+                            auto result = CheckBagMgr.startCheckBag(player, uuid);
+                            CheckResultSend(result, "开始检查玩家背包");
+                        }, category);
+                });
+        }else{
+            return sendPlayerListForm(player, "检查玩家背包", "请选择要检查背包的玩家",
+                [](Player* player, mce::UUID const& uuid) {
+                    auto result = CheckBagMgr.startCheckBag(player, uuid);
+                    CheckResultSend(result, "开始检查玩家背包");
+                });
+        }
     }
 
     bool openExportScreen(Player* player) {

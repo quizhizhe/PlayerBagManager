@@ -91,6 +91,33 @@ inline ScreenCategory fromString(std::string const& value) {
     return ScreenCategory::Check;
 }
 
+// =========== PlayerCategory Converter ===========
+std::string toString(PlayerCategory type) {
+    switch (type)
+    {
+        CaseEnumValue(PlayerCategory, All);
+        CaseEnumValue(PlayerCategory, Normal);
+        CaseEnumValue(PlayerCategory, FakePlayer);
+        CaseEnumValue(PlayerCategory, Unnamed);
+    default:
+        return "Normal";
+        break;
+
+    }
+}
+
+template<>
+inline PlayerCategory fromString(std::string const& value) {
+    auto name = toLowerCase(value);
+
+    IfEnumValue(PlayerCategory, All);
+    IfEnumValue(PlayerCategory, Normal);
+    IfEnumValue(PlayerCategory, FakePlayer);
+    IfEnumValue(PlayerCategory, Unnamed);
+
+    return PlayerCategory::Normal;
+}
+
 namespace Config {
     inline std::string serialize() {
         nlohmann::json json;

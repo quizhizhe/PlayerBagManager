@@ -4,35 +4,28 @@
 #include <PlayerInfoAPI.h>
 #include <FormUI.h>
 
-// Test
-#if false
-LARGE_INTEGER freq_;
-auto INITPERFORMANCEFREQUENCY = QueryPerformanceFrequency(&freq_);
-LARGE_INTEGER begin_time;
-LARGE_INTEGER end_time;
-inline double ns_time() {
-    return (end_time.QuadPart - begin_time.QuadPart) * 1000000.0 / freq_.QuadPart;
-}
-#define TestLogTime(func, ...)\
-QueryPerformanceCounter(&begin_time);\
-func(__VA_ARGS__);\
-QueryPerformanceCounter(&end_time);\
-logger.warn("  {}\t time: {}ns", #func, ns_time());
+bool stringSortFunc(std::string const& left, std::string const& right) {
+    size_t maxSize = std::max(left.size(), right.size());
 
-void testTime() {
-    TestLogTime(PlayerDataHelper::getAllUuid, !Config::MsaIdOnly);
-    TestLogTime(PlayerDataHelper::getAllUuid, !Config::MsaIdOnly);
-    TestLogTime(PlayerDataHelper::getAllUuid, !Config::MsaIdOnly);
-    TestLogTime(PlayerDataHelper::getAllUuid, !Config::MsaIdOnly);
+    for (size_t i = 0; i < maxSize; i++)
+    {
+        auto c1 = left[i];
+        auto c2 = right[i];
+        if (c1 == c2)
+            continue;
+        auto tmp = tolower(c1) - tolower(c2);
+        if (tmp == 0)
+            return c1 > c2;
+        return tmp < 0;
+    }
+    return right.size() - left.size();
 }
-#else
-#define testTime() ((void)0)
-#endif
 
 bool CheckBagManager::mIsFree = true;
 
 CheckBagManager::CheckBagManager() {
-    testTime();
+    TestFuncTime(PlayerDataHelper::getAllUuid, !Config::MsaIdOnly);
+    TestFuncTime(PlayerDataHelper::getAllUuid, !Config::MsaIdOnly);
     mUuidList = PlayerDataHelper::getAllUuid(!Config::MsaIdOnly);
 };
 
@@ -93,6 +86,13 @@ void CheckBagManager::afterPlayerLeave(ServerPlayer* player)
     logger.info(format, player->getRealName());
 
 }
+inline std::string getDisplayString(std::string const& suuid) {
+    auto name = PlayerInfo::fromUUID(suuid);
+    if (name.empty())
+        return suuid;
+    else
+        return name;
+}
 
 std::vector<std::string> CheckBagManager::getPlayerList() {
     std::vector<std::string> playerList;
@@ -100,31 +100,91 @@ std::vector<std::string> CheckBagManager::getPlayerList() {
     size_t index = 0;
     size_t rindex = mUuidList.size() - 1;
     for (auto& uuid : mUuidList) {
+        TestFuncTime(PlayerInfo::fromUUID, uuid);
         auto name = PlayerInfo::fromUUID(uuid);
         if (name.empty())
             playerList[rindex--] = uuid;
         else
             playerList[index++] = name;
     }
-    std::sort(playerList.begin(), playerList.begin() + index,
-        [](std::string const& left, std::string const& right)->bool {
-            size_t maxSize = left.size();
-            if (right.size() > maxSize)
-                maxSize = right.size();
-            for (size_t i = 0; i < maxSize; i++)
-            {
-                auto c1 = left[i];
-                auto c2 = right[i];
-                if (c1 == c2)
-                    continue;
-                auto tmp = tolower(c1) - tolower(c2);
-                if (tmp==0)
-                    return c1 > c2;
-                return tmp < 0;
-            }
-            return right.size() - left.size();
-        });
+    std::sort(playerList.begin(), playerList.begin() + index, stringSortFunc);
     std::sort(playerList.begin() + index, playerList.end());
+    return playerList;
+}
+
+std::vector<std::string> CheckBagManager::getPlayerList(PlayerCategory category) {
+    if (category == PlayerCategory::All)
+        return getPlayerList();
+    std::vector<std::string> playerList;
+    size_t index = 0;
+    size_t rindex = mUuidList.size() - 1;
+    for (auto& suuid : mUuidList) {
+        auto uuid = mce::UUID::fromString(suuid);
+        TestFuncTime(PlayerDataHelper::isFakePlayer_ddf8196, uuid);
+        if (PlayerDataHelper::isFakePlayer_ddf8196(uuid)) {
+            if (category != PlayerCategory::FakePlayer)
+                continue;
+            auto name = PlayerInfo::fromUUID(suuid);
+            if (name.empty())
+                playerList.push_back(suuid);
+            else
+                playerList.emplace_back(name);
+            continue;
+        }
+        else {
+            auto name = PlayerInfo::fromUUID(suuid);
+            if (name.empty()) {
+                if (category == PlayerCategory::Unnamed)
+                    playerList.push_back(suuid);
+            }
+            else if(category == PlayerCategory::Normal)
+                playerList.emplace_back(name);
+            continue;
+        }
+    }
+    TestFuncTime(std::sort, playerList.begin(), playerList.end(), stringSortFunc);
+    std::sort(playerList.begin(), playerList.end(), stringSortFunc);
+    return playerList;
+}
+
+std::vector<std::pair<PlayerCategory, std::vector<std::string>>> CheckBagManager::getClassifiedPlayerList() {
+    std::vector<std::pair<PlayerCategory, std::vector<std::string>>> playerList;
+    std::vector<std::string> normalList;
+    std::vector<std::string> fakePlayerList;
+    std::vector<std::string> unnamedFakePlayerList;
+    std::vector<std::string> unnamedList;
+    for (auto& suuid : mUuidList) {
+        auto uuid = mce::UUID::fromString(suuid);
+        if (PlayerDataHelper::isFakePlayer_ddf8196(uuid)) {
+            auto name = PlayerInfo::fromUUID(suuid);
+            if (name.empty())
+                fakePlayerList.push_back(suuid);
+            else
+                unnamedFakePlayerList.emplace_back(name);
+            continue;
+        }
+        else {
+            auto name = PlayerInfo::fromUUID(suuid);
+            if (name.empty())
+                unnamedList.push_back(suuid);
+            else
+                normalList.emplace_back(name);
+            continue;
+
+        }
+    }
+
+    std::sort(normalList.begin(), normalList.end(), stringSortFunc);
+    std::sort(fakePlayerList.begin(), fakePlayerList.end(), stringSortFunc);
+    std::sort(unnamedFakePlayerList.begin(), unnamedFakePlayerList.end());
+    std::sort(unnamedList.begin(), unnamedList.end());
+    fakePlayerList.insert(fakePlayerList.end(), unnamedFakePlayerList.begin(), unnamedFakePlayerList.end());
+    if (normalList.size())
+        playerList.emplace_back(PlayerCategory::Normal, std::move(normalList));
+    if (fakePlayerList.size())
+        playerList.emplace_back(PlayerCategory::FakePlayer, std::move(fakePlayerList));
+    if (unnamedList.size())
+        playerList.emplace_back(PlayerCategory::Unnamed, std::move(unnamedList));
     return playerList;
 }
 

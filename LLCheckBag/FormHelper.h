@@ -14,7 +14,7 @@ else {\
 }
 
 namespace FormHelper {
-    bool sendPlayerListForm(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, mce::UUID const& uuid)>&& callback);
+    bool sendPlayerListForm(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, mce::UUID const& uuid)>&& callback, PlayerCategory category = PlayerCategory::All);
     bool sendDataTypeForm(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, NbtDataType type)>&& callback);
     bool openRemoveDataScreen(Player* player);
     bool openCheckBagScreen(Player* player);

@@ -95,6 +95,8 @@ public:
         return path.string();
     }
     std::vector<std::string> getPlayerList();
+    std::vector<std::string> getPlayerList(PlayerCategory category);
+    std::vector<std::pair<PlayerCategory, std::vector<std::string>>> getClassifiedPlayerList();
     std::unique_ptr<CompoundTag> getBackupBag(Player* player);
 
     Result removePlayerData(ServerPlayer* player);

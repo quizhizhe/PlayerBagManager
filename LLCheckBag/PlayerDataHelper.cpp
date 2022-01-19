@@ -194,4 +194,11 @@ namespace PlayerDataHelper {
             return {};
         }
     }
+
+    bool isFakePlayer_ddf8196(mce::UUID const& uuid) {
+        auto tag = getPlayerIdsTag(uuid);
+        if (!tag)
+            return false;
+        return tag->getString(PLAYER_KEY_MSA_ID) == tag->getString(PLAYER_KEY_SELF_SIGNED_ID);
+    }
 }
