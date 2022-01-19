@@ -106,6 +106,25 @@ std::vector<std::string> CheckBagManager::getPlayerList() {
         else
             playerList[index++] = name;
     }
+    std::sort(playerList.begin(), playerList.begin() + index,
+        [](std::string const& left, std::string const& right)->bool {
+            size_t maxSize = left.size();
+            if (right.size() > maxSize)
+                maxSize = right.size();
+            for (size_t i = 0; i < maxSize; i++)
+            {
+                auto c1 = left[i];
+                auto c2 = right[i];
+                if (c1 == c2)
+                    continue;
+                auto tmp = tolower(c1) - tolower(c2);
+                if (tmp==0)
+                    return c1 > c2;
+                return tmp < 0;
+            }
+            return right.size() - left.size();
+        });
+    std::sort(playerList.begin() + index, playerList.end());
     return playerList;
 }
 
