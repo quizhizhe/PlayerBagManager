@@ -2,6 +2,7 @@
 #include "CheckBagManager.h"
 #include "PlayerDataHelper.h"
 #include <PlayerInfoAPI.h>
+#include <FormUI.h>
 
 // Test
 #if false
@@ -41,35 +42,30 @@ CheckBagManager& CheckBagManager::getManager()
     return manager;
 }
 
-std::string CheckBagManager::getSuffix(DataType type)
+std::string CheckBagManager::getSuffix(NbtDataType type)
 {
-    std::string suffix;
     switch (type)
     {
-    case CheckBagManager::DataType::Snbt:
-        suffix = "snbt";
-        break;
-    case CheckBagManager::DataType::Binary:
-        suffix = "nbt";
-        break;
-    case CheckBagManager::DataType::Json:
-        suffix = "json";
-        break;
+    case NbtDataType::Snbt:
+        return "snbt";
+    case NbtDataType::Binary:
+        return "nbt";
+    case NbtDataType::Json:
+        return "json";
     default:
-        break;
+        return "";
     }
-    return suffix;
 }
 
-CheckBagManager::DataType CheckBagManager::fromSuffix(std::string_view suffix)
+NbtDataType CheckBagManager::fromSuffix(std::string_view suffix)
 {
     if (suffix == "snbt")
-        return DataType::Snbt;
+        return NbtDataType::Snbt;
     if (suffix == "nbt")
-        return DataType::Binary;
+        return NbtDataType::Binary;
     if (suffix == "json")
-        return DataType::Json;
-    return DataType::Unknown;
+        return NbtDataType::Json;
+    return NbtDataType::Unknown;
 }
 
 void CheckBagManager::beforePlayerLeave(ServerPlayer* player)
@@ -127,7 +123,7 @@ std::unique_ptr<CompoundTag> CheckBagManager::getBackupBag(Player* player)
         auto path = getBackupPath(player);
         auto bin = ReadAllFile(path);
         if (bin.has_value())
-            return CompoundTag::fromBinaryNBT((void*)bin.value().c_str(), bin.value().size());
+            return PlayerDataHelper::deserializeNbt(bin.value(), NbtDataType::Binary);
         return {};
     }
 }
@@ -195,6 +191,7 @@ CheckBagManager::Result CheckBagManager::restoreBagData(Player* player)
         if (!backupTag)
             return Result::BackupNotFound;
         PlayerDataHelper::setPlayerBag(player, *backupTag);
+        player->refreshInventory();
         std::wstring wPath(backupPath.begin(), backupPath.end());
         DeleteFile(wPath.c_str());
         return Result::Success;
@@ -212,10 +209,12 @@ CheckBagManager::Result CheckBagManager::setBagData(Player* player, mce::UUID co
         auto res = backupData(player, uuid, *playerTag);
 
         if (res == Result::Success) {
-            PlayerDataHelper::changeBagTag(*playerTag, *targetTag);
-            player->setNbt(playerTag.get());
-            player->refreshInventory();
-            return Result::Success;
+            auto res = PlayerDataHelper::changeBagTag(*playerTag, *targetTag);
+            res = res && player->setNbt(playerTag.get());
+            res = res && player->refreshInventory();
+            if(res)
+                return Result::Success;
+            return Result::Error;
         };
         return res;
     }
@@ -244,7 +243,10 @@ CheckBagManager::Result CheckBagManager::startCheckBag(Player* player, mce::UUID
     mIsFree = false;
     if (auto target = getPlayer(uuid))
         return startCheckBag(player, target);
-    return setBagData(player, uuid, PlayerDataHelper::getPlayerData(uuid));
+    auto targetTag = PlayerDataHelper::getPlayerData(uuid);
+    if (!targetTag)
+        return Result::TargetNotExist;
+    return setBagData(player, uuid, std::move(targetTag));
 }
 
 CheckBagManager::Result CheckBagManager::overwriteData(Player* player)
@@ -258,23 +260,37 @@ CheckBagManager::Result CheckBagManager::overwriteData(Player* player)
     return rtn;
 }
 
-CheckBagManager::Result CheckBagManager::exportData(std::string const& name, DataType type)
-{
+CheckBagManager::Result CheckBagManager::exportData(mce::UUID const& uuid, NbtDataType type = NbtDataType::Snbt) {
+    if(!uuid)
+        return Result::Error;
     std::string suffix = getSuffix(type);
-    auto path = getExportPath(name, suffix);
-    auto uuid = mce::UUID::fromString(name);
-    std::unique_ptr<CompoundTag> tag;
-    if (uuid) {
-        tag = PlayerDataHelper::getPlayerData(uuid);
-    }
-    else {
-        auto suuid = PlayerInfo::getUUID(name);
-        auto uuid = mce::UUID::fromString(suuid);
-        tag = PlayerDataHelper::getPlayerData(uuid);
-    }
-    if (WriteAllFile(path, tag->toBinaryNBT(), true))
+    auto path = getExportPath(uuid.asString(), suffix);
+    std::unique_ptr<CompoundTag> tag = PlayerDataHelper::getPlayerData(uuid);
+    nlohmann::json playerInfo;
+    auto playerName = PlayerInfo::fromUUID(uuid.asString());
+    playerInfo["name"] = playerName;
+    playerInfo["uuid"] = uuid.asString();
+    playerInfo["ServerId"] = PlayerDataHelper::getServerId(uuid);
+    auto infoStr = playerInfo.dump(4);
+    std::filesystem::path infoPath(path);
+    auto fileName = playerName.empty() ? uuid.asString() : playerName;
+    fileName += "_info.json";
+    infoPath.remove_filename().append(fileName);
+    std::string data = PlayerDataHelper::serializeNbt(std::move(tag), type);
+    if (WriteAllFile(path, data, true) && WriteAllFile(infoPath.string(), infoStr, false))
         return Result::Success;
     return Result::Error;
+}
+
+CheckBagManager::Result CheckBagManager::exportData(std::string const& name, NbtDataType type = NbtDataType::Snbt)
+{
+    auto suuid = PlayerInfo::getUUID(name);
+    if (suuid.empty())
+        suuid = name;
+    auto uuid = mce::UUID::fromString(suuid);
+    if (!uuid)
+        return Result::Error;
+    return exportData(uuid, type);
 }
 
 TClasslessInstanceHook(void, "?_onPlayerLeft@ServerNetworkHandler@@AEAAXPEAVServerPlayer@@_N@Z",

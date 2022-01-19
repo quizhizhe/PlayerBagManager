@@ -14,6 +14,18 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
+        LL::registerPlugin("LLCheckBag", "Inventory check plugin that depends on LiteLoader", 
+            LL::Version(
+                PLUGIN_VERSION_MAJOR,
+                PLUGIN_VERSION_MINOR,
+                PLUGIN_VERSION_REVISION,
+                PLUGIN_VERSION_IS_BETA ? LL::Version::Beta : LL::Version::Release
+            ), {
+                    { "Git", "https://github.com/quizhizhe/LLCheckBag" },
+                    //{ "License", PLUGIN_LICENCE },
+                    //{ "Website", PLUGIN_WEBSIDE },
+            });
+        break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
     case DLL_PROCESS_DETACH:

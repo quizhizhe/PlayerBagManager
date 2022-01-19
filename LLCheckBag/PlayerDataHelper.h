@@ -9,7 +9,9 @@ namespace PlayerDataHelper {
     std::string getServerId(mce::UUID const& uuid);
     std::unique_ptr<CompoundTag> getPlayerData(mce::UUID const& uuid);
     bool writePlayerData(mce::UUID const& uuid, CompoundTag& data);
-    void changeBagTag(CompoundTag& dst, CompoundTag& src);
+    bool changeBagTag(CompoundTag& dst, CompoundTag& src);
     bool setPlayerBag(Player* player, CompoundTag& data);
     bool writePlayerBag(mce::UUID const& uuid, CompoundTag& data);
+    std::string serializeNbt(std::unique_ptr<CompoundTag> tag, NbtDataType type = NbtDataType::Binary);
+    std::unique_ptr<CompoundTag> deserializeNbt(std::string const& data, NbtDataType type = NbtDataType::Binary);
 }

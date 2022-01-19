@@ -1,4 +1,6 @@
-#pragma once
+﻿#pragma once
+
+#define CheckBagMgr CheckBagManager::getManager()
 
 inline class Player* getPlayer(class mce::UUID const& a0) {
     class Player* (Level:: * rv)(class mce::UUID const&);
@@ -38,20 +40,37 @@ public:
         Request,
         NotStart,
         BackupError,
-        BackupNotFound
-    };
-    enum class DataType :int {
-        Snbt,
-        Binary,
-        Json,
-        Unknown,
+        BackupNotFound,
+        TargetNotExist,
     };
 
     static bool mIsFree;
     static CheckBagManager& getManager();
 
-    std::string getSuffix(DataType type);
-    DataType fromSuffix(std::string_view suffix);
+    static std::string getSuffix(NbtDataType type);
+    static NbtDataType fromSuffix(std::string_view suffix);
+    inline static std::string getResultString(Result result) {
+        switch (result)
+        {
+        case CheckBagManager::Result::Success:
+            return "成功";
+        case CheckBagManager::Result::Error:
+            return "未知错误";
+        case CheckBagManager::Result::Request:
+            return "操作冲突，改为请求操作";
+        case CheckBagManager::Result::NotStart:
+            return "未开始";
+        case CheckBagManager::Result::BackupError:
+            return "备份失败";
+        case CheckBagManager::Result::BackupNotFound:
+            return "未找到备份";
+        case CheckBagManager::Result::TargetNotExist:
+            return "目标不存在";
+        default:
+            return "未知错误";
+        }
+    }
+
 
     inline void updateIsFree() {
         mIsFree = mRemoveRequsets.size() + mCheckBagLog.size();
@@ -88,6 +107,14 @@ public:
     Result startCheckBag(Player* player, Player* target);
     Result startCheckBag(Player* player, mce::UUID const& uuid);
     Result overwriteData(Player* player);
-    Result exportData(std::string const& name, DataType type);
+    Result exportData(mce::UUID const& uuid, NbtDataType type);
+    Result exportData(std::string const& name, NbtDataType type);
+
+    // Callback will be ignore if player cancel the form
+    bool sendPlayerListForm(Player* player, std::string const& title, std::string const& content, 
+        std::function<void(Player* player, mce::UUID const& uuid)>&& callback);
+    // Callback will be ignore if player cancel the form
+    bool sendDataTypeForm(Player* player, std::string const& title, std::string const& content,
+        std::function<void(Player* player, NbtDataType type)>&& callback);
 };
 

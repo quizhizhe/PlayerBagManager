@@ -3,13 +3,92 @@
 #include <third-party/Nlohmann/json.hpp>
 #include <filesystem>
 
+#define CaseEnumValue(type, value)\
+case type::value:\
+    return #value
+#define IfEnumValue(type, value)\
+if (name == toLowerCase(#value))\
+    return type::value;
+
 #define SerializeVaule(var) json[#var] = Config::var
+#define SerializeEnumVaule(var) json[#var] = toString(Config::var)
+
 #define DeserializeVaule(var)\
-if (json.find(#var) != json.end())\
+if (json.find(#var) != json.end()){\
     Config::var = json.value(#var, Config::var);\
+}\
 else{\
     logger.warn("Missing Config {}, use default value {}", #var, Config::var);\
     needUpdate = true;\
+}
+
+#define DeserializeEnumVaule(var)\
+if (json.find(#var) != json.end()){\
+    auto svar = toString(Config::var);\
+    svar = json.value(#var, svar); \
+    Config::var = fromString<decltype(Config::var)>(svar);\
+}\
+else{\
+    logger.warn("Missing Config {}, use default value {}", #var, toString(Config::var));\
+    needUpdate = true;\
+}
+
+inline std::string toLowerCase(std::string const& name) {
+    std::string lname = "";
+    std::transform(name.begin(), name.end(), lname.begin(), ::tolower);
+    return lname;
+}
+
+// =========== NbtDataType Converter ===========
+inline std::string toString(NbtDataType type) {
+    switch (type)
+    {
+    CaseEnumValue(NbtDataType, Snbt);
+    CaseEnumValue(NbtDataType, Binary);
+    CaseEnumValue(NbtDataType, Json);
+    default:
+        return "Binary";
+    }
+}
+
+template<>
+inline NbtDataType fromString(std::string const& value) {
+    auto name = toLowerCase(value);
+
+    IfEnumValue(NbtDataType, Snbt);
+    IfEnumValue(NbtDataType, Binary);
+    IfEnumValue(NbtDataType, Json);
+
+    return NbtDataType::Binary;
+}
+
+// =========== ScreenCategory Converter ===========
+inline std::string toString(ScreenCategory type) {
+    switch (type)
+    {
+        CaseEnumValue(ScreenCategory, Check);
+        CaseEnumValue(ScreenCategory, Menu);
+        CaseEnumValue(ScreenCategory, Import);
+        CaseEnumValue(ScreenCategory, Export);
+        CaseEnumValue(ScreenCategory, Delete);
+    default:
+        return "Check";
+        break;
+
+    }
+}
+
+template<>
+inline ScreenCategory fromString(std::string const& value) {
+    auto name = toLowerCase(value);
+
+    IfEnumValue(ScreenCategory, Check);
+    IfEnumValue(ScreenCategory, Menu);
+    IfEnumValue(ScreenCategory, Import);
+    IfEnumValue(ScreenCategory, Export);
+    IfEnumValue(ScreenCategory, Delete);
+
+    return ScreenCategory::Check;
 }
 
 namespace Config {
@@ -21,12 +100,14 @@ namespace Config {
         SerializeVaule(CommandAlias);
         SerializeVaule(BackupDirectory);
         SerializeVaule(ExportDirectory);
-        SerializeVaule(CheckLLFakePlayer);
-
+        //SerializeVaule(CheckLLFakePlayer);
+        SerializeEnumVaule(BackupDataType);
+        SerializeEnumVaule(DefaultScreen);
         return json.dump(4);
     }
+
     inline bool deserialize(std::string jsonStr) {
-        auto json = nlohmann::json::parse(jsonStr, nullptr, true, true);
+        auto json = nlohmann::json::parse(jsonStr, nullptr, false, true);
         bool needUpdate = false;
 
         DeserializeVaule(PacketMode);
@@ -34,13 +115,20 @@ namespace Config {
         DeserializeVaule(CommandAlias);
         DeserializeVaule(BackupDirectory);
         DeserializeVaule(ExportDirectory);
-        DeserializeVaule(CheckLLFakePlayer);
+        //DeserializeVaule(CheckLLFakePlayer);
+        DeserializeEnumVaule(BackupDataType);
+        DeserializeEnumVaule(DefaultScreen);
 
+        if (BackupDataType != NbtDataType::Binary || BackupDataType != NbtDataType::Snbt) {
+            needUpdate = true;
+            BackupDataType = NbtDataType::Binary;
+        }
         if (needUpdate) {
             WriteAllFile(PLUGIN_CONFIG_PATH, serialize(), false);
         }
         return true;
     }
+
     bool initConfig() {
         bool res = false;
         auto jsonStr = ReadAllFile(PLUGIN_CONFIG_PATH);
