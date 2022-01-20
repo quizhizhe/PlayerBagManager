@@ -117,6 +117,55 @@ namespace FormHelper {
             });
     }
 
+    bool openCheckBagMenuScreen(Player* player) {
+        Form::SimpleForm form("检查玩家背包", "请选择要执行的操作");
+        std::vector<std::string> buttonList;
+        form.append(Form::Button("查看其他玩家背包"));
+        form.append(Form::Button("更新目标玩家背包"));
+        form.append(Form::Button("覆盖目标玩家背包"));
+        form.append(Form::Button("停止查看玩家背包"));
+        form.append(Form::Button("清除目标玩家所有数据"));
+
+        return form.sendTo((ServerPlayer*)player, [player](int index) {
+            if (index < 0)
+                return;
+            CheckBagManager::Result result = CheckBagManager::Result::Error;
+            switch (index)
+            {
+            case 0:
+                if (!openCheckBagScreen(player)) {
+                    player->sendText("发送表单失败");
+                }
+                break;
+            case 1: {
+                auto& manager = CheckBagMgr;
+                auto target = manager.tryGetTargetUuid(player);
+                result = CheckBagMgr.startCheckBag(player, target);
+                CheckResultSend(result, "开始查包");
+                break;
+            }
+            case 2:
+                result = CheckBagMgr.overwriteData(player);
+                CheckResultSend(result, "覆盖玩家数据");
+                break;
+            case 3:
+                result = CheckBagMgr.stopCheckBag(player);
+                CheckResultSend(result, "停止查包");
+                break;
+            case 4: {
+                auto& manager = CheckBagMgr;
+                auto target = manager.tryGetTargetUuid(player);
+                manager.stopCheckBag(player);
+                auto result = manager.removePlayerData(target);
+                CheckResultSend(result, "移除玩家数据");
+                break;
+            }
+            default:
+                break;
+            }
+            });
+    }
+
     bool openCheckBagScreen(Player* player) {
         if (Config::GuiWithCategory) {
             return sendPlayerCategoryForm(player, "检查玩家背包", "选择玩家分类",
@@ -135,6 +184,12 @@ namespace FormHelper {
                     CheckResultSend(result, "开始检查玩家背包");
                 });
         }
+    }
+
+    bool openCheckBagSmartScreen(Player* player) {
+        if (CheckBagMgr.isCheckingBag(player))
+            return openCheckBagMenuScreen(player);
+        return openCheckBagScreen(player);
     }
 
     bool openExportScreen(Player* player) {
@@ -175,7 +230,7 @@ namespace FormHelper {
             switch ((ScreenCategory)index)
             {
             case ScreenCategory::Check:
-                openCheckBagScreen(player);
+                openCheckBagSmartScreen(player);
                 break;
             case ScreenCategory::Menu:
                 openMenuScreen(player);

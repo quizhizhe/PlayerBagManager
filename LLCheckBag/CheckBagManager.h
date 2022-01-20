@@ -98,6 +98,12 @@ public:
         auto uuid = player->getUuid();
         return mCheckBagLogMap.find(uuid) != mCheckBagLogMap.end();
     }
+    inline mce::UUID tryGetTargetUuid(Player* player) {
+        auto log = tryGetLog(player);
+        if (log)
+            return log->mTarget;
+        return mce::UUID::fromString("");
+    }
     inline std::string getBackupPath(Player* player) {
         auto realName = player->getRealName();
         auto path = std::filesystem::path(Config::BackupDirectory);

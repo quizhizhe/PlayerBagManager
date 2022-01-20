@@ -64,7 +64,7 @@ class LLCheckBagCommand : public Command {
 		case LLCheckBagCommand::Operation::Check:
 			if (!mPlayer_isSet) {
 				auto player = GetPlayerOrReturn();
-				if (!FormHelper::openCheckBagScreen(player))
+				if (!FormHelper::openCheckBagSmartScreen(player))
 					output.error("发送表单失败");
 			}
 			else {
@@ -155,7 +155,7 @@ class LLCheckBagCommand : public Command {
 		Player* player = Command::getPlayerFromOrigin(origin);
 		if (!mOperation_isSet) {
 			auto player = GetPlayerOrReturn();
-			if (!FormHelper::openCheckBagScreen(player))
+			if (!FormHelper::openCheckBagSmartScreen(player))
 				output.error("发送表单失败");
 			return;
 		}else
