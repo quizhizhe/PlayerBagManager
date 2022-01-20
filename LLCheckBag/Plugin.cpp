@@ -26,7 +26,7 @@ if (result == CheckBagManager::Result::Success) \
 	output.success(operation "成功");\
 else {\
 	output.error(operation "失败");\
-	output.error("原因" + CheckBagManager::getResultString(result));\
+	output.error("原因：" + CheckBagManager::getResultString(result));\
 }
 
 class LLCheckBagCommand : public Command {
@@ -78,6 +78,7 @@ class LLCheckBagCommand : public Command {
 			auto player = GetPlayerOrReturn();
 			auto result = manager.restoreBagData(player);
 			CheckResultOutput(result, "恢复玩家背包");
+			break;
 		}
 		case LLCheckBagCommand::Operation::Overwrite: {
 			auto player = GetPlayerOrReturn();
@@ -177,18 +178,30 @@ public:
 			{"menu",Operation::Menu},
 			{"list",Operation::List},
 			//{"import",Operation::Import},
+			{"rb",Operation::Rollback},
+			{"ow",Operation::Overwrite},
+			{"s",Operation::Stop},
+			{"m",Operation::Menu},
+			{"l",Operation::List},
+			//{"i",Operation::Import},
 			});
 		registry->addEnum<Operation>("LLCheckBag_ActionWithPlayer", {
 			{"check",Operation::Check},
 			{"remove",Operation::Remove},
+			{"c",Operation::Check},
+			{"rm",Operation::Remove},
 			});
 		registry->addEnum<Operation>("LLCheckBag_ActionExport", {
 			{"export",Operation::Export},
+			{"e",Operation::Export},
 			});
 		registry->addEnum<NbtDataType>("LLCheckBag_ExportType", {
 			{"snbt",NbtDataType::Snbt},
 			{"binary",NbtDataType::Binary},
 			{"json",NbtDataType::Json},
+			{"s",NbtDataType::Snbt},
+			{"b",NbtDataType::Binary},
+			{"j",NbtDataType::Json},
 			});
 
 		auto action = makeMandatory<CommandParameterDataType::ENUM>(&LLCheckBagCommand::mOperation, "action", "LLCheckBag_Action", &LLCheckBagCommand::mOperation_isSet);

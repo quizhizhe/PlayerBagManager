@@ -187,7 +187,7 @@ namespace PlayerDataHelper {
         case NbtDataType::Snbt:
             return CompoundTag::fromSNBT(data);
         case NbtDataType::Binary:
-            return CompoundTag::fromBinaryNBT((void*)data.c_str(), data.size());
+            return CompoundTag::fromBinaryNBT((void*)data.c_str(), data.size(), true);
         case NbtDataType::Json:
         case NbtDataType::Unknown:
         default:

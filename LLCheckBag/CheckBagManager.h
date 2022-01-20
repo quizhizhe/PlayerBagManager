@@ -31,64 +31,13 @@ class CheckBagManager
         }
 
     };
-    class UuidNameMap {
-        // <UUID, name>
-        std::unordered_map<std::string, std::string> mUuidNameMap;
-        // <name, UUID>
-        std::unordered_map<std::string, std::string> mNameUuidMap;
-        // <UUID, isFakePlayer>
-        std::unordered_map<std::string, bool> mFakePlayerMap;
-    public:
-        UuidNameMap() {};
-        UuidNameMap(std::unordered_map<std::string, std::string>&& uuidNameMap);
-        inline std::string const& tryGetUuid(std::string const& name) {
-            auto iter = mNameUuidMap.find(name);
-            if (iter != mNameUuidMap.end())
-                return iter->second;
-            return "";
-        }
-        inline std::string const& tryGetName(std::string const& uuid) {
-            auto iter = mUuidNameMap.find(uuid);
-            if (iter != mUuidNameMap.end())
-                return iter->second;
-            return "";
-        }
-        inline std::string const& tryGetName(mce::UUID const& uuid) {
-            auto iter = mUuidNameMap.find(uuid.asString());
-            if (iter != mUuidNameMap.end())
-                return iter->second;
-            return "";
-        }
-        bool emplace(std::string const& uuid, std::string const& name);
-        inline void clear() {
-            mUuidNameMap.clear();
-            mNameUuidMap.clear();
-        }
-        inline auto size() {
-            return mUuidNameMap.size();
-        }
-        inline auto begin() {
-            return mUuidNameMap.begin();
-        }
-        inline auto end() {
-            return mUuidNameMap.end();
-        }
-        inline auto find(std::string const& key) {
-            return mNameUuidMap.find(key);
-        }
-        inline bool isFakePlayer(std::string const& uuid) {
-            auto iter = mFakePlayerMap.find(uuid);
-            return iter != mFakePlayerMap.end() && iter->second;
-        }
-    };
-    UuidNameMap mUuidNameMap;
-    // <UuidString, ActorUniqueID>
+    std::unordered_map<std::string, std::pair<std::string, bool>> mUuidNameMap;
+    // <UUID, ActorUniqueID>
     std::unordered_map<std::string, __int64> mRemoveRequsets;
-    // <UuidString, CheckBagLog>
+    // <UUID, CheckBagLog>
     std::unordered_map<std::string, CheckBagLog> mCheckBagLogMap;
 
     inline CheckBagLog* tryGetLog(std::string const& uuid) {
-        
         auto logIter = mCheckBagLogMap.find(uuid);
         if (logIter == mCheckBagLogMap.end())
             return nullptr;
@@ -147,12 +96,12 @@ public:
 
     inline bool isCheckingBag(Player* player) {
         auto uuid = player->getUuid();
-        return mCheckBagLogMap.find(uuid) == mCheckBagLogMap.end();
+        return mCheckBagLogMap.find(uuid) != mCheckBagLogMap.end();
     }
     inline std::string getBackupPath(Player* player) {
         auto realName = player->getRealName();
         auto path = std::filesystem::path(Config::BackupDirectory);
-        path.append(realName + ".nbt");
+        path.append(realName + "." + getSuffix(Config::BackupDataType));
         return path.string();
     }
     inline std::string getExportPath(std::string const& name, std::string const& suffix) {
@@ -160,6 +109,7 @@ public:
         path.append(name + "." + suffix);
         return path.string();
     }
+
     std::vector<std::string> getPlayerList();
     std::vector<std::string> getPlayerList(PlayerCategory category);
     std::vector<std::pair<PlayerCategory, std::vector<std::string>>> getClassifiedPlayerList();
@@ -167,7 +117,7 @@ public:
 
     Result removePlayerData(ServerPlayer* player);
     Result removePlayerData(mce::UUID const& uuid);
-    Result backupData(Player* player, mce::UUID const& target, CompoundTag& tag);
+    Result setCheckBagLog(Player* player, mce::UUID const& target, CompoundTag& tag);
     Result overwriteBagData(Player* player, CheckBagLog const& log);
     Result restoreBagData(Player* player);
     Result setBagData(Player* player, mce::UUID const& uuid, std::unique_ptr<CompoundTag> targetTag);
@@ -178,11 +128,5 @@ public:
     Result exportData(mce::UUID const& uuid, NbtDataType type);
     Result exportData(std::string const& name, NbtDataType type);
 
-    // Callback will be ignore if player cancel the form
-    bool sendPlayerListForm(Player* player, std::string const& title, std::string const& content,
-        std::function<void(Player* player, mce::UUID const& uuid)>&& callback);
-    // Callback will be ignore if player cancel the form
-    bool sendDataTypeForm(Player* player, std::string const& title, std::string const& content,
-        std::function<void(Player* player, NbtDataType type)>&& callback);
 };
 
