@@ -1,6 +1,8 @@
 #pragma once
 #include "pch.h"
 
+#define PLUGIN_DEV_MODE
+#include "DebugHelper.h"
 
 // Version
 #define PLUGIN_VERSION_MAJOR 1
@@ -37,14 +39,23 @@ enum class ScreenCategory :int {
     Delete,
 };
 
-inline std::string toString(NbtDataType type);
-inline std::string toString(ScreenCategory type);
+enum class PlayerCategory :int {
+    All,
+    Normal,
+    FakePlayer,
+    Unnamed,
+};
+
+std::string toString(NbtDataType type);
+std::string toString(ScreenCategory type);
+std::string toString(PlayerCategory type);
 template <typename T>
 inline T fromString(std::string const& name);
 
 namespace Config {
     static bool PacketMode = false;
     static bool MsaIdOnly = false;
+    static bool GuiWithCategory = true;
     static std::string CommandAlias = "llcb";
     static std::string BackupDirectory = "plugins/LLCheckBag/Backup/";
     static std::string ExportDirectory = "plugins/LLCheckBag/Export/";

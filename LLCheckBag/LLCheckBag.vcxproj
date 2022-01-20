@@ -79,6 +79,7 @@ copy /Y $(TargetPath) $(LocalDebuggerWorkingDirectory)\plugins\
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="DebugHelper.h" />
     <ClInclude Include="FormHelper.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Config.h" />
