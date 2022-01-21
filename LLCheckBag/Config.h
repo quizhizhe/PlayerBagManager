@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 
-//#define PLUGIN_DEV_MODE
+#define PLUGIN_DEV_MODE
 #include "DebugHelper.h"
 
 // Version
@@ -22,7 +22,7 @@
 extern Logger logger;
 
 #define PLUGIN_CONFIG_PATH "plugins/LLCheckBag/config.json"
-#define PLUGIN_LOG_PATH "plugins/logs/LLCheckBag.log"
+#define PLUGIN_LOG_PATH "logs/LLCheckBag.log"
 
 enum class NbtDataType :int {
     Snbt,
