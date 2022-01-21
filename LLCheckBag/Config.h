@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 
-#define PLUGIN_DEV_MODE
+//#define PLUGIN_DEV_MODE
 #include "DebugHelper.h"
 
 // Version
@@ -37,6 +37,7 @@ enum class ScreenCategory :int {
     Import,
     Export,
     Delete,
+    ExportAll,
 };
 
 enum class PlayerCategory :int {
@@ -46,11 +47,14 @@ enum class PlayerCategory :int {
     Unnamed,
 };
 
+template <typename T>
+inline T fromString(std::string const& name);
 std::string toString(NbtDataType type);
 std::string toString(ScreenCategory type);
 std::string toString(PlayerCategory type);
-template <typename T>
-inline T fromString(std::string const& name);
+//template NbtDataType fromString<NbtDataType>(std::string const& name);
+//template ScreenCategory fromString<ScreenCategory>(std::string const& name);
+//template PlayerCategory fromString<PlayerCategory>(std::string const& name);
 
 namespace Config {
     static bool PacketMode = false;

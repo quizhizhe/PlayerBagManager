@@ -3,23 +3,7 @@
 #include "PlayerDataHelper.h"
 #include <PlayerInfoAPI.h>
 #include <FormUI.h>
-
-bool stringSortFunc(std::string const& left, std::string const& right) {
-    size_t maxSize = std::max(left.size(), right.size());
-
-    for (size_t i = 0; i < maxSize; i++)
-    {
-        auto c1 = left[i];
-        auto c2 = right[i];
-        if (c1 == c2)
-            continue;
-        auto tmp = tolower(c1) - tolower(c2);
-        if (tmp == 0)
-            return c1 > c2;
-        return tmp < 0;
-    }
-    return right.size() - left.size();
-}
+#include <MC/StringTag.hpp>
 
 bool CheckBagManager::mIsFree = true;
 
@@ -31,7 +15,11 @@ void CheckBagManager::initUuidNameMap() {
         mUuidNameMap.emplace(suuid, std::pair{ suuid, isFakePlayer });
     }
     PlayerInfo::forEachInfo([this](std::string_view name, std::string_view xuid, std::string_view uuid) ->bool {
-        mUuidNameMap[std::string(uuid)].first = name;
+        auto suuid = std::string(uuid);
+        auto iter = mUuidNameMap.find(suuid);
+        if (iter == mUuidNameMap.end())
+            return true;
+        iter->second.first = name;
         return true;
         });
 }
@@ -111,6 +99,13 @@ void CheckBagManager::afterPlayerJoin(ServerPlayer* player) {
     }
 }
 
+mce::UUID CheckBagManager::fromNameOrUuid(std::string const& nameOrUuid) {
+    auto uuid = mce::UUID::fromString(nameOrUuid);
+    if (!uuid)
+        return mce::UUID::fromString(PlayerInfo::getUUID(nameOrUuid));
+    return mce::UUID::fromString("");
+}
+
 std::vector<std::string> CheckBagManager::getPlayerList() {
     std::vector<std::string> playerList;
     playerList.resize(mUuidNameMap.size());
@@ -124,7 +119,7 @@ std::vector<std::string> CheckBagManager::getPlayerList() {
         else
             playerList[index++] = name;
     }
-    std::sort(playerList.begin(), playerList.begin() + index, stringSortFunc);
+    std::sort(playerList.begin(), playerList.begin() + index, nameSortFunc);
     std::sort(playerList.begin() + index, playerList.end());
     return playerList;
 }
@@ -154,8 +149,8 @@ std::vector<std::string> CheckBagManager::getPlayerList(PlayerCategory category)
             continue;
         }
     }
-    //TestFuncTime(std::sort, playerList.begin(), playerList.end(), stringSortFunc); //  100 - 200
-    std::sort(playerList.begin(), playerList.end(), stringSortFunc);
+    //TestFuncTime(std::sort, playerList.begin(), playerList.end(), nameSortFunc); //  100 - 200
+    std::sort(playerList.begin(), playerList.end(), nameSortFunc);
     return playerList;
 }
 
@@ -184,8 +179,8 @@ std::vector<std::pair<PlayerCategory, std::vector<std::string>>> CheckBagManager
         }
     }
 
-    std::sort(normalList.begin(), normalList.end(), stringSortFunc);
-    std::sort(fakePlayerList.begin(), fakePlayerList.end(), stringSortFunc);
+    std::sort(normalList.begin(), normalList.end(), nameSortFunc);
+    std::sort(fakePlayerList.begin(), fakePlayerList.end(), nameSortFunc);
     std::sort(unnamedFakePlayerList.begin(), unnamedFakePlayerList.end());
     std::sort(unnamedList.begin(), unnamedList.end());
     fakePlayerList.insert(fakePlayerList.end(), unnamedFakePlayerList.begin(), unnamedFakePlayerList.end());
@@ -233,8 +228,10 @@ CheckBagManager::Result CheckBagManager::removePlayerData(mce::UUID const& uuid)
         mIsFree = false;
         return Result::Success;
     }
-    if (PlayerDataHelper::removeData(uuid))
+    if (PlayerDataHelper::removeData(uuid)) {
+        mUuidNameMap.erase(uuid.asString());
         return Result::Success;
+    }
     return Result::Error;
 }
 
@@ -253,10 +250,10 @@ CheckBagManager::Result CheckBagManager::setCheckBagLog(Player* player, mce::UUI
 }
 
 CheckBagManager::Result CheckBagManager::overwriteBagData(Player* player, CheckBagLog const& log) {
-    auto target = log.getTarget();
+    auto targetPlayer = log.getTarget();
     auto data = player->getNbt();
-    if (target) {
-        if (PlayerDataHelper::setPlayerBag(target, *data))
+    if (targetPlayer) {
+        if (PlayerDataHelper::setPlayerBag(targetPlayer, *data))
             return Result::Success;
         return Result::Error;
     }
@@ -348,33 +345,93 @@ CheckBagManager::Result CheckBagManager::overwriteData(Player* player)
 CheckBagManager::Result CheckBagManager::exportData(mce::UUID const& uuid, NbtDataType type = NbtDataType::Snbt) {
     if (!uuid)
         return Result::Error;
-    std::string suffix = getSuffix(type);
-    auto path = getExportPath(uuid.asString(), suffix);
-    std::unique_ptr<CompoundTag> tag = PlayerDataHelper::getPlayerTag(uuid);
-    nlohmann::json playerInfo;
+    std::string data;
+    if (!getPlayer(uuid) && type == NbtDataType::Binary) {
+        data = PlayerDataHelper::getPlayerData(uuid);
+    }else{
+        std::unique_ptr<CompoundTag> tag = PlayerDataHelper::getExpectedPlayerTag(uuid);
+        if (!tag)
+            return Result::Error;
+        data = PlayerDataHelper::serializeNbt(std::move(tag), type);
+    }
+
+    if (data.empty())
+        return Result::Error;
+
     auto playerName = PlayerInfo::fromUUID(uuid.asString());
+    auto idsTag = PlayerDataHelper::getPlayerIdsTag(uuid);
+    nlohmann::json playerInfo;
     playerInfo["name"] = playerName;
     playerInfo["uuid"] = uuid.asString();
-    playerInfo["ServerId"] = PlayerDataHelper::getServerId(uuid);
+    for (auto& [type, idTag] : *idsTag) {
+        playerInfo[type] = const_cast<CompoundTagVariant&>(idTag).asStringTag()->value();
+    }
     auto infoStr = playerInfo.dump(4);
-    std::filesystem::path infoPath(path);
-    auto fileName = playerName.empty() ? uuid.asString() : playerName;
-    fileName += "_info.json";
-    infoPath.remove_filename().append(fileName);
-    std::string data = PlayerDataHelper::serializeNbt(std::move(tag), type);
-    if (WriteAllFile(path, data, true) && WriteAllFile(infoPath.string(), infoStr, false))
+
+    auto dataPath = getExportPath(uuid, type);
+    std::filesystem::path infoPath(dataPath +".json");
+    if (WriteAllFile(dataPath, data, true) && WriteAllFile(infoPath.string(), infoStr, false))
         return Result::Success;
     return Result::Error;
 }
 
-CheckBagManager::Result CheckBagManager::exportData(std::string const& name, NbtDataType type = NbtDataType::Snbt)
+CheckBagManager::Result CheckBagManager::exportData(std::string const& nameOrUuid, NbtDataType type = NbtDataType::Snbt)
 {
-    auto uuid = mce::UUID::fromString(name);
-    if (!uuid)
-        uuid = mce::UUID::fromString(PlayerInfo::getUUID(name));
-    if (!uuid)
+    if (auto uuid = fromNameOrUuid(nameOrUuid))
+        return exportData(uuid, type);
+    return Result::Error;
+}
+
+CheckBagManager::Result CheckBagManager::importData(mce::UUID const& uuid, std::string filePath, bool isBagOnly) {
+    if (!uuid|| filePath.empty())
         return Result::Error;
-    return exportData(uuid, type);
+    auto suffix = filePath.substr(filePath.find_last_of('.')+1);
+    auto newTag = PlayerDataHelper::readTagFile(std::filesystem::path(Config::ExportDirectory).append(filePath).string(), fromSuffix(suffix));
+    if (!newTag)
+        return Result::Error;
+    if (isBagOnly) {
+        if (auto player = getPlayer(uuid)) {
+            PlayerDataHelper::setPlayerBag(player, *newTag);
+        }
+        else {
+            auto oldTag = PlayerDataHelper::getExpectedPlayerTag(uuid);
+            if(!oldTag)
+                return Result::Error;
+            if (PlayerDataHelper::writePlayerBag(uuid, *newTag))
+                return Result::Success;
+            return Result::Error;
+        }
+    }
+    else {
+        if(getPlayer(uuid))
+            return Result::Error;
+        if (PlayerDataHelper::writePlayerData(uuid, *newTag))
+            return Result::Success;
+    }
+    return Result::Error;
+}
+
+CheckBagManager::Result CheckBagManager::importData(std::string const& nameOrUuid, std::string filePath, bool isBagOnly)
+{
+    return Result::Error;
+    if (auto uuid = fromNameOrUuid(nameOrUuid))
+        return importData(uuid, filePath, isBagOnly);
+    return Result::Error;
+}
+
+size_t CheckBagManager::exportAllData(NbtDataType type)
+{
+    size_t count = 0;
+    for (auto& suuid : getPlayerList()) {
+        auto result = exportData(suuid, type);
+        if (result == CheckBagManager::Result::Success)
+            count++;
+        else{
+            logger.warn("导出 {} 数据失败", suuid);
+            logger.warn("原因：{}", CheckBagManager::getResultString(result));
+        }
+    }
+    return count;
 }
 
 TClasslessInstanceHook(void, "?_onPlayerLeft@ServerNetworkHandler@@AEAAXPEAVServerPlayer@@_N@Z",

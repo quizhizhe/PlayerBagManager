@@ -34,8 +34,8 @@ else{\
 }
 
 inline std::string toLowerCase(std::string const& name) {
-    std::string lname = "";
-    std::transform(name.begin(), name.end(), lname.begin(), ::tolower);
+    std::string lname = name;
+    std::transform(lname.begin(), lname.end(), lname.begin(), ::tolower);
     return lname;
 }
 
@@ -53,7 +53,7 @@ inline std::string toString(NbtDataType type) {
 
 template<>
 inline NbtDataType fromString(std::string const& value) {
-    auto name = toLowerCase(value);
+    std::string name = toLowerCase(value);
 
     IfEnumValue(NbtDataType, Snbt);
     IfEnumValue(NbtDataType, Binary);
@@ -71,6 +71,7 @@ inline std::string toString(ScreenCategory type) {
         CaseEnumValue(ScreenCategory, Import);
         CaseEnumValue(ScreenCategory, Export);
         CaseEnumValue(ScreenCategory, Delete);
+        CaseEnumValue(ScreenCategory, ExportAll);
     default:
         return "Check";
         break;
@@ -80,13 +81,14 @@ inline std::string toString(ScreenCategory type) {
 
 template<>
 inline ScreenCategory fromString(std::string const& value) {
-    auto name = toLowerCase(value);
+    std::string name = toLowerCase(value);
 
     IfEnumValue(ScreenCategory, Check);
     IfEnumValue(ScreenCategory, Menu);
     IfEnumValue(ScreenCategory, Import);
     IfEnumValue(ScreenCategory, Export);
     IfEnumValue(ScreenCategory, Delete);
+    IfEnumValue(ScreenCategory, ExportAll);
 
     return ScreenCategory::Check;
 }
@@ -107,8 +109,8 @@ std::string toString(PlayerCategory type) {
 }
 
 template<>
-inline PlayerCategory fromString(std::string const& value) {
-    auto name = toLowerCase(value);
+PlayerCategory fromString(std::string const& value) {
+    std::string name = toLowerCase(value);
 
     IfEnumValue(PlayerCategory, All);
     IfEnumValue(PlayerCategory, Normal);

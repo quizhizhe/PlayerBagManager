@@ -120,6 +120,19 @@ namespace PlayerDataHelper {
             return "";
         return tag->getString(PLAYER_KEY_SERVER_ID);
     }
+    std::string getPlayerData(mce::UUID const& uuid)
+    {
+        auto serverId = getServerId(uuid);
+        if (serverId.empty())
+            return {};
+        if (!Global<DBStorage>->hasKey(serverId, playerCategory))
+            return {};
+        std::string data = "";
+        if (Global<DBStorage>->loadData(serverId, data, playerCategory))
+            return data;
+        else
+            return "";
+    }
     std::unique_ptr<CompoundTag> getPlayerTag(mce::UUID const& uuid)
     {
         auto serverId = getServerId(uuid);
@@ -128,6 +141,13 @@ namespace PlayerDataHelper {
         if (!Global<DBStorage>->hasKey(serverId, playerCategory))
             return {};
         return Global<DBStorage>->getCompoundTag(serverId, playerCategory);
+    }
+    std::unique_ptr<CompoundTag> getExpectedPlayerTag(mce::UUID const& uuid)
+    {
+        if (auto player = getPlayer(uuid)) {
+            return player->getNbt();
+        }
+        return getPlayerTag(uuid);
     }
     bool writePlayerData(mce::UUID const& uuid, CompoundTag& data) {
         auto serverId = getServerId(uuid);
@@ -205,5 +225,15 @@ namespace PlayerDataHelper {
     bool isFakePlayer_ddf8196(std::string const& suuid) {
         auto uuid = mce::UUID::fromString(suuid);
         return isFakePlayer_ddf8196(uuid);
+    }
+
+    std::unique_ptr<CompoundTag> readTagFile(std::string const& path, NbtDataType type)
+    {
+        if (type != NbtDataType::Binary && type != NbtDataType::Snbt)
+            return {};
+        auto data = ReadAllFile(path, type == NbtDataType::Binary);
+        if (!data.has_value())
+            return {};
+        return deserializeNbt(data.value(), type);
     }
 }
