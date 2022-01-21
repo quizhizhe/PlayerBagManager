@@ -1,12 +1,6 @@
 ﻿#pragma once
-
+#include "PlayerDataHelper.h"
 #define CheckBagMgr CheckBagManager::getManager()
-
-inline class Player* getPlayer(class mce::UUID const& a0) {
-    class Player* (Level:: * rv)(class mce::UUID const&);
-    *((void**)&rv) = dlsym("?getPlayer@Level@@UEBAPEAVPlayer@@AEBVUUID@mce@@@Z");
-    return (Global<Level>->*rv)(std::forward<class mce::UUID const&>(a0));
-}
 // BidirectionalUnorderedMap<UuidString, name>
 class CheckBagManager
 {
@@ -104,15 +98,25 @@ public:
             return log->mTarget;
         return mce::UUID::fromString("");
     }
-    inline std::string getBackupPath(Player* player) {
+    inline std::string getNameOrUuid(mce::UUID const& uuid) {
+        auto suuid = uuid.asString();
+        auto iter = mUuidNameMap.find(suuid); 
+        if (iter != mUuidNameMap.end())
+            return iter->second.first;
+        return suuid;
+    }
+    static mce::UUID fromNameOrUuid(std::string const& nameOrUuid);
+    inline static std::string getBackupPath(Player* player) {
         auto realName = player->getRealName();
         auto path = std::filesystem::path(Config::BackupDirectory);
         path.append(realName + "." + getSuffix(Config::BackupDataType));
         return path.string();
     }
-    inline std::string getExportPath(std::string const& name, std::string const& suffix) {
+    inline std::string getExportPath(mce::UUID const& uuid, NbtDataType type) {
+        auto fileName = getNameOrUuid(uuid);
+        std::string suffix = getSuffix(type);
         auto path = std::filesystem::path(Config::ExportDirectory);
-        path.append(name + "." + suffix);
+        path.append(fileName + "." + suffix);
         return path.string();
     }
 
@@ -132,7 +136,10 @@ public:
     Result startCheckBag(Player* player, mce::UUID const& uuid);
     Result overwriteData(Player* player);
     Result exportData(mce::UUID const& uuid, NbtDataType type);
-    Result exportData(std::string const& name, NbtDataType type);
+    Result exportData(std::string const& nameOrUuid, NbtDataType type);
+    Result importData(mce::UUID const& uuid, std::string filePath, bool isBagOnly);
+    Result importData(std::string const& nameOrUuid, std::string filePath, bool isBagOnly);
+    size_t exportAllData(NbtDataType type);
 
 };
 

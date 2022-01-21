@@ -41,6 +41,7 @@ class LLCheckBagCommand : public Command {
 		Import,
 		Export,
 		Menu,
+		ExportAll,
 	} mOperation;
 	std::string mPlayer;
 	NbtDataType mDataType = NbtDataType::Snbt;
@@ -132,18 +133,19 @@ class LLCheckBagCommand : public Command {
 			break;
 		}
 		case LLCheckBagCommand::Operation::Import: {
-			return output.error("暂不支持导入功能");
-			if (!mPlayer_isSet) {
-				auto player = GetPlayerOrReturn();
-				if (!FormHelper::openImportScreen(player))
-					output.error("发送表单失败");
-			}
-			else {
-				auto dataType = mDataType_isSet ? mDataType : NbtDataType::Snbt;
-				//auto result = manager.importData(mPlayer, dataType);
-				//CheckResultOutput(result, "导出玩家数据");
-
-			}
+			//return output.error("暂不支持导入功能");
+			auto player = GetPlayerOrReturn();
+			if (!FormHelper::openImportScreen(player))
+				output.error("发送表单失败");
+			break;
+		}
+		case LLCheckBagCommand::Operation::ExportAll: {
+			auto dataType = mDataType_isSet ? mDataType : NbtDataType::Snbt;
+			auto count = CheckBagMgr.exportAllData(dataType);
+			if (count > 0)
+				output.success(fmt::format("成功导出 {} 个玩家的数据", count));
+			else
+				output.error("没有可导出的数据或数据导出失败");
 			break;
 		}
 		default:
@@ -177,13 +179,13 @@ public:
 			{"stop",Operation::Stop},
 			{"menu",Operation::Menu},
 			{"list",Operation::List},
-			//{"import",Operation::Import},
+			{"import",Operation::Import},
 			{"rb",Operation::Rollback},
 			{"ow",Operation::Overwrite},
 			{"s",Operation::Stop},
 			{"m",Operation::Menu},
 			{"l",Operation::List},
-			//{"i",Operation::Import},
+			{"i",Operation::Import},
 			});
 		registry->addEnum<Operation>("LLCheckBag_ActionWithPlayer", {
 			{"check",Operation::Check},
@@ -195,23 +197,29 @@ public:
 			{"export",Operation::Export},
 			{"e",Operation::Export},
 			});
+		registry->addEnum<Operation>("LLCheckBag_ActionExportAll", {
+			{"exportall",Operation::ExportAll},
+			});
 		registry->addEnum<NbtDataType>("LLCheckBag_ExportType", {
 			{"snbt",NbtDataType::Snbt},
 			{"binary",NbtDataType::Binary},
 			{"json",NbtDataType::Json},
 			{"s",NbtDataType::Snbt},
 			{"b",NbtDataType::Binary},
+			{"bin",NbtDataType::Binary},
 			{"j",NbtDataType::Json},
 			});
 
 		auto action = makeMandatory<CommandParameterDataType::ENUM>(&LLCheckBagCommand::mOperation, "action", "LLCheckBag_Action", &LLCheckBagCommand::mOperation_isSet);
 		auto actionWithPlayer = makeMandatory<CommandParameterDataType::ENUM>(&LLCheckBagCommand::mOperation, "action", "LLCheckBag_ActionWithPlayer", &LLCheckBagCommand::mOperation_isSet);
 		auto actionExport = makeMandatory<CommandParameterDataType::ENUM>(&LLCheckBagCommand::mOperation, "action", "LLCheckBag_ActionExport", &LLCheckBagCommand::mOperation_isSet);
+		auto actionExportAll = makeMandatory<CommandParameterDataType::ENUM>(&LLCheckBagCommand::mOperation, "action", "LLCheckBag_ActionExportAll", &LLCheckBagCommand::mOperation_isSet);
 		auto dataTypeParam = makeOptional<CommandParameterDataType::ENUM>(&LLCheckBagCommand::mDataType, "dataType", "LLCheckBag_ExportType", &LLCheckBagCommand::mDataType_isSet);
 
 		action.addOptions((CommandParameterOption)1);
 		actionWithPlayer.addOptions((CommandParameterOption)1);
 		actionExport.addOptions((CommandParameterOption)1);
+		actionExportAll.addOptions((CommandParameterOption)1);
 		dataTypeParam.addOptions((CommandParameterOption)1);
 
 		auto playerParam = makeOptional<CommandParameterDataType::SOFT_ENUM>(&LLCheckBagCommand::mPlayer, "player", "LLCheckBag_PlayerList", &LLCheckBagCommand::mPlayer_isSet);
@@ -220,6 +228,7 @@ public:
 		registry->registerOverload<LLCheckBagCommand>("llcheckbag", action);
 		registry->registerOverload<LLCheckBagCommand>("llcheckbag", actionWithPlayer, playerParam);
 		registry->registerOverload<LLCheckBagCommand>("llcheckbag", actionExport, playerParam, dataTypeParam);
+		registry->registerOverload<LLCheckBagCommand>("llcheckbag", actionExportAll, dataTypeParam);
 	}
 };
 
@@ -227,12 +236,12 @@ void PluginInit()
 {
 	logger.setFile(PLUGIN_LOG_PATH);
 	Config::initConfig();
-
+	
 	Event::RegCmdEvent::subscribe([](Event::RegCmdEvent ev) { // Register commands Event
 		LLCheckBagCommand::setup(ev.mCommandRegistry);
 		return true;
 		});
-	Event::PlayerJoinEvent::subscribe([](Event::PlayerJoinEvent ev) { // Register commands Event
+	Event::PlayerJoinEvent::subscribe([](Event::PlayerJoinEvent ev) {
 		CheckBagMgr.afterPlayerJoin((ServerPlayer*)ev.mPlayer);
 		return true;
 		});

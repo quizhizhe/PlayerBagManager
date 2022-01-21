@@ -5,7 +5,7 @@
 #include "CheckBagManager.h"
 #include <PlayerInfoAPI.h>
 
-#define CheckResultSend(result, operation)\
+#define SendCheckResult(result, operation)\
 if (result == CheckBagManager::Result::Success)\
 	player->sendText(operation "成功");\
 else {\
@@ -22,5 +22,6 @@ namespace FormHelper {
     bool openCheckBagSmartScreen(Player* player);
     bool openExportScreen(Player* player);
     bool openImportScreen(Player* player);
+    bool openExportAllScreen(Player* player);
     bool openMenuScreen(Player* player);
 }
