@@ -158,6 +158,38 @@ namespace Config {
         return true;
     }
 
+    inline std::string serializeOp() {
+        nlohmann::json json;
+        json["uuid"].push_back("12345678-90ab-cdef-1234-567890abcdef");
+        return json.dump(4);
+    }
+
+    inline bool deserializeOp(std::string jsonStr) {
+        Config::op = nlohmann::json::parse(jsonStr, nullptr, false, true);
+        return true;
+    }
+
+    bool isOP(std::string uuid) {
+        for (json::iterator it = Config::op["uuid"].begin(); it != Config::op["uuid"].end(); ++it) {
+            if (uuid == *it) return true;
+        }
+        return false;
+    }
+
+    bool initOp() {
+        bool res = false;
+        auto jsonStr = ReadAllFile(PLUGIN_OP_PATH);
+        if (jsonStr.has_value()) {
+            res = deserializeOp(jsonStr.value());
+        }
+        if (!res) {
+            logger.warn("OP File \"{}\" Not Found, Use Default Config", PLUGIN_OP_PATH);
+            std::filesystem::create_directories(std::filesystem::path(PLUGIN_OP_PATH).remove_filename());
+            res = WriteAllFile(PLUGIN_OP_PATH, serializeOp(), false);
+        }
+        return res;
+    }
+
     bool initConfig() {
         bool res = false;
         auto jsonStr = ReadAllFile(PLUGIN_CONFIG_PATH);

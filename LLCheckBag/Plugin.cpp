@@ -42,6 +42,7 @@ class LLCheckBagCommand : public Command {
 		Export,
 		Menu,
 		ExportAll,
+		AddOp,
 	} mOperation;
 	std::string mPlayer;
 	NbtDataType mDataType = NbtDataType::Snbt;
@@ -155,6 +156,10 @@ class LLCheckBagCommand : public Command {
 
 	void execute(CommandOrigin const& origin, CommandOutput& output) const {
 		Player* player = Command::getPlayerFromOrigin(origin);
+		if (!Config::isOP(player->getUuid())) {
+			output.error("抱歉，你没有使用这个指令的权限");
+			return;
+		}
 		if (!mOperation_isSet) {
 			auto player = GetPlayerOrReturn();
 			if (!FormHelper::openCheckBagSmartScreen(player))
@@ -180,12 +185,14 @@ public:
 			{"menu",Operation::Menu},
 			{"list",Operation::List},
 			{"import",Operation::Import},
+			//{"addop",Operation::AddOp},
 			{"rb",Operation::Rollback},
 			{"ow",Operation::Overwrite},
 			{"s",Operation::Stop},
 			{"m",Operation::Menu},
 			{"l",Operation::List},
 			{"i",Operation::Import},
+			//{"ao",Operation::AddOp},
 			});
 		registry->addEnum<Operation>("LLCheckBag_ActionWithPlayer", {
 			{"check",Operation::Check},
@@ -236,6 +243,7 @@ void PluginInit()
 {
 	logger.setFile(PLUGIN_LOG_PATH);
 	Config::initConfig();
+	Config::initOp();
 	
 	Event::RegCmdEvent::subscribe([](Event::RegCmdEvent ev) { // Register commands Event
 		LLCheckBagCommand::setup(ev.mCommandRegistry);

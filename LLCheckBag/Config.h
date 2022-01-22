@@ -22,6 +22,7 @@
 extern Logger logger;
 
 #define PLUGIN_CONFIG_PATH "plugins/LLCheckBag/config.json"
+#define PLUGIN_OP_PATH "plugins/LLCheckBag/op.json"
 #define PLUGIN_LOG_PATH "plugins/logs/LLCheckBag.log"
 
 enum class NbtDataType :int {
@@ -57,6 +58,7 @@ std::string toString(PlayerCategory type);
 //template PlayerCategory fromString<PlayerCategory>(std::string const& name);
 
 namespace Config {
+    static nlohmann::json op;
     static bool PacketMode = false;
     static bool MsaIdOnly = false;
     static bool GuiWithCategory = true;
@@ -66,6 +68,8 @@ namespace Config {
     //static bool CheckLLFakePlayer = true;
     static NbtDataType BackupDataType = NbtDataType::Binary;
     static ScreenCategory DefaultScreen = ScreenCategory::Check;
+    bool isOP(std::string xuid);
 
     bool initConfig();
+    bool initOp();
 }

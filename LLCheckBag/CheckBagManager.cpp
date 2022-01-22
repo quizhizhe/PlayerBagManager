@@ -97,6 +97,12 @@ void CheckBagManager::afterPlayerJoin(ServerPlayer* player) {
         auto isFakePlayer = PlayerDataHelper::isFakePlayer_ddf8196(suuid);
         mUuidNameMap.emplace(suuid, std::pair{ player->getRealName(),isFakePlayer });
     }
+    auto backupTag = getBackupBag(player);
+    if (!backupTag)
+        return;
+    mIsFree = false;
+    auto uuid = player->getUuid();
+    mCheckBagLogMap.emplace(uuid, CheckBagLog(mce::UUID::fromString(uuid), std::move(backupTag)));
 }
 
 mce::UUID CheckBagManager::fromNameOrUuid(std::string const& nameOrUuid) {

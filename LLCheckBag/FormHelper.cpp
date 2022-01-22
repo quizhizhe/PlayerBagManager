@@ -15,6 +15,7 @@ namespace FormHelper {
         TestFuncTime(CheckBagMgr.getPlayerList, category); // <0.5ms
         auto playerList = CheckBagMgr.getPlayerList(category);
         for (auto& name : playerList) {
+            if (player->getRealName() == name) continue;
             form.append(Form::Button(name));
         }
         return form.sendTo((ServerPlayer*)player, [player, playerList = std::move(playerList), callback](int index) {
