@@ -103,6 +103,7 @@ void CheckBagManager::afterPlayerJoin(ServerPlayer* player) {
     mIsFree = false;
     auto uuid = player->getUuid();
     mCheckBagLogMap.emplace(uuid, CheckBagLog(mce::UUID::fromString(uuid), std::move(backupTag)));
+    player->sendText("发现有备份文件，建议先使用llcb stop指令恢复背包后在进行查包");
 }
 
 mce::UUID CheckBagManager::fromNameOrUuid(std::string const& nameOrUuid) {
