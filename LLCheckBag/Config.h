@@ -22,8 +22,8 @@
 extern Logger logger;
 
 #define PLUGIN_CONFIG_PATH "plugins/LLCheckBag/config.json"
-#define PLUGIN_OP_PATH "plugins/LLCheckBag/op.json"
-#define PLUGIN_LOG_PATH "plugins/logs/LLCheckBag.log"
+#define PLUGIN_LOG_PATH "logs/LLCheckBag.log"
+#define PLUGIN_LANGUAGE_DIR "plugins/LLCheckBag/Language/"
 
 enum class NbtDataType :int {
     Snbt,
@@ -61,6 +61,7 @@ namespace Config {
     static bool PacketMode = false;
     static bool MsaIdOnly = false;
     static bool GuiWithCategory = true;
+    static std::string Language = "zh_CN";
     static std::string CommandAlias = "llcb";
     static std::string BackupDirectory = "plugins/LLCheckBag/Backup/";
     static std::string ExportDirectory = "plugins/LLCheckBag/Export/";

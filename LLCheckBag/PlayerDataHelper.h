@@ -4,7 +4,7 @@
 
 inline bool nameSortFunc(std::string const& left, std::string const& right) {
     size_t maxSize = std::max(left.size(), right.size());
-
+    
     for (size_t i = 0; i < maxSize; i++)
     {
         auto c1 = left[i];

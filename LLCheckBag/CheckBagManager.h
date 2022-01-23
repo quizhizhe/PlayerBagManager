@@ -4,7 +4,7 @@
 // BidirectionalUnorderedMap<UuidString, name>
 class CheckBagManager
 {
-    
+
     CheckBagManager();
     CheckBagManager(CheckBagManager& manager) = delete;
     struct CheckBagLog {
@@ -61,21 +61,21 @@ public:
         switch (result)
         {
         case CheckBagManager::Result::Success:
-            return "成功";
+            return tr("manager.result.success");
         case CheckBagManager::Result::Error:
-            return "未知错误";
+            return tr("manager.result.error");
         case CheckBagManager::Result::Request:
-            return "操作冲突，改为请求操作";
+            return tr("manager.result.player_online");
         case CheckBagManager::Result::NotStart:
-            return "未开始";
+            return tr("manager.result.not_start");
         case CheckBagManager::Result::BackupError:
-            return "备份失败";
+            return tr("manager.result.backup_failed");
         case CheckBagManager::Result::BackupNotFound:
-            return "未找到备份";
+            return tr("manager.result.backup_not_found");
         case CheckBagManager::Result::TargetNotExist:
-            return "目标不存在";
+            return tr("manager.result.target_not_exists");
         default:
-            return "未知错误";
+            return tr("manager.result.unknown_error");
         }
     }
 
@@ -100,7 +100,7 @@ public:
     }
     inline std::string getNameOrUuid(mce::UUID const& uuid) {
         auto suuid = uuid.asString();
-        auto iter = mUuidNameMap.find(suuid); 
+        auto iter = mUuidNameMap.find(suuid);
         if (iter != mUuidNameMap.end())
             return iter->second.first;
         return suuid;

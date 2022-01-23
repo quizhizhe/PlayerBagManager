@@ -45,6 +45,8 @@ llcheckbag import/i                     // 导入玩家数据
     "DefaultScreen": "Check",
     // 导出目录，同时也是导入目录
     "ExportDirectory": "plugins/LLCheckBag/Export/",
+    // 语言，可选值：zh_CN
+    "Language": "zh_CN",
     // 不懂请选择默认值
     "MsaIdOnly": false,
     // 仅 CustomOperator 为 true 时有效，设置权限使用指令的玩家的xuid（字符串格式）
@@ -53,5 +55,5 @@ llcheckbag import/i                     // 导入玩家数据
 ```
 
 ## 备注
-* 如果需要编辑并导入玩家数据请确保你对 nbt 数据格式以及玩家数据结构有一定程度的了解，并先请先备份好你的存档
+* 如果需要编辑并导入玩家数据请确保你对 nbt 数据格式以及玩家数据结构有一定程度的了解，并**请先备份好你的存档**
 * 建议使用 [nbt-studio](https://github.com/tryashtar/nbt-studio) 或其他 nbt 编辑工具查看或者编辑导出的玩家 nbt 数据（其实就是千万别用记事本）

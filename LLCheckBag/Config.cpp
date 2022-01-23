@@ -2,6 +2,7 @@
 #include "Config.h"
 #include <third-party/Nlohmann/json.hpp>
 #include <filesystem>
+#include <TranslationAPI.h>
 
 #define CaseEnumValue(type, value)\
 case type::value:\
@@ -75,7 +76,6 @@ inline std::string toString(ScreenCategory type) {
     default:
         return "Check";
         break;
-
     }
 }
 
@@ -126,6 +126,7 @@ namespace Config {
 
         //SerializeVaule(PacketMode);
         SerializeVaule(MsaIdOnly);
+        SerializeVaule(Language);
         SerializeVaule(CommandAlias);
         SerializeVaule(BackupDirectory);
         SerializeVaule(ExportDirectory);
@@ -143,6 +144,7 @@ namespace Config {
 
         //DeserializeVaule(PacketMode);
         DeserializeVaule(MsaIdOnly);
+        DeserializeVaule(Language);
         DeserializeVaule(CommandAlias);
         DeserializeVaule(BackupDirectory);
         DeserializeVaule(ExportDirectory);
@@ -170,7 +172,19 @@ namespace Config {
         auto res = std::find(Config::OperatorXuidList.begin(), Config::OperatorXuidList.end(), xuid);
         return  res != Config::OperatorXuidList.end();
     }
-
+    bool loadLanguage(std::string language) {
+        auto languageFile = std::filesystem::path(PLUGIN_LANGUAGE_DIR);
+        languageFile.append(Config::Language + ".json");
+        if (!std::filesystem::exists(languageFile)) {
+            languageFile = std::filesystem::path(PLUGIN_LANGUAGE_DIR);
+            languageFile.append("zh_CN.json");
+            if (!std::filesystem::exists(languageFile)) {
+                return false;
+            }
+        }
+        return Translation::load(languageFile.string());
+        
+    }
     bool initConfig() {
         bool res = false;
         auto jsonStr = ReadAllFile(PLUGIN_CONFIG_PATH);
@@ -194,6 +208,10 @@ namespace Config {
         }
         std::filesystem::create_directories(Config::BackupDirectory);
         std::filesystem::create_directories(Config::ExportDirectory);
+        if (!loadLanguage(Config::Language)) {
+            logger.error("Error loading language file!");
+            throw("Error loading language file!");
+        }
         return res;
     };
 

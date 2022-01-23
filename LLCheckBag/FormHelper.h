@@ -7,10 +7,9 @@
 
 #define SendCheckResult(result, operation)\
 if (result == CheckBagManager::Result::Success)\
-	player->sendText(operation "成功");\
+	player->sendText(tr("operation.success", operation));\
 else {\
-	player->sendText(std::string("§c§l") + operation + "失败§r");\
-	player->sendText(std::string("§c§l原因：") + CheckBagManager::getResultString(result)+"§r");\
+	player->sendText(fmt::format("§c§l§r", tr("operation.failed", operation, CheckBagManager::getResultString(result)))); \
 }
 
 namespace FormHelper {

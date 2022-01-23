@@ -355,7 +355,8 @@ CheckBagManager::Result CheckBagManager::exportData(mce::UUID const& uuid, NbtDa
     std::string data;
     if (!getPlayer(uuid) && type == NbtDataType::Binary) {
         data = PlayerDataHelper::getPlayerData(uuid);
-    }else{
+    }
+    else {
         std::unique_ptr<CompoundTag> tag = PlayerDataHelper::getExpectedPlayerTag(uuid);
         if (!tag)
             return Result::Error;
@@ -376,7 +377,7 @@ CheckBagManager::Result CheckBagManager::exportData(mce::UUID const& uuid, NbtDa
     auto infoStr = playerInfo.dump(4);
 
     auto dataPath = getExportPath(uuid, type);
-    std::filesystem::path infoPath(dataPath +".json");
+    std::filesystem::path infoPath(dataPath + ".json");
     if (WriteAllFile(dataPath, data, true) && WriteAllFile(infoPath.string(), infoStr, false))
         return Result::Success;
     return Result::Error;
@@ -390,9 +391,9 @@ CheckBagManager::Result CheckBagManager::exportData(std::string const& nameOrUui
 }
 
 CheckBagManager::Result CheckBagManager::importData(mce::UUID const& uuid, std::string filePath, bool isBagOnly) {
-    if (!uuid|| filePath.empty())
+    if (!uuid || filePath.empty())
         return Result::Error;
-    auto suffix = filePath.substr(filePath.find_last_of('.')+1);
+    auto suffix = filePath.substr(filePath.find_last_of('.') + 1);
     auto newTag = PlayerDataHelper::readTagFile(std::filesystem::path(Config::ExportDirectory).append(filePath).string(), fromSuffix(suffix));
     if (!newTag)
         return Result::Error;
@@ -402,7 +403,7 @@ CheckBagManager::Result CheckBagManager::importData(mce::UUID const& uuid, std::
         }
         else {
             auto oldTag = PlayerDataHelper::getExpectedPlayerTag(uuid);
-            if(!oldTag)
+            if (!oldTag)
                 return Result::Error;
             if (PlayerDataHelper::writePlayerBag(uuid, *newTag))
                 return Result::Success;
@@ -410,7 +411,7 @@ CheckBagManager::Result CheckBagManager::importData(mce::UUID const& uuid, std::
         }
     }
     else {
-        if(getPlayer(uuid))
+        if (getPlayer(uuid))
             return Result::Error;
         if (PlayerDataHelper::writePlayerData(uuid, *newTag))
             return Result::Success;
@@ -433,9 +434,8 @@ size_t CheckBagManager::exportAllData(NbtDataType type)
         auto result = exportData(suuid, type);
         if (result == CheckBagManager::Result::Success)
             count++;
-        else{
-            logger.warn("导出 {} 数据失败", suuid);
-            logger.warn("原因：{}", CheckBagManager::getResultString(result));
+        else {
+            logger.warn("导出 {} 数据失败，原因：{}", suuid, CheckBagManager::getResultString(result));
         }
     }
     return count;

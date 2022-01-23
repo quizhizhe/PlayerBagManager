@@ -75,6 +75,8 @@ LibraryBuilder.exe -o ..\Lib\
     <PostBuildEvent>
       <Command>if exist $(LocalDebuggerWorkingDirectory)\plugins\ (
 copy /Y $(TargetPath) $(LocalDebuggerWorkingDirectory)\plugins\
+mkdir $(LocalDebuggerWorkingDirectory)\plugins\LLCheckBag\
+xcopy /Y /E $(SolutionDir)\Data\ $(LocalDebuggerWorkingDirectory)\plugins\LLCheckBag\
 )</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -86,6 +88,7 @@ copy /Y $(TargetPath) $(LocalDebuggerWorkingDirectory)\plugins\
     <ClInclude Include="CheckBagManager.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PlayerDataHelper.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp" />
