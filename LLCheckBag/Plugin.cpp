@@ -154,15 +154,60 @@ class LLCheckBagCommand : public Command {
 		}
 	}
 
+	void addOp(CommandOrigin const& origin, CommandOutput& output) const {
+		xuid_t xuid = "";
+		for (auto& player : Level::getAllPlayers()) {
+			if (player->getRealName() == mPlayer) {
+				xuid = player->getXuid();
+			}
+		}
+		if (!xuid.empty()) {
+			if (Config::isOperator(xuid))
+				return output.error(fmt::format("玩家 {} 已在操作员列表中", mPlayer));
+			Config::addOperator(xuid);
+			return output.success(fmt::format("设置玩家 {} 为操作员成功", mPlayer));
+		}
+		return output.error(fmt::format("未找到玩家 {}, 请确保玩家在线且正确输入玩家真名（非别名）", mPlayer));
+	}
+
 	void execute(CommandOrigin const& origin, CommandOutput& output) const {
+		if ((OriginType)origin.getOriginType() == OriginType::DedicatedServer
+			&& mOperation_isSet && mPlayer_isSet && mOperation == Operation::AddOp) {
+			return addOp(origin, output);
+		}
 		Player* player = Command::getPlayerFromOrigin(origin);
-		if (!Config::isOP(player->getRealName())) {
+		if (!Config::isOperator(player->getXuid())) {
 			output.error("抱歉，你没有使用这个指令的权限");
 			return;
 		}
 		if (!mOperation_isSet) {
+			ASSERT(!mPlayer_isSet);
 			auto player = GetPlayerOrReturn();
-			if (!FormHelper::openCheckBagSmartScreen(player))
+			bool res = false;
+			switch (Config::DefaultScreen)
+			{
+			case ScreenCategory::Check:
+				res = FormHelper::openCheckBagSmartScreen(player);
+				break;
+			case ScreenCategory::Menu:
+				res = FormHelper::openMenuScreen(player);
+				break;
+			case ScreenCategory::Import:
+				res = FormHelper::openImportScreen(player);
+				break;
+			case ScreenCategory::Export:
+				res = FormHelper::openExportScreen(player);
+				break;
+			case ScreenCategory::Delete:
+				res = FormHelper::openRemoveDataScreen(player);
+				break;
+			case ScreenCategory::ExportAll:
+				res = FormHelper::openExportAllScreen(player);
+				break;
+			default:
+				break;
+			}
+			if (!res)
 				output.error("发送表单失败");
 			return;
 		}else
@@ -185,20 +230,19 @@ public:
 			{"menu",Operation::Menu},
 			{"list",Operation::List},
 			{"import",Operation::Import},
-			//{"addop",Operation::AddOp},
 			{"rb",Operation::Rollback},
 			{"ow",Operation::Overwrite},
 			{"s",Operation::Stop},
 			{"m",Operation::Menu},
 			{"l",Operation::List},
 			{"i",Operation::Import},
-			//{"ao",Operation::AddOp},
 			});
 		registry->addEnum<Operation>("LLCheckBag_ActionWithPlayer", {
 			{"check",Operation::Check},
 			{"remove",Operation::Remove},
 			{"c",Operation::Check},
 			{"rm",Operation::Remove},
+			{"op",Operation::AddOp},
 			});
 		registry->addEnum<Operation>("LLCheckBag_ActionExport", {
 			{"export",Operation::Export},
@@ -243,7 +287,6 @@ void PluginInit()
 {
 	logger.setFile(PLUGIN_LOG_PATH);
 	Config::initConfig();
-	Config::initOp();
 	
 	Event::RegCmdEvent::subscribe([](Event::RegCmdEvent ev) { // Register commands Event
 		LLCheckBagCommand::setup(ev.mCommandRegistry);

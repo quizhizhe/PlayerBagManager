@@ -18,7 +18,7 @@ if (json.find(#var) != json.end()){\
     Config::var = json.value(#var, Config::var);\
 }\
 else{\
-    logger.warn("Missing Config {}, use default value {}", #var, Config::var);\
+    logger.info("Missing Config {}, use default value ", #var/*, Config::var*/);\
     needUpdate = true;\
 }
 
@@ -124,11 +124,13 @@ namespace Config {
     inline std::string serialize() {
         nlohmann::json json;
 
-        SerializeVaule(PacketMode);
+        //SerializeVaule(PacketMode);
         SerializeVaule(MsaIdOnly);
         SerializeVaule(CommandAlias);
         SerializeVaule(BackupDirectory);
         SerializeVaule(ExportDirectory);
+        SerializeVaule(CustomOperator);
+        SerializeVaule(OperatorXuidList);
         //SerializeVaule(CheckLLFakePlayer);
         SerializeEnumVaule(BackupDataType);
         SerializeEnumVaule(DefaultScreen);
@@ -139,70 +141,63 @@ namespace Config {
         auto json = nlohmann::json::parse(jsonStr, nullptr, false, true);
         bool needUpdate = false;
 
-        DeserializeVaule(PacketMode);
+        //DeserializeVaule(PacketMode);
         DeserializeVaule(MsaIdOnly);
         DeserializeVaule(CommandAlias);
         DeserializeVaule(BackupDirectory);
         DeserializeVaule(ExportDirectory);
+        DeserializeVaule(CustomOperator);
+        DeserializeVaule(OperatorXuidList);
         //DeserializeVaule(CheckLLFakePlayer);
         DeserializeEnumVaule(BackupDataType);
         DeserializeEnumVaule(DefaultScreen);
 
-        if (BackupDataType != NbtDataType::Binary || BackupDataType != NbtDataType::Snbt) {
+        if ((BackupDataType != NbtDataType::Binary) && (BackupDataType != NbtDataType::Snbt)) {
             needUpdate = true;
             BackupDataType = NbtDataType::Binary;
         }
-        if (needUpdate) {
-            WriteAllFile(PLUGIN_CONFIG_PATH, serialize(), false);
-        }
-        return true;
+        return !needUpdate;
     }
 
-    inline std::string serializeOp() {
-        nlohmann::json json;
-        json["name"].push_back("TestPlayerName");
-        return json.dump(4);
-    }
-
-    inline bool deserializeOp(std::string jsonStr) {
-        Config::op = nlohmann::json::parse(jsonStr, nullptr, false, true);
-        return true;
-    }
-
-    bool isOP(std::string uuid) {
-        for (json::iterator it = Config::op["uuid"].begin(); it != Config::op["uuid"].end(); ++it) {
-            if (uuid == *it) return true;
-        }
-        return false;
-    }
-
-    bool initOp() {
-        bool res = false;
-        auto jsonStr = ReadAllFile(PLUGIN_OP_PATH);
-        if (jsonStr.has_value()) {
-            res = deserializeOp(jsonStr.value());
-        }
-        if (!res) {
-            logger.warn("OP File \"{}\" Not Found, Use Default Config", PLUGIN_OP_PATH);
-            std::filesystem::create_directories(std::filesystem::path(PLUGIN_OP_PATH).remove_filename());
-            res = WriteAllFile(PLUGIN_OP_PATH, serializeOp(), false);
-        }
+    bool addOperator(std::string xuid) {
+        Config::OperatorXuidList.push_back(xuid);
+        auto res = isOperator(xuid);
+        res = res && saveConfig();
         return res;
+    }
+
+    bool isOperator(std::string xuid) {
+        auto res = std::find(Config::OperatorXuidList.begin(), Config::OperatorXuidList.end(), xuid);
+        return  res != Config::OperatorXuidList.end();
     }
 
     bool initConfig() {
         bool res = false;
         auto jsonStr = ReadAllFile(PLUGIN_CONFIG_PATH);
         if (jsonStr.has_value()) {
-            res = deserialize(jsonStr.value());
+            try
+            {
+                res = deserialize(jsonStr.value());
+            }
+            catch (const std::exception&)
+            {
+                logger.error("Error in loading config file \"{}\", Use default config", PLUGIN_CONFIG_PATH);
+                res = false;
+            }
+        }
+        else {
+            logger.info("Config File \"{}\" Not Found, Use Default Config", PLUGIN_CONFIG_PATH);
+            std::filesystem::create_directories(std::filesystem::path(PLUGIN_CONFIG_PATH).remove_filename());
         }
         if (!res) {
-            logger.warn("Config File \"{}\" Not Found, Use Default Config", PLUGIN_CONFIG_PATH);
-            std::filesystem::create_directories(std::filesystem::path(PLUGIN_CONFIG_PATH).remove_filename());
-            res = WriteAllFile(PLUGIN_CONFIG_PATH, serialize(), false);
+            res = saveConfig();
         }
         std::filesystem::create_directories(Config::BackupDirectory);
         std::filesystem::create_directories(Config::ExportDirectory);
         return res;
     };
+
+    bool saveConfig() {
+        return WriteAllFile(PLUGIN_CONFIG_PATH, serialize(), false);
+    }
 }

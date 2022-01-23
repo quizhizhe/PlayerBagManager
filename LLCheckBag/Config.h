@@ -58,7 +58,6 @@ std::string toString(PlayerCategory type);
 //template PlayerCategory fromString<PlayerCategory>(std::string const& name);
 
 namespace Config {
-    static nlohmann::json op;
     static bool PacketMode = false;
     static bool MsaIdOnly = false;
     static bool GuiWithCategory = true;
@@ -68,8 +67,11 @@ namespace Config {
     //static bool CheckLLFakePlayer = true;
     static NbtDataType BackupDataType = NbtDataType::Binary;
     static ScreenCategory DefaultScreen = ScreenCategory::Check;
-    bool isOP(std::string xuid);
+    static bool CustomOperator = true;
+    static std::vector<std::string> OperatorXuidList = {};
 
+    bool addOperator(std::string xuid);
+    bool isOperator(std::string xuid);
     bool initConfig();
-    bool initOp();
+    bool saveConfig();
 }

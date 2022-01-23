@@ -7,4 +7,5 @@
 /Tools
 /x64
 /.vs
-/LLCheckBag/x64/Release
+/LLCheckBag/x64/Release/
+**/*.vcxproj.user
