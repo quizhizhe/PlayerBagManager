@@ -160,7 +160,7 @@ namespace Config {
 
     inline std::string serializeOp() {
         nlohmann::json json;
-        json["uuid"].push_back("12345678-90ab-cdef-1234-567890abcdef");
+        json["name"].push_back("TestPlayerName");
         return json.dump(4);
     }
 

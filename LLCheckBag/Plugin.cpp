@@ -156,7 +156,7 @@ class LLCheckBagCommand : public Command {
 
 	void execute(CommandOrigin const& origin, CommandOutput& output) const {
 		Player* player = Command::getPlayerFromOrigin(origin);
-		if (!Config::isOP(player->getUuid())) {
+		if (!Config::isOP(player->getRealName())) {
 			output.error("抱歉，你没有使用这个指令的权限");
 			return;
 		}
