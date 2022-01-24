@@ -213,7 +213,7 @@ namespace FormHelper {
                 ++iter;
                 if (iter == list.end())
                     iter = list.begin();
-                auto result = manager.startCheckBag(player, mce::UUID::fromString(*iter));
+                auto result = manager.startCheckBag(player, manager.fromNameOrUuid(*iter));
                 SendCheckResult(result, tr(CheckBagMenus[index]));
                 break;
             }
@@ -228,7 +228,7 @@ namespace FormHelper {
                 --iter;
                 if (iter == list.begin())
                     iter = list.end();
-                auto result = manager.startCheckBag(player, mce::UUID::fromString(*iter));
+                auto result = manager.startCheckBag(player, manager.fromNameOrUuid(*iter));
                 SendCheckResult(result, tr(CheckBagMenus[index]));
                 break;
             }

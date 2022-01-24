@@ -1,5 +1,15 @@
 # LLCheckBag
-这是 Bedrock Minecraft Server 的背包检查插件，需要 LiteLoader 的前置
+这是 [Bedrock Minecraft Server](https://www.minecraft.net/en-us/download/server/bedrock) 的背包检查插件，需要 [LiteLoader](https://github.com/LiteLDev/LiteLoaderBDS) 的前置
+
+## 简介
+这是一个可以查看存档中所有玩家背包的插件，并附带多种玩家数据操作用于确认玩家数据是否异常
+
+## 功能
+* 查看某玩家背包
+* 导出某玩家数据
+* 导入某玩家数据
+* 删除某玩家所有数据，注：**不只是背包数据**
+    *注：以上功能均支持存档中所有玩家，理论上服务器安装 LiteLoader 2.0 后进入过服务器的玩家均能识别出玩家名，否则以uuid形式显示
 
 ## 编译
 使用
@@ -27,7 +37,6 @@ llcheckbag import/i                     // 导入玩家数据（仅GUI）
 ```
 
 ## 部分 GUI 说明
-### Check  查看玩家背包
 ### Import 导入玩家数据
 * 输入 `llcheckbag import` 或 `llcheckbag i` 可打开导入界面，选择需要导入的玩家数据，
 * 列表里文件为 **ExportDirectory** 设置的文件夹中的文件，仅支持后缀为 `.snbt` 或者 `.nbt` 的文件

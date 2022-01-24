@@ -110,7 +110,7 @@ mce::UUID CheckBagManager::fromNameOrUuid(std::string const& nameOrUuid) {
     auto uuid = mce::UUID::fromString(nameOrUuid);
     if (!uuid)
         return mce::UUID::fromString(PlayerInfo::getUUID(nameOrUuid));
-    return mce::UUID::fromString("");
+    return uuid;
 }
 
 std::vector<std::string> CheckBagManager::getPlayerList() {
@@ -333,7 +333,7 @@ CheckBagManager::Result CheckBagManager::startCheckBag(Player* player, mce::UUID
     if (auto target = getPlayer(uuid))
         return startCheckBag(player, target);
     auto targetTag = PlayerDataHelper::getPlayerTag(uuid);
-    if (!targetTag)
+    if (!targetTag || targetTag->isEmpty())
         return Result::TargetNotExist;
     return setBagData(player, uuid, std::move(targetTag));
 }
