@@ -3,6 +3,7 @@
 #include <third-party/Nlohmann/json.hpp>
 #include <filesystem>
 #include <TranslationAPI.h>
+#include <PlayerInfoAPI.h>
 
 #define CaseEnumValue(type, value)\
 case type::value:\
@@ -124,6 +125,7 @@ namespace Config {
     inline std::string serialize() {
         nlohmann::json json;
 
+        SerializeVaule(ConfigVersion);
         //SerializeVaule(PacketMode);
         SerializeVaule(MsaIdOnly);
         SerializeVaule(Language);
@@ -138,9 +140,41 @@ namespace Config {
         return json.dump(4);
     }
 
+    // return needUpdate
+    inline bool checkConfigCompatible(nlohmann::json& json) {
+        int cfgver = 0;
+        cfgver = json.value("ConfigVersion", 0);
+        if (cfgver == Config::ConfigVersion)
+            return false;
+        logger.info("update config from ConfigVersion {}", cfgver);
+        switch (cfgver)
+        {
+        case 0: {
+            auto opsPath = ReadAllFile("plugins/LLCheckBag/op.json");
+            if (opsPath.has_value()) {
+                std::vector<std::string> opNames;
+                std::vector<std::string> opXuids;
+                auto opjson = nlohmann::json::parse(opsPath.value(), nullptr, false, true);
+                opNames = opjson.value("name", opNames);
+                for (auto& opName : opNames) {
+                    auto xuid = PlayerInfo::getXuid(opName);
+                    if (!xuid.empty())
+                        opXuids.push_back(xuid);
+                }
+                json["OperatorXuidList"] = opXuids;
+                std::filesystem::remove("plugins/LLCheckBag/op.json");
+            }
+        }
+        default:
+            break;
+        }
+    }
+
     inline bool deserialize(std::string jsonStr) {
         auto json = nlohmann::json::parse(jsonStr, nullptr, false, true);
         bool needUpdate = false;
+
+        needUpdate = checkConfigCompatible(json);
 
         //DeserializeVaule(PacketMode);
         DeserializeVaule(MsaIdOnly);

@@ -54,6 +54,8 @@ After selecting, the **Import data screen** will pop up.
 ## Configuration file(plugins/LLCheckBag/config.json)
 ```json
 {
+    // Configuration file version, in order to convert the configuration to the latest version, **Do Not Modify**
+    "ConfigVersion": 1,
     // Backup data format, optional values: Binary, Snbt
     "BackupDataType": "Binary",
     // Inventory backup directory

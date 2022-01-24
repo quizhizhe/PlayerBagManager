@@ -7,7 +7,7 @@
 // Version
 #define PLUGIN_VERSION_MAJOR 1
 #define PLUGIN_VERSION_MINOR 1
-#define PLUGIN_VERSION_REVISION 0
+#define PLUGIN_VERSION_REVISION 1
 #define PLUGIN_VERSION_IS_BETA false
 
 #define STR1(R) #R
@@ -58,6 +58,7 @@ std::string toString(PlayerCategory type);
 //template PlayerCategory fromString<PlayerCategory>(std::string const& name);
 
 namespace Config {
+    static int ConfigVersion = 1;
     static bool PacketMode = false;
     static bool MsaIdOnly = false;
     static bool GuiWithCategory = true;

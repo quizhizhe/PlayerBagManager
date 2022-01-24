@@ -51,6 +51,8 @@ llcheckbag import/i                     // 导入玩家数据（仅GUI）
 ## 配置文件(plugins/LLCheckBag/config.json)
 ```json
 {
+    // 配置文件版本，为了转换旧版本的配置到最新版本，**别修改**
+    "ConfigVersion": 1,
     // 备份数据格式，可选值：Binary, Snbt
     "BackupDataType": "Binary",
     // 背包备份目录
@@ -63,7 +65,7 @@ llcheckbag import/i                     // 导入玩家数据（仅GUI）
     "DefaultScreen": "Check",
     // 导出目录，同时也是导入目录
     "ExportDirectory": "plugins/LLCheckBag/Export/",
-    // 语言，可选值：zh_CN
+    // 语言，可选值：zh_CN, en_US
     "Language": "zh_CN",
     // 不懂请选择默认值
     "MsaIdOnly": false,
