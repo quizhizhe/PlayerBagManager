@@ -83,7 +83,7 @@ jobs:
         name: LLCheckBag
         path: ${{ github.workspace }}/output/
     
-    - name: ar
+    - name: Archive
       working-directory: ${{env.GITHUB_WORKSPACE}}
       if: startsWith(github.ref, 'refs/tags/v')
       run: Compress-Archive -Path output/* output/LLCheckBag.zip

@@ -1,15 +1,16 @@
 # LLCheckBag
-这是 [Bedrock Minecraft Server](https://www.minecraft.net/en-us/download/server/bedrock) 的背包检查插件，需要 [LiteLoader](https://github.com/LiteLDev/LiteLoaderBDS) 的前置
+这是 [Bedrock Minecraft Server](https://www.minecraft.net/en-us/download/server/bedrock) 的背包检查插件，
+可以查看存档中所有玩家背包的插件，并附带多种玩家数据操作用于确认玩家数据是否异常
+需要 [LiteLoader](https://github.com/LiteLDev/LiteLoaderBDS) 的前置
 
-## 简介
-这是一个可以查看存档中所有玩家背包的插件，并附带多种玩家数据操作用于确认玩家数据是否异常
+##### 简体中文 | [English](README_en.md)
 
 ## 功能
 * 查看某玩家背包
 * 导出某玩家数据
 * 导入某玩家数据
 * 删除某玩家所有数据，注：**不只是背包数据**
-    *注：以上功能均支持存档中所有玩家，理论上服务器安装 LiteLoader 2.0 后进入过服务器的玩家均能识别出玩家名，否则以uuid形式显示
+    * 注：以上功能均支持存档中所有玩家，理论上服务器安装 LiteLoader 2.0 后进入过服务器的玩家均能识别出玩家名，否则以uuid形式显示
 
 ## 编译
 使用
@@ -43,7 +44,7 @@ llcheckbag import/i                     // 导入玩家数据（仅GUI）
 选择好后会弹出**导入数据界面**，
 * 第一行显示自动的是自动匹配的存档中已有的玩家名，
 * 导入模式分为仅背包和完整数据模式，
-    * 仅背包：此选项会会导入背包物品数据，包括 人物背包，潜影盒，盔甲蓝，副手，玩家UI物品数据
+    * 仅背包：此选项会会导入背包物品数据，包括 人物背包，末影箱，盔甲蓝，副手，玩家UI物品数据
     * 完整数据：此选项会导入完整的玩家nbt数据
 * 导入目标分为匹配的玩家，新玩家，选择玩家，**需要注意的是，新玩家模式需要玩家信息文件（后缀为`.nbt.json`或者`.snbt.json`）**
 
