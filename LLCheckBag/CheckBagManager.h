@@ -50,13 +50,15 @@ public:
         BackupError,
         BackupNotFound,
         TargetNotExist,
+        InfoDataNotFound,
+        DataTypeNotSupported,
     };
 
     static bool mIsFree;
     static CheckBagManager& getManager();
 
     static std::string getSuffix(NbtDataType type);
-    static NbtDataType fromSuffix(std::string_view suffix);
+    static NbtDataType fromSuffix(std::string const& suffix);
     inline static std::string getResultString(Result result) {
         switch (result)
         {
@@ -74,6 +76,10 @@ public:
             return tr("manager.result.backup_not_found");
         case CheckBagManager::Result::TargetNotExist:
             return tr("manager.result.target_not_exists");
+        case CheckBagManager::Result::InfoDataNotFound:
+            return tr("manager.result.info_data_not_found");
+        case CheckBagManager::Result::DataTypeNotSupported:
+            return tr("manager.result.data_type_not_supported");
         default:
             return tr("manager.result.unknown_error");
         }
@@ -139,6 +145,7 @@ public:
     Result exportData(std::string const& nameOrUuid, NbtDataType type);
     Result importData(mce::UUID const& uuid, std::string filePath, bool isBagOnly);
     Result importData(std::string const& nameOrUuid, std::string filePath, bool isBagOnly);
+    Result importNewData(std::string filePath);
     size_t exportAllData(NbtDataType type);
 
 };

@@ -42,4 +42,5 @@ namespace PlayerDataHelper {
     bool isFakePlayer_ddf8196(mce::UUID const& uuid);
     bool isFakePlayer_ddf8196(std::string const& suuid);
     std::unique_ptr<CompoundTag> readTagFile(std::string const& path, NbtDataType type = NbtDataType::Binary);
+    bool writeNewPlayerData(std::unique_ptr<CompoundTag> idsTag, std::unique_ptr<CompoundTag> dataTag);
 }

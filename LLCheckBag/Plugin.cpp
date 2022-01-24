@@ -174,10 +174,12 @@ class LLCheckBagCommand : public Command {
             && mOperation_isSet && mPlayer_isSet && mOperation == Operation::AddOp) {
             return addOp(origin, output);
         }
-        Player* player = Command::getPlayerFromOrigin(origin);
-        if (!Config::isOperator(player->getXuid())) {
-            output.error(tr("command.no_permission"));
-            return;
+        if ((OriginType)origin.getOriginType() != OriginType::DedicatedServer) {
+            Player* player = Command::getPlayerFromOrigin(origin);
+            /// 防止 execute 绕过权限限制？
+            if (!player || !Config::isOperator(player->getXuid())) {
+                return output.error(tr("command.no_permission"));
+            }
         }
         if (!mOperation_isSet) {
             ASSERT(!mPlayer_isSet);

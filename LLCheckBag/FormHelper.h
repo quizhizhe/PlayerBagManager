@@ -9,7 +9,7 @@
 if (result == CheckBagManager::Result::Success)\
 	player->sendText(tr("operation.success", operation));\
 else {\
-	player->sendText(fmt::format("§c§l§r", tr("operation.failed", operation, CheckBagManager::getResultString(result)))); \
+	player->sendText(fmt::format("§c§l{}§r", tr("operation.failed", operation, CheckBagManager::getResultString(result)))); \
 }
 
 namespace FormHelper {

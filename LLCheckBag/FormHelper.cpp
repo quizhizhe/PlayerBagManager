@@ -295,6 +295,7 @@ namespace FormHelper {
         }
         return listName;
     }
+
     bool openImportScreen(Player* player) {
         //return false;
         std::vector<std::string> fileList = listdir(Config::ExportDirectory);
@@ -306,18 +307,23 @@ namespace FormHelper {
             [player, fileList = std::move(fileList)](int index) {
             if (index < 0)
                 return;
-            std::string filePath = fileList[index];
-            std::string fileName = std::filesystem::path(filePath).filename().string();
+            std::string fileName = fileList[index];
+            std::string filePath = std::filesystem::path(Config::ExportDirectory).append(fileName).string();
             auto nameOrUuid = fileName.substr(0, fileName.find_last_of('.'));
             auto targetUuid = CheckBagManager::fromNameOrUuid(nameOrUuid);
             auto exist = !PlayerDataHelper::getServerId(targetUuid).empty();
             Form::CustomForm form(tr("operation.import"));
             form.append(Form::Label("label", exist ? tr("screen.import.targer_found", nameOrUuid) : tr("screen.import.target_not_found")));
             form.append(Form::Dropdown("importMode", tr("screen.import.mode.text"), { tr("screen.import.mode.bag_only"),tr("screen.import.mode.complete") }));
+            //form.append(Form::Dropdown("target", tr("screen.import.target.text"),
+            //    exist ? std::vector<std::string>{ tr("screen.import.target.match"), tr("screen.import.target.select") } : std::vector<std::string>{ tr("screen.import.target.select") }));
             form.append(Form::Dropdown("target", tr("screen.import.target.text"),
-                exist ? std::vector<std::string>{ tr("screen.import.target.match"), tr("screen.import.target.select") } : std::vector<std::string>{ tr("screen.import.target.match") }));
-            //form.append(Form::Dropdown("target", "导入目标", { exist ? "匹配的玩家" : "新玩家", "选择目标玩家" }));
-            form.sendTo((ServerPlayer*)player, [player, filePath, targetUuid](const std::map<string, std::shared_ptr<Form::CustomFormElement>>& data) {
+                { 
+                    exist ? tr("screen.import.target.match") : tr("screen.import.target.new"),
+                    tr("screen.import.target.select") 
+                }));
+            form.sendTo((ServerPlayer*)player, 
+                [player, filePath, targetUuid](const std::map<string, std::shared_ptr<Form::CustomFormElement>>& data) {
                 auto modeDW = std::dynamic_pointer_cast<Form::Dropdown>(data.at("importMode"));
                 auto isBagOnly = modeDW->options[modeDW->getData()] == tr("screen.import.mode.bag_only");
                 auto targetDW = std::dynamic_pointer_cast<Form::Dropdown>(data.at("target"));
@@ -332,30 +338,17 @@ namespace FormHelper {
                         SendCheckResult(result, tr("operation.import"));
                     }
                 }
-                else if (target == tr("screen.import.target.select")) {
-                    player->sendText(tr("screen.import.error.no_impl"));
-                    return;
+                else if (target == tr("screen.import.target.new")) {
                     if (isBagOnly)
                     {
-                        player->sendText(fmt::format("§c§l仅背包模式下不可选择新玩家作为目标§r"));
+                        player->sendText("§c§l仅背包模式下不可选择新玩家作为目标§r");
                     }
                     else {
-                        if (!std::filesystem::exists(filePath + ".json")) {
-                            player->sendText(fmt::format("§c§l获取玩家信息文件失败，文件 {} 不存在§r", filePath + ".json"));
-                            return;
-                        }
-
-                        auto data = ReadAllFile(filePath, true);
-                        if (!data.has_value()) {
-                            player->sendText(fmt::format("§c§l读取数据失败§r"));
-                            return;
-                        }
-                        auto tag = CompoundTag::fromBinaryNBT((void*)data.value().c_str(), data.value().size(), true);
-                        //auto playerInfo = ReadAllFile()
-                        //PlayerDataHelper::writeNewPlayerData()
+                        auto result = CheckBagMgr.importNewData(filePath);
+                        SendCheckResult(result, tr("operation.import"));
                     }
                 }
-                else if (target == tr("screen.import.target.new")) {
+                else if (target == tr("screen.import.target.select")) {
                     sendPlayerListForm(player, tr("screen.import.error.online"), tr("screen.import.select_target"),
                         [filePath, isBagOnly](Player* player, mce::UUID const& uuid) {
                             auto result = CheckBagMgr.importData(uuid, filePath, isBagOnly);

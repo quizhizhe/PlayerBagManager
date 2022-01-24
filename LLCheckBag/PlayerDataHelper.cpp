@@ -87,32 +87,40 @@ namespace PlayerDataHelper {
     }
     bool removeData(mce::UUID const& uuid)
     {
-        auto& dbStorage = *Global<DBStorage>;
-        auto tag = getPlayerIdsTag(uuid);
-        if (!tag) {
-            //logger.error("key \"player_{}\" not found in storage", uuid.asString());
-            return false;
-        }
-        for (auto& [key, idTagVariant] : *tag) {
-            auto idTag = const_cast<CompoundTagVariant&>(idTagVariant).asStringTag();
-            std::string id = idTag->value();
-            id = key == PLAYER_KEY_SERVER_ID ? id : "player_" + id;
-            if (!dbStorage.hasKey(id, playerCategory)) {
-                logger.warn("Failed to find key {} when deleting player({})'s data", id, uuid.asString());
-                continue;
+        try
+        {
+            auto& dbStorage = *Global<DBStorage>;
+            auto tag = getPlayerIdsTag(uuid);
+            if (!tag) {
+                //logger.error("key \"player_{}\" not found in storage", uuid.asString());
+                return false;
             }
-            auto res = dbStorage.deleteData(id, playerCategory);
-            //res->addOnComplete([id](Bedrock::Threading::IAsyncResult<void> const& result) {
-            //    if (result.getStatus() == 1)
-            //        dbLogger.warn("Remove {} Success", id);
-            //    else
-            //    {
-            //        auto code = result.getError();
-            //        dbLogger.error("Remove {} Failed, cause: {}", id, code.message());
-            //    }
-            //    });
+            for (auto& [key, idTagVariant] : *tag) {
+                auto idTag = const_cast<CompoundTagVariant&>(idTagVariant).asStringTag();
+                std::string id = idTag->value();
+                id = key == PLAYER_KEY_SERVER_ID ? id : "player_" + id;
+                if (!dbStorage.hasKey(id, playerCategory)) {
+                    logger.warn("Failed to find key {} when deleting player({})'s data", id, uuid.asString());
+                    continue;
+                }
+                auto res = dbStorage.deleteData(id, playerCategory);
+                //res->addOnComplete([id](Bedrock::Threading::IAsyncResult<void> const& result) {
+                //    if (result.getStatus() == 1)
+                //        dbLogger.warn("Remove {} Success", id);
+                //    else
+                //    {
+                //        auto code = result.getError();
+                //        dbLogger.error("Remove {} Failed, cause: {}", id, code.message());
+                //    }
+                //    });
+            }
+            return true;
         }
-        return true;
+        catch (const std::exception&)
+        {
+            logger.error("Error in PlayerDataHelper::removeData");
+        }
+        return false;
     }
     std::string getServerId(mce::UUID const& uuid) {
         auto tag = getPlayerIdsTag(uuid);
@@ -150,11 +158,19 @@ namespace PlayerDataHelper {
         return getPlayerTag(uuid);
     }
     bool writePlayerData(mce::UUID const& uuid, CompoundTag& data) {
-        auto serverId = getServerId(uuid);
-        if (serverId.empty())
-            return false;
-        Global<DBStorage>->saveData(serverId, data.toBinaryNBT(), playerCategory);
-        return true;
+        try
+        {
+            auto serverId = getServerId(uuid);
+            if (serverId.empty())
+                return false;
+            Global<DBStorage>->saveData(serverId, data.toBinaryNBT(), playerCategory);
+            return true;
+        }
+        catch (const std::exception&)
+        {
+            logger.error("Error in PlayerDataHelper::writePlayerData");
+        }
+        return false;
     }
     bool changeBagTag(CompoundTag& dst, CompoundTag& src) {
         if (!&dst || !&src)
@@ -176,12 +192,20 @@ namespace PlayerDataHelper {
         return res;
     }
     bool writePlayerBag(mce::UUID const& uuid, CompoundTag& data) {
-        auto res = true;
-        auto playerTag = getPlayerTag(uuid);
-        if (!playerTag)
-            res = false;
-        res = res && changeBagTag(*playerTag, data);
-        return res && writePlayerData(uuid, *playerTag);
+        try
+        {
+            auto res = true;
+            auto playerTag = getPlayerTag(uuid);
+            if (!playerTag)
+                res = false;
+            res = res && changeBagTag(*playerTag, data);
+            return res && writePlayerData(uuid, *playerTag);
+        }
+        catch (const std::exception&)
+        {
+            logger.error("Error in PlayerDataHelper::writePlayerBag");
+        }
+        return false;
     }
 
     std::string serializeNbt(std::unique_ptr<CompoundTag> tag, NbtDataType type) {
@@ -202,6 +226,8 @@ namespace PlayerDataHelper {
         }
     }
     std::unique_ptr<CompoundTag> deserializeNbt(std::string const& data, NbtDataType type) {
+        if (data.empty())
+            return {};
         switch (type)
         {
         case NbtDataType::Snbt:
@@ -235,5 +261,39 @@ namespace PlayerDataHelper {
         if (!data.has_value())
             return {};
         return deserializeNbt(data.value(), type);
+    }
+    bool writeNewPlayerData(std::unique_ptr<CompoundTag> idsTag, std::unique_ptr<CompoundTag> dataTag) {
+        try
+        {
+            auto idsData = serializeNbt(idsTag->clone(), NbtDataType::Binary);
+            auto data = serializeNbt(std::move(dataTag), NbtDataType::Binary);
+            std::string serverId = "";
+            for (auto& [type, idTag] : *idsTag) {
+                std::string id = const_cast<CompoundTagVariant&>(idTag).asStringTag()->value();
+
+                switch (do_hash(type.c_str()))
+                {
+                case do_hash("MsaId"):
+                case do_hash("PlatformOfflineId"):
+                case do_hash("PlatformOnlineId"):
+                case do_hash("SelfSignedId"):
+                    Global<DBStorage>->saveData("player_" + id, std::string(idsData), playerCategory);
+                    break;
+                case do_hash("ServerId"):
+                    serverId = id;
+                    break;
+                default:
+                    break;
+                }
+            }
+            Global<DBStorage>->saveData(serverId, std::move(data), playerCategory);
+            return true;
+        }
+        catch (const std::exception&)
+        {
+            logger.error("Error in PlayerDataHelper::writeNewPlayerData");
+            return false;
+        }
+        return false;
     }
 }

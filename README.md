@@ -9,27 +9,35 @@ git clone --recursive https://github.com/quizhizhe/LLCheckBag.git
 拉取项目，用 [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) 打开sln文件，选择，生成->生成LLCheckBag
 
 ## 用法
-* 指令（可将 llcheckbag 替换成设置的指令别名，默认 llcb）：
-* 注：如果目标玩家[Target]未设置则为打开对应 GUI
+* 指令（*可将 llcheckbag 替换成设置的指令别名，默认 llcb*）：
+* 注：如果目标玩家`[Target]`未设置则为打开对应 GUI
 ```
 llcheckbag
 llcheckbag check/c      [Target]        // 检查玩家背包
 llcheckbag remove/rm    [Target]        // 移除玩家数据
 llcheckbag op           [Target]        // 设置查包管理员
 llcheckbag export/e     [Target] [Type] // 导出玩家数据
-llcheckbag exportall    [Type]          // 导出所有玩家数据
+llcheckbag exportall    [Type]          // 导出所有玩家数据，**不只是背包数据**
 llcheckbag rollback/rb                  // 回滚玩家数据（一般查包时崩服后用）
 llcheckbag overwrite/ow                 // 覆盖被查包玩家数据
 llcheckbag stop/s                       // 停止查包
 llcheckbag menu/m                       // 打开查包 GUI 菜单
 llcheckbag list/l                       // 列出所有玩家（玩家名称或者玩家UUID）
-llcheckbag import/i                     // 导入玩家数据
+llcheckbag import/i                     // 导入玩家数据（仅GUI）
 ```
 
 ## 部分 GUI 说明
 ### Check  查看玩家背包
 ### Import 导入玩家数据
- 
+* 输入 `llcheckbag import` 或 `llcheckbag i` 可打开导入界面，选择需要导入的玩家数据，
+* 列表里文件为 **ExportDirectory** 设置的文件夹中的文件，仅支持后缀为 `.snbt` 或者 `.nbt` 的文件
+选择好后会弹出**导入数据界面**，
+* 第一行显示自动的是自动匹配的存档中已有的玩家名，
+* 导入模式分为仅背包和完整数据模式，
+    * 仅背包：此选项会会导入背包物品数据，包括 人物背包，潜影盒，盔甲蓝，副手，玩家UI物品数据
+    * 完整数据：此选项会导入完整的玩家nbt数据
+* 导入目标分为匹配的玩家，新玩家，选择玩家，**需要注意的是，新玩家模式需要玩家信息文件（后缀为`.nbt.json`或者`.snbt.json`）**
+
 ## 配置文件(plugins/LLCheckBag/config.json)
 ```json
 {

@@ -53,7 +53,7 @@ std::string CheckBagManager::getSuffix(NbtDataType type)
     }
 }
 
-NbtDataType CheckBagManager::fromSuffix(std::string_view suffix)
+NbtDataType CheckBagManager::fromSuffix(std::string const& suffix)
 {
     if (suffix == "snbt")
         return NbtDataType::Snbt;
@@ -394,7 +394,7 @@ CheckBagManager::Result CheckBagManager::importData(mce::UUID const& uuid, std::
     if (!uuid || filePath.empty())
         return Result::Error;
     auto suffix = filePath.substr(filePath.find_last_of('.') + 1);
-    auto newTag = PlayerDataHelper::readTagFile(std::filesystem::path(Config::ExportDirectory).append(filePath).string(), fromSuffix(suffix));
+    auto newTag = PlayerDataHelper::readTagFile(filePath, fromSuffix(suffix));
     if (!newTag)
         return Result::Error;
     if (isBagOnly) {
@@ -424,6 +424,55 @@ CheckBagManager::Result CheckBagManager::importData(std::string const& nameOrUui
     return Result::Error;
     if (auto uuid = fromNameOrUuid(nameOrUuid))
         return importData(uuid, filePath, isBagOnly);
+    return Result::Error;
+}
+
+CheckBagManager::Result CheckBagManager::importNewData(std::string filePath) {
+    if (!std::filesystem::exists(filePath + ".json")) {
+        logger.error("Failed to get player info file，file {} not exist", filePath + ".json");
+        return Result::InfoDataNotFound;
+    }
+    auto infoData = ReadAllFile(filePath + ".json");
+
+    auto playerIds = nlohmann::json::parse(infoData.value_or(""));
+    auto idsTag = CompoundTag::create();
+    std::string name;
+    std::string suuid;
+    for (auto& [key, val] : playerIds.items()) {
+        std::string id = val.get<std::string>();
+        logger.error("{}: {},", key, id);
+        if (key == "name") {
+            name = id;
+            continue;
+        }
+        if (key == "uuid") {
+            suuid = id;
+            continue;
+        }
+        idsTag->putString(key, id);
+    }
+    if (suuid.empty()){
+        suuid = idsTag->getString("MsaId");
+        if (suuid.empty() && !Config::MsaIdOnly)
+            suuid = idsTag->getString("SelfSignedId");
+    }
+    if (suuid.empty())
+        return Result::Error;
+
+    auto suffix = filePath.substr(filePath.find_last_of('.') + 1);
+    auto type = fromSuffix(suffix);
+    if (type != NbtDataType::Binary && type != NbtDataType::Snbt)
+        return Result::DataTypeNotSupported;
+    auto data = ReadAllFile(filePath, NbtDataType::Binary == type);
+    auto tag = PlayerDataHelper::deserializeNbt(data.value_or(""));
+    if (!tag || idsTag->isEmpty()) {
+        return Result::Error;
+    }
+    if (PlayerDataHelper::writeNewPlayerData(std::move(idsTag), std::move(tag))) {
+        bool isFakePlayer = PlayerDataHelper::isFakePlayer_ddf8196(suuid);
+        mUuidNameMap.emplace(suuid, std::pair{(name.empty() ? suuid : name), isFakePlayer});
+        return Result::Success;
+    }
     return Result::Error;
 }
 
