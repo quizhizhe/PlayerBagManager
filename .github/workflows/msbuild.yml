@@ -88,12 +88,13 @@ jobs:
       id: rel
       if: startsWith(github.ref, 'refs/tags/v')
       run: |
-        echo ::set-output name=tag::${GITHUB_REF#refs/tags/v*}
-        Compress-Archive -Path output/* output/LLCheckBag-${GITHUB_REF#refs/tags/v*}.zip
+        echo ::set-output name=tag::${GITHUB_REF}
+        Compress-Archive -Path output/* output/LLCheckBag-${GITHUB_REF}.zip
+      # shell: bash
       
     - name: Create New Release
       uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/')
+      if: startsWith(github.ref, 'refs/tags/v')
       with:
         token: ${{ secrets.ACTIONS_TOKEN }}
         body_path: ${{ github.workspace }}/CHANGELOG.txt
