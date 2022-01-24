@@ -100,8 +100,8 @@ void CheckBagManager::afterPlayerJoin(ServerPlayer* player) {
     auto backupTag = getBackupBag(player);
     if (!backupTag)
         return;
-    mIsFree = false;
     auto uuid = player->getUuid();
+    mIsFree = false;
     mCheckBagLogMap.emplace(uuid, CheckBagLog(mce::UUID::fromString(uuid), std::move(backupTag)));
     player->sendText("发现有备份文件，建议先使用llcb stop指令恢复背包后在进行查包");
 }
@@ -220,8 +220,8 @@ std::unique_ptr<CompoundTag> CheckBagManager::getBackupBag(Player* player)
 
 CheckBagManager::Result CheckBagManager::removePlayerData(ServerPlayer* player)
 {
-    mIsFree = false;
     auto uuid = player->getUuid();
+    mIsFree = false;
     mRemoveRequsets.emplace(uuid, player->getUniqueID().id);
     return Result::Request;
 }
@@ -231,12 +231,13 @@ CheckBagManager::Result CheckBagManager::removePlayerData(mce::UUID const& uuid)
     if (!uuid)
         return Result::Error;
     if (auto player = getPlayer(uuid)) {
-        mRemoveRequsets.emplace(uuid.asString(), player->getUniqueID().id);
         mIsFree = false;
+        mRemoveRequsets.emplace(uuid.asString(), player->getUniqueID().id);
         return Result::Success;
     }
     if (PlayerDataHelper::removeData(uuid)) {
         mUuidNameMap.erase(uuid.asString());
+        updateIsFree();
         return Result::Success;
     }
     return Result::Error;
@@ -250,6 +251,7 @@ CheckBagManager::Result CheckBagManager::setCheckBagLog(Player* player, mce::UUI
     }
     auto&& data = PlayerDataHelper::serializeNbt(tag.clone(), Config::BackupDataType);
     if (WriteAllFile(getBackupPath(player), data, true)) {
+        mIsFree = false;
         mCheckBagLogMap.emplace(player->getUuid(), CheckBagLog(target, tag.clone()));
         return Result::Success;
     }
@@ -321,7 +323,6 @@ CheckBagManager::Result CheckBagManager::stopCheckBag(Player* player)
 
 CheckBagManager::Result CheckBagManager::startCheckBag(Player* player, Player* target)
 {
-    mIsFree = false;
     // TODO 
     auto uuid = target->getUuid();
     return setBagData(player, mce::UUID::fromString(uuid), target->getNbt());
@@ -329,7 +330,6 @@ CheckBagManager::Result CheckBagManager::startCheckBag(Player* player, Player* t
 
 CheckBagManager::Result CheckBagManager::startCheckBag(Player* player, mce::UUID const& uuid)
 {
-    mIsFree = false;
     if (auto target = getPlayer(uuid))
         return startCheckBag(player, target);
     auto targetTag = PlayerDataHelper::getPlayerTag(uuid);
@@ -440,7 +440,6 @@ CheckBagManager::Result CheckBagManager::importNewData(std::string filePath) {
     std::string suuid;
     for (auto& [key, val] : playerIds.items()) {
         std::string id = val.get<std::string>();
-        logger.error("{}: {},", key, id);
         if (key == "name") {
             name = id;
             continue;
@@ -451,7 +450,7 @@ CheckBagManager::Result CheckBagManager::importNewData(std::string filePath) {
         }
         idsTag->putString(key, id);
     }
-    if (suuid.empty()){
+    if (suuid.empty()) {
         suuid = idsTag->getString("MsaId");
         if (suuid.empty() && !Config::MsaIdOnly)
             suuid = idsTag->getString("SelfSignedId");
@@ -470,7 +469,7 @@ CheckBagManager::Result CheckBagManager::importNewData(std::string filePath) {
     }
     if (PlayerDataHelper::writeNewPlayerData(std::move(idsTag), std::move(tag))) {
         bool isFakePlayer = PlayerDataHelper::isFakePlayer_ddf8196(suuid);
-        mUuidNameMap.emplace(suuid, std::pair{(name.empty() ? suuid : name), isFakePlayer});
+        mUuidNameMap.emplace(suuid, std::pair{ (name.empty() ? suuid : name), isFakePlayer });
         return Result::Success;
     }
     return Result::Error;

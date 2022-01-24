@@ -12,16 +12,16 @@ namespace PlayerDataHelper {
     void forEachUuid(bool includeSelfSignedId, std::function<void(std::string_view const& uuid)> callback)
     {
         static size_t count;
+        count = 0;
+#ifdef PLUGIN_DEV_MODE
         static size_t serverCount;
         serverCount = 0;
-        count = 0;
+#endif // PLUGIN_DEV_MODE
         Global<DBStorage>->forEachKeyWithPrefix("player_", playerCategory,
             [&callback, includeSelfSignedId](gsl::cstring_span<-1> key_left, gsl::cstring_span<-1> data) {
                 if (key_left.size() == 36) {
                     auto tag = CompoundTag::fromBinaryNBT((void*)data.data(), data.size());
                     auto& msaId = tag->getString(PLAYER_KEY_MSA_ID);
-                    //logger.warn("{}", key_left.data());
-                    //logger.warn(tag->toJson(4));
                     if (!msaId.empty()) {
                         if (msaId == key_left) {
                             count++;
@@ -32,8 +32,6 @@ namespace PlayerDataHelper {
                     if (!includeSelfSignedId)
                         return;
                     auto& selfSignedId = tag->getString(PLAYER_KEY_SELF_SIGNED_ID);
-                    //if (msaId.empty() && selfSignedId.empty())
-                    //    __debugbreak();
                     if (!selfSignedId.empty()) {
                         if (selfSignedId == key_left) {
                             count++;
@@ -42,39 +40,43 @@ namespace PlayerDataHelper {
                         return;
                     }
                 }
-                else if(key_left.size() == 36+7) {
+#ifdef PLUGIN_DEV_MODE
+                else if (key_left.size() == 36 + 7) {
                     serverCount++;
                 }
             });
         if (serverCount != count) {
-            logger.warn("获取玩家id数据时发现异常数据");
-            //logger.error("ServerId1");
-            //for (auto& id : allServerId) {
-            //    if (std::find(allServerId2.begin(), allServerId2.end(), id) == allServerId2.end())
-            //        logger.warn(id);
-            //}
-            //logger.error("ServerId2");
-            //for (auto& id : allServerId2) {
-            //    if (allServerId.find(id) == allServerId.end())
-            //        logger.warn(id);
-            //}
-            //__debugbreak();
+            logger.warn("获取玩家id数据时发现异常数据，玩家数据数量:{} 和UUID数量:{} 不同", serverCount, count);
         }
+#else
+    });
+#endif // PLUGIN_DEV_MODE
     }
 
     std::vector<string> getAllUuid(bool includeSelfSignedId)
     {
         std::vector<std::string> uuids;
-        //std::vector<std::string> serverIds;
+
         forEachUuid(includeSelfSignedId, [&uuids](std::string_view uuid) {
-            //auto u = mce::UUID::fromString(std::string(uuid));
-            //auto sid = getServerId(u);
-            //if (std::find(serverIds.begin(), serverIds.end(), sid) != serverIds.end())
-            //    __debugbreak();
-            //serverIds.push_back(sid);
             uuids.push_back(std::string(uuid));
-            //logger.info("{}", uuid);
             });
+#ifdef PLUGIN_DEV_MODE
+        std::unordered_map<std::string, std::string> serverIds;
+        for (auto& uuid : uuids) {
+            auto serverId = getServerId(mce::UUID::fromString(uuid));
+            if (serverIds.find(serverId) != serverIds.end()) {
+                logger.error("发现超过一个UUID拥有相同的ServerId");
+                logger.error("UUID 1  : {}", uuid);
+                logger.error("UUID 2  : {}", serverIds[serverId]);
+                logger.error("ServerId: {}", serverId);
+                continue;
+            }
+            if (!Global<DBStorage>->hasKey(serverId, playerCategory)) {
+                logger.error("未找到ServerId \"{}\" 对应的数据", serverId);
+            }
+            serverIds.emplace(serverId, uuid);
+        }
+#endif // PLUGIN_DEV_MODE
         return uuids;
     }
     std::unique_ptr<CompoundTag> getPlayerIdsTag(mce::UUID const& uuid) {

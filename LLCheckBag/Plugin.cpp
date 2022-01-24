@@ -220,7 +220,7 @@ public:
 
     static void setup(CommandRegistry* registry) {
         auto& manager = CheckBagMgr;
-        registry->registerCommand("llcheckbag", tr("command.description").c_str(), CommandPermissionLevel::Any, {(CommandFlagValue)0}, {(CommandFlagValue)0x80});
+        registry->registerCommand("llcheckbag", tr("command.description").c_str(), CommandPermissionLevel::Any, { (CommandFlagValue)0 }, { (CommandFlagValue)0x80 });
         registry->registerAlias("llcheckbag", Config::CommandAlias);
 
         registry->addSoftEnum("LLCheckBag_PlayerList", manager.getPlayerList());

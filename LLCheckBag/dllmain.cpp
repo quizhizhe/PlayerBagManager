@@ -6,15 +6,15 @@
 #pragma comment(lib, "../LiteLoaderSDK/Lib/LiteLoader.lib")
 #include <HookAPI.h>
 
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-                     )
+BOOL APIENTRY DllMain(HMODULE hModule,
+    DWORD  ul_reason_for_call,
+    LPVOID lpReserved
+)
 {
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
-        LL::registerPlugin("LLCheckBag", "Inventory check plugin that depends on LiteLoader", 
+        LL::registerPlugin("LLCheckBag", "Inventory check plugin that depends on LiteLoader",
             LL::Version(
                 PLUGIN_VERSION_MAJOR,
                 PLUGIN_VERSION_MINOR,

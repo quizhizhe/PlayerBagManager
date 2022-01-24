@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.h"
 
-//#define PLUGIN_DEV_MODE
+#define PLUGIN_DEV_MODE
 #include "DebugHelper.h"
 
 // Version

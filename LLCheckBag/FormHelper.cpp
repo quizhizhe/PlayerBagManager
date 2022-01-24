@@ -318,43 +318,43 @@ namespace FormHelper {
             //form.append(Form::Dropdown("target", tr("screen.import.target.text"),
             //    exist ? std::vector<std::string>{ tr("screen.import.target.match"), tr("screen.import.target.select") } : std::vector<std::string>{ tr("screen.import.target.select") }));
             form.append(Form::Dropdown("target", tr("screen.import.target.text"),
-                { 
+                {
                     exist ? tr("screen.import.target.match") : tr("screen.import.target.new"),
-                    tr("screen.import.target.select") 
+                    tr("screen.import.target.select")
                 }));
-            form.sendTo((ServerPlayer*)player, 
+            form.sendTo((ServerPlayer*)player,
                 [player, filePath, targetUuid](const std::map<string, std::shared_ptr<Form::CustomFormElement>>& data) {
-                auto modeDW = std::dynamic_pointer_cast<Form::Dropdown>(data.at("importMode"));
-                auto isBagOnly = modeDW->options[modeDW->getData()] == tr("screen.import.mode.bag_only");
-                auto targetDW = std::dynamic_pointer_cast<Form::Dropdown>(data.at("target"));
-                auto& target = targetDW->options[targetDW->getData()];
-                if (target == tr("screen.import.target.match")) {
-                    if (getPlayer(targetUuid) && !isBagOnly) {
-                        player->sendText(tr("screen.import.error.online"));
-                        return;
+                    auto modeDW = std::dynamic_pointer_cast<Form::Dropdown>(data.at("importMode"));
+                    auto isBagOnly = modeDW->options[modeDW->getData()] == tr("screen.import.mode.bag_only");
+                    auto targetDW = std::dynamic_pointer_cast<Form::Dropdown>(data.at("target"));
+                    auto& target = targetDW->options[targetDW->getData()];
+                    if (target == tr("screen.import.target.match")) {
+                        if (getPlayer(targetUuid) && !isBagOnly) {
+                            player->sendText(tr("screen.import.error.online"));
+                            return;
+                        }
+                        else {
+                            auto result = CheckBagMgr.importData(targetUuid, filePath, isBagOnly);
+                            SendCheckResult(result, tr("operation.import"));
+                        }
                     }
-                    else {
-                        auto result = CheckBagMgr.importData(targetUuid, filePath, isBagOnly);
-                        SendCheckResult(result, tr("operation.import"));
+                    else if (target == tr("screen.import.target.new")) {
+                        if (isBagOnly)
+                        {
+                            player->sendText("§c§l仅背包模式下不可选择新玩家作为目标§r");
+                        }
+                        else {
+                            auto result = CheckBagMgr.importNewData(filePath);
+                            SendCheckResult(result, tr("operation.import"));
+                        }
                     }
-                }
-                else if (target == tr("screen.import.target.new")) {
-                    if (isBagOnly)
-                    {
-                        player->sendText("§c§l仅背包模式下不可选择新玩家作为目标§r");
+                    else if (target == tr("screen.import.target.select")) {
+                        sendPlayerListForm(player, tr("screen.import.error.online"), tr("screen.import.select_target"),
+                            [filePath, isBagOnly](Player* player, mce::UUID const& uuid) {
+                                auto result = CheckBagMgr.importData(uuid, filePath, isBagOnly);
+                                SendCheckResult(result, tr("screen.import.error.online"));
+                            });
                     }
-                    else {
-                        auto result = CheckBagMgr.importNewData(filePath);
-                        SendCheckResult(result, tr("operation.import"));
-                    }
-                }
-                else if (target == tr("screen.import.target.select")) {
-                    sendPlayerListForm(player, tr("screen.import.error.online"), tr("screen.import.select_target"),
-                        [filePath, isBagOnly](Player* player, mce::UUID const& uuid) {
-                            auto result = CheckBagMgr.importData(uuid, filePath, isBagOnly);
-                            SendCheckResult(result, tr("screen.import.error.online"));
-                        });
-                }
                 });
         });
     }
