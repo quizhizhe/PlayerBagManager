@@ -88,8 +88,8 @@ jobs:
       id: rel
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        echo ::set-output name=tag::${GITHUB_REF#refs/*/}
-        Compress-Archive -Path output/* output/LLCheckBag-${GITHUB_REF#refs/*/}.zip
+        echo ::set-env name=RELEASE_TAG::${GITHUB_REF#refs/tags/}
+        Compress-Archive -Path output/* output/LLCheckBag-${RELEASE_TAG}.zip
       
     - name: Create New Release
       uses: softprops/action-gh-release@v1
@@ -97,6 +97,6 @@ jobs:
       with:
         token: ${{ secrets.ACTIONS_TOKEN }}
         body_path: ${{ github.workspace }}/CHANGELOG.txt
-        files: ${{ github.workspace }}\output\LLCheckBag-${{ steps.rel.outputs.tag }}.zip
+        files: ${{ github.workspace }}\output\LLCheckBag-${RELEASE_TAG}.zip
       env:
           GITHUB_REPOSITORY: quizhizhe/LLCheckBag 
