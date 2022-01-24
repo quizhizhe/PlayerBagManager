@@ -1,14 +1,18 @@
 #pragma once
 #include "pch.h"
 
-#define PLUGIN_DEV_MODE
 #include "DebugHelper.h"
 
 // Version
 #define PLUGIN_VERSION_MAJOR 1
 #define PLUGIN_VERSION_MINOR 1
 #define PLUGIN_VERSION_REVISION 1
+#ifdef PLUGIN_DEV_MODE
+#define PLUGIN_VERSION_IS_BETA true
+#else
 #define PLUGIN_VERSION_IS_BETA false
+#endif // PLUGIN_DEV_MODE
+
 
 #define STR1(R) #R
 #define STR2(R) STR1(R)

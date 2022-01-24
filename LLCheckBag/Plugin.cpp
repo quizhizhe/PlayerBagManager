@@ -59,7 +59,7 @@ class LLCheckBagCommand : public Command {
     }
 
     void checkBagCli(CommandOrigin const& origin, CommandOutput& output) const {
-        auto& manager = CheckBagMgr;
+        auto& manager = CBMgr;
         switch (mOperation)
         {
         case LLCheckBagCommand::Operation::Check:
@@ -141,7 +141,7 @@ class LLCheckBagCommand : public Command {
         }
         case LLCheckBagCommand::Operation::ExportAll: {
             auto dataType = mDataType_isSet ? mDataType : NbtDataType::Snbt;
-            auto count = CheckBagMgr.exportAllData(dataType);
+            auto count = CBMgr.exportAllData(dataType);
             if (count > 0)
                 output.success(tr("operation.export.success", count));
             else
@@ -219,7 +219,7 @@ class LLCheckBagCommand : public Command {
 public:
 
     static void setup(CommandRegistry* registry) {
-        auto& manager = CheckBagMgr;
+        auto& manager = CBMgr;
         registry->registerCommand("llcheckbag", tr("command.description").c_str(), CommandPermissionLevel::Any, { (CommandFlagValue)0 }, { (CommandFlagValue)0x80 });
         registry->registerAlias("llcheckbag", Config::CommandAlias);
 
@@ -295,7 +295,7 @@ void PluginInit()
         return true;
         });
     Event::PlayerJoinEvent::subscribe([](Event::PlayerJoinEvent ev) {
-        CheckBagMgr.afterPlayerJoin((ServerPlayer*)ev.mPlayer);
+        CBMgr.afterPlayerJoin((ServerPlayer*)ev.mPlayer);
         return true;
         });
     logger.info("LLCheckBag Loaded, version: {}", PLUGIN_VERSION_STRING);

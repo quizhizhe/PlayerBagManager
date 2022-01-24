@@ -12,8 +12,8 @@ namespace FormHelper {
         PlayerCategory category
     ) {
         Form::SimpleForm form(title, content);
-        TestFuncTime(CheckBagMgr.getPlayerList, category); // <0.5ms
-        auto playerList = CheckBagMgr.getPlayerList(category);
+        TestFuncTime(CBMgr.getPlayerList, category); // <0.5ms
+        auto playerList = CBMgr.getPlayerList(category);
         for (auto& name : playerList) {
             if (player->getRealName() == name) continue;
             form.append(Form::Button(name));
@@ -62,7 +62,7 @@ namespace FormHelper {
             [](Player* player, PlayerCategory category) {
                 sendPlayerListForm(player, tr("operation.start_check"), tr("screen.check.select_target"),
                     [](Player* player, mce::UUID const& uuid) {
-                        auto result = CheckBagMgr.startCheckBag(player, uuid);
+                        auto result = CBMgr.startCheckBag(player, uuid);
                         SendCheckResult(result, tr("operation.start_check"));
                     }, category);
             });;
@@ -71,7 +71,7 @@ namespace FormHelper {
     //bool sendPlayerListFormSlow(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, mce::UUID const& uuid)>&& callback) {
     //    if (Config::GuiWithCategory) {
     //        Form::SimpleForm form(title, "请选择分类");
-    //        auto classfiedlayerList = CheckBagMgr.getClassifiedPlayerList();
+    //        auto classfiedlayerList = CBMgr.getClassifiedPlayerList();
     //        for (auto& [category, list] : classfiedlayerList) {
     //            auto btn = Form::Button(toString(category));
     //            form.append(btn);
@@ -100,7 +100,7 @@ namespace FormHelper {
     //    }
     //    else {
     //        Form::SimpleForm form(title, content);
-    //        auto playerList = CheckBagMgr.getPlayerList();
+    //        auto playerList = CBMgr.getPlayerList();
     //        for (auto& name : playerList) {
     //            auto btn = Form::Button(name);
     //            form.append(btn);
@@ -142,7 +142,7 @@ namespace FormHelper {
     bool openRemoveDataScreen(Player* player) {
         return sendPlayerListForm(player, tr("operation.remove"), tr("screen.remove.select_target"),
             [](Player* player, mce::UUID const& uuid) {
-                auto result = CheckBagMgr.removePlayerData(uuid);
+                auto result = CBMgr.removePlayerData(uuid);
                 SendCheckResult(result, tr("operation.remove"));
             });
     }
@@ -158,7 +158,7 @@ namespace FormHelper {
             "screen.check.menu.remove",
         };
 
-        auto& manager = CheckBagMgr;
+        auto& manager = CBMgr;
         auto uuid = manager.tryGetTargetUuid(player);
         auto name = manager.getNameOrUuid(uuid);
         Form::SimpleForm form(tr("operation.start_check"), tr("screen.check.menu.contet", name));
@@ -178,23 +178,23 @@ namespace FormHelper {
                 break;
             case do_hash("screen.check.menu.update"):
             {
-                auto& manager = CheckBagMgr;
+                auto& manager = CBMgr;
                 auto target = manager.tryGetTargetUuid(player);
-                result = CheckBagMgr.startCheckBag(player, target);
+                result = CBMgr.startCheckBag(player, target);
                 SendCheckResult(result, tr(CheckBagMenus[index]));
                 break;
             }
             case do_hash("screen.check.menu.overwrite"):
-                result = CheckBagMgr.overwriteData(player);
+                result = CBMgr.overwriteData(player);
                 SendCheckResult(result, tr(CheckBagMenus[index]));
                 break;
             case do_hash("screen.check.menu.stop"):
-                result = CheckBagMgr.stopCheckBag(player);
+                result = CBMgr.stopCheckBag(player);
                 SendCheckResult(result, tr(CheckBagMenus[index]));
                 break;
             case do_hash("screen.check.menu.remove"):
             {
-                auto& manager = CheckBagMgr;
+                auto& manager = CBMgr;
                 auto target = manager.tryGetTargetUuid(player);
                 manager.stopCheckBag(player);
                 auto result = manager.removePlayerData(target);
@@ -204,7 +204,7 @@ namespace FormHelper {
             case do_hash("screen.check.menu.next"):
             {
                 // 相对于所有玩家
-                auto& manager = CheckBagMgr;
+                auto& manager = CBMgr;
                 auto target = manager.tryGetTargetUuid(player);
                 auto targetName = manager.getNameOrUuid(target);
                 auto list = manager.getPlayerList();
@@ -219,7 +219,7 @@ namespace FormHelper {
             }
             case do_hash("screen.check.menu.back"):
             {
-                auto& manager = CheckBagMgr;
+                auto& manager = CBMgr;
                 auto target = manager.tryGetTargetUuid(player);
                 auto targetName = manager.getNameOrUuid(target);
                 auto list = manager.getPlayerList();
@@ -242,21 +242,21 @@ namespace FormHelper {
         if (Config::GuiWithCategory) {
             return sendPlayerListWithCategoryForm(player, tr("operation.start_check"), tr("screen.player_category.content"),
                 [](Player* player, mce::UUID const& uuid) {
-                    auto result = CheckBagMgr.startCheckBag(player, uuid);
+                    auto result = CBMgr.startCheckBag(player, uuid);
                     SendCheckResult(result, tr("operation.start_check"));
                 });
         }
         else {
             return sendPlayerListForm(player, tr("operation.start_check"), tr("screen.check.select_target"),
                 [](Player* player, mce::UUID const& uuid) {
-                    auto result = CheckBagMgr.startCheckBag(player, uuid);
+                    auto result = CBMgr.startCheckBag(player, uuid);
                     SendCheckResult(result, tr("operation.start_check"));
                 });
         }
     }
 
     bool openCheckBagSmartScreen(Player* player) {
-        if (CheckBagMgr.isCheckingBag(player))
+        if (CBMgr.isCheckingBag(player))
             return openCheckBagMenuScreen(player);
         return openCheckBagScreen(player);
     }
@@ -266,7 +266,7 @@ namespace FormHelper {
             [](Player* player, mce::UUID const& uuid) {
                 sendDataTypeForm(player, tr("operation.export"), "",
                     [uuid](Player* player, NbtDataType dataType) {
-                        auto result = CheckBagMgr.exportData(uuid, dataType);
+                        auto result = CBMgr.exportData(uuid, dataType);
                         SendCheckResult(result, tr("operation.export"));
                     });
             });
@@ -334,7 +334,7 @@ namespace FormHelper {
                             return;
                         }
                         else {
-                            auto result = CheckBagMgr.importData(targetUuid, filePath, isBagOnly);
+                            auto result = CBMgr.importData(targetUuid, filePath, isBagOnly);
                             SendCheckResult(result, tr("operation.import"));
                         }
                     }
@@ -344,14 +344,14 @@ namespace FormHelper {
                             player->sendText("§c§l仅背包模式下不可选择新玩家作为目标§r");
                         }
                         else {
-                            auto result = CheckBagMgr.importNewData(filePath);
+                            auto result = CBMgr.importNewData(filePath);
                             SendCheckResult(result, tr("operation.import"));
                         }
                     }
                     else if (target == tr("screen.import.target.select")) {
                         sendPlayerListForm(player, tr("screen.import.error.online"), tr("screen.import.select_target"),
                             [filePath, isBagOnly](Player* player, mce::UUID const& uuid) {
-                                auto result = CheckBagMgr.importData(uuid, filePath, isBagOnly);
+                                auto result = CBMgr.importData(uuid, filePath, isBagOnly);
                                 SendCheckResult(result, tr("screen.import.error.online"));
                             });
                     }
@@ -362,7 +362,7 @@ namespace FormHelper {
     bool openExportAllScreen(Player* player) {
         return sendDataTypeForm(player, tr("operation.export_all"), tr("operation.export.select_type"),
             [](Player* player, NbtDataType type) {
-                auto& manager = CheckBagMgr;
+                auto& manager = CBMgr;
                 size_t count = 0;
                 for (auto& suuid : manager.getPlayerList()) {
                     auto result = manager.exportData(suuid, type);
@@ -385,7 +385,7 @@ namespace FormHelper {
             ScreenCategory::Delete,
         };
 
-        auto& manager = CheckBagMgr;
+        auto& manager = CBMgr;
         Form::SimpleForm form("LLCheckBag", tr("screen.menu.content"));
         for (auto& btn : MenuButtons) {
             form.append(Form::Button{ tr("screen.category." + toString(btn)) });

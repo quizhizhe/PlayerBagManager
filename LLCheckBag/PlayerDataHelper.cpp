@@ -2,7 +2,7 @@
 #include "PlayerDataHelper.h"
 #include <MC/DBStorage.hpp>
 #include <MC/StringTag.hpp>
-#include <MC/VanillaBlocks.hpp>
+
 namespace PlayerDataHelper {
     DBHelpers::Category const playerCategory = (DBHelpers::Category)7;
     std::string const PLAYER_KEY_SERVER_ID = "ServerId";

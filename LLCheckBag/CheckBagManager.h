@@ -1,10 +1,9 @@
 ﻿#pragma once
 #include "PlayerDataHelper.h"
-#define CheckBagMgr CheckBagManager::getManager()
+#define CBMgr CheckBagManager::getManager()
 // BidirectionalUnorderedMap<UuidString, name>
 class CheckBagManager
 {
-
     CheckBagManager();
     CheckBagManager(CheckBagManager& manager) = delete;
     struct CheckBagLog {
@@ -25,6 +24,7 @@ class CheckBagManager
         }
 
     };
+    // <UUID, <Name, IsFakePlayer>>
     std::unordered_map<std::string, std::pair<std::string, bool>> mUuidNameMap;
     // <UUID, ActorUniqueID>
     std::unordered_map<std::string, __int64> mRemoveRequsets;
