@@ -173,15 +173,23 @@ namespace PlayerDataHelper {
         return false;
     }
     bool changeBagTag(CompoundTag& dst, CompoundTag& src) {
-        if (!&dst || !&src)
+        try
+        {
+            if (!&dst || !&src)
+                return false;
+            auto res = true;
+            res = res && dst.put("Armor", src.get("Armor")->copy());
+            res = res && dst.put("EnderChestInventory", src.get("EnderChestInventory")->copy());
+            res = res && dst.put("Inventory", src.get("Inventory")->copy());
+            res = res && dst.put("Mainhand", src.get("Mainhand")->copy());
+            res = res && dst.put("Offhand", src.get("Offhand")->copy());
+            return res;
+        }
+        catch (const std::exception&)
+        {
+            logger.error("Error in PlayerDataHelper::changeBagTag");
             return false;
-        auto res = true;
-        res = res && dst.put("Armor", src.get("Armor")->copy());
-        res = res && dst.put("EnderChestInventory", src.get("EnderChestInventory")->copy());
-        res = res && dst.put("Inventory", src.get("Inventory")->copy());
-        res = res && dst.put("Mainhand", src.get("Mainhand")->copy());
-        res = res && dst.put("Offhand", src.get("Offhand")->copy());
-        return res;
+        }
     }
     bool setPlayerBag(Player* player, CompoundTag& data) {
         auto res = true;
