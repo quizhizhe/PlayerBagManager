@@ -165,6 +165,12 @@ xcopy /Y /E $(SolutionDir)\Data\ $(LocalDebuggerWorkingDirectory)\plugins\LLChec
     <ClCompile Include="Plugin.cpp" />
     <ClCompile Include="PlayerDataHelper.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Data\Language\en_US.json" />
+    <None Include="..\Data\Language\zh_CN.json" />
+    <None Include="..\README.md" />
+    <None Include="..\README_en.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

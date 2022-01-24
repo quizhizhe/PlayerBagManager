@@ -35,6 +35,8 @@ llcheckbag stop/s                       // 停止查包
 llcheckbag menu/m                       // 打开查包 GUI 菜单
 llcheckbag list/l                       // 列出所有玩家（玩家名称或者玩家UUID）
 llcheckbag import/i                     // 导入玩家数据（仅GUI）
+llcheckbag next/n                       // 查看下一个玩家背包（相对于所有玩家）
+llcheckbag previous                     // 查看上一个玩家背包（相对于所有玩家）
 ```
 
 ## 部分 GUI 说明

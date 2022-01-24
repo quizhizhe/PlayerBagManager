@@ -152,9 +152,9 @@ namespace FormHelper {
             "screen.check.menu.check_other",
             "screen.check.menu.update",
             "screen.check.menu.overwrite",
-            "screen.check.menu.next",
+            "operation.check_next",
             "screen.check.menu.stop",
-            "screen.check.menu.back",
+            "operation.check_previous",
             "screen.check.menu.remove",
         };
 
@@ -201,34 +201,15 @@ namespace FormHelper {
                 SendCheckResult(result, tr(CheckBagMenus[index]));
                 break;
             }
-            case do_hash("screen.check.menu.next"):
+            case do_hash("operation.check_next"):
             {
-                // 相对于所有玩家
-                auto& manager = CBMgr;
-                auto target = manager.tryGetTargetUuid(player);
-                auto targetName = manager.getNameOrUuid(target);
-                auto list = manager.getPlayerList();
-                auto iter = std::find(list.begin(), list.end(), targetName);
-                ASSERT(iter != list.end());
-                ++iter;
-                if (iter == list.end())
-                    iter = list.begin();
-                auto result = manager.startCheckBag(player, manager.fromNameOrUuid(*iter));
+                auto result = CBMgr.checkNext(player);
                 SendCheckResult(result, tr(CheckBagMenus[index]));
                 break;
             }
-            case do_hash("screen.check.menu.back"):
+            case do_hash("operation.check_previous"):
             {
-                auto& manager = CBMgr;
-                auto target = manager.tryGetTargetUuid(player);
-                auto targetName = manager.getNameOrUuid(target);
-                auto list = manager.getPlayerList();
-                auto iter = std::find(list.begin(), list.end(), targetName);
-                ASSERT(iter != list.end());
-                --iter;
-                if (iter == list.begin())
-                    iter = list.end();
-                auto result = manager.startCheckBag(player, manager.fromNameOrUuid(*iter));
+                auto result = CBMgr.checkPrevious(player);
                 SendCheckResult(result, tr(CheckBagMenus[index]));
                 break;
             }

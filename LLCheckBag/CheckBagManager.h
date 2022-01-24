@@ -9,12 +9,14 @@ class CheckBagManager
     struct CheckBagLog {
         mce::UUID mTarget;
         std::unique_ptr<CompoundTag> mBackup;
+        PlayerCategory mCategory;
 
-        CheckBagLog(mce::UUID const& target, std::unique_ptr<CompoundTag> backup)
+        CheckBagLog(mce::UUID const& target, std::unique_ptr<CompoundTag> backup, PlayerCategory category = PlayerCategory::All)
             :mBackup(std::move(backup)),
-            mTarget(target) {
+            mTarget(target),
+            mCategory(category) {
         }
-        CheckBagLog(Player* target, std::unique_ptr<CompoundTag> backup) : mBackup(std::move(backup)) {
+        CheckBagLog(Player* target, std::unique_ptr<CompoundTag> backup, PlayerCategory category = PlayerCategory::All) : mBackup(std::move(backup)) {
             auto uuid = target->getUuid();
             mTarget = mce::UUID::fromString(uuid);
         }
@@ -140,6 +142,8 @@ public:
     Result stopCheckBag(Player* player);
     Result startCheckBag(Player* player, Player* target);
     Result startCheckBag(Player* player, mce::UUID const& uuid);
+    Result checkNext(Player* player);
+    Result checkPrevious(Player* player);
     Result overwriteData(Player* player);
     Result exportData(mce::UUID const& uuid, NbtDataType type);
     Result exportData(std::string const& nameOrUuid, NbtDataType type);

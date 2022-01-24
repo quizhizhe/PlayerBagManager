@@ -69,4 +69,18 @@
       <Filter>Base</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\README_en.md">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Data\Language\en_US.json">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\Data\Language\zh_CN.json">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
 </Project>

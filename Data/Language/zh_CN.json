@@ -18,7 +18,9 @@
   "operation.export.no_target": "没有可导出的数据或数据导出失败",
   "operation.export.failed": "导出 {} 数据失败，原因：{}",
   "operation.import": "导入玩家数据",
-  "operation.export_all": "导出玩家数据",
+  "operation.export_all": "导入所有玩家数据",
+  "operation.check_next.hint": "下一个玩家：§e{}§r",
+  "operation.check_previous.hint": "上一个玩家：§e{}§r",
   "operation.op.failed.already_in": "玩家 {} 已在操作员列表中",
   "operation.op.success": "设置玩家 {} 为操作员成功",
   "operation.op.failed.not_found": "未找到玩家 {}, 请确保玩家在线且正确输入玩家真名（非别名）",
@@ -65,9 +67,9 @@
   "screen.check.menu.check_other": "查看其他玩家背包",
   "screen.check.menu.update": "更新（自身背包 <= 目标玩家背包）",
   "screen.check.menu.overwrite": "覆盖（自身背包 => 目标玩家背包）",
-  "screen.check.menu.next": "查看下一个玩家",
+  "operation.check_next": "查看下一个玩家",
   "screen.check.menu.stop": "停止查看玩家背包",
-  "screen.check.menu.back": "查看上一个玩家",
+  "operation.check_previous": "查看上一个玩家",
   "screen.check.menu.remove": "清除目标玩家所有数据",
   "screen.menu.content": "请选择要执行的操作"
 }

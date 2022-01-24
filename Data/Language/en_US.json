@@ -18,7 +18,9 @@
   "operation.export.no_target": "No exportable data or data export failed",
   "operation.export.failed": "Failed to export {} data, Reason: {}",
   "operation.import": "Import Player data",
-  "operation.export_all": "Import All Player data",
+  "operation.export_all": "Export All Player data",
+  "operation.check_next.hint": "The next Player is §e{}§r",
+  "operation.check_previous.hint": "The previous Player is §e{}§r",
   "operation.op.failed.already_in": "Player {} is in the operator list",
   "operation.op.success": "Set Player {} as Operator Success",
   "operation.op.failed.not_found": "Player {} not found, please make sure the player is online and enter the player's XboxID correctly (not alias)",
@@ -65,9 +67,9 @@
   "screen.check.menu.check_other": "Check other Player Inventory",
   "screen.check.menu.update": "Update（Own Inventory <= Target Player Inventory）",
   "screen.check.menu.overwrite": "Overwrite (Own Inventory => Target Player Inventory)",
-  "screen.check.menu.next": "Check next Player Inventory",
+  "operation.check_next": "Check next Player Inventory",
   "screen.check.menu.stop": "Stop check Inventory",
-  "screen.check.menu.back": "Check previous Player Inventory",
+  "operation.check_previous": "Check previous Player Inventory",
   "screen.check.menu.remove": "Remove target Player All data",
   "screen.menu.content": "Please select the operation"
 }

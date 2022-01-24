@@ -38,6 +38,8 @@ llcheckbag stop/s                       // Stop checking
 llcheckbag menu/m                       // Open the Inventory check GUI menu
 llcheckbag list/l                       // List all players (player name or player UUID)
 llcheckbag import/i                     // Import player data (GUI only)
+llcheckbag next/n                       // Check next player Inventory (relative to all players)
+llcheckbag previous                     // Check previous player Inventory (relative to all players)
 ```
 
 ## Part of the GUI usage

@@ -338,6 +338,49 @@ CheckBagManager::Result CheckBagManager::startCheckBag(Player* player, mce::UUID
     return setBagData(player, uuid, std::move(targetTag));
 }
 
+CheckBagManager::Result CheckBagManager::checkNext(Player* player) {
+    // 相对于所有玩家
+    auto log = tryGetLog(player);
+    if (!log)
+        return Result::NotStart;
+    auto target = log->mTarget;
+    auto targetName = getNameOrUuid(target);
+    auto list = getPlayerList(log->mCategory);
+    auto iter = std::find(list.begin(), list.end(), targetName);
+    ASSERT(iter != list.end());
+    ++iter;
+    if (iter == list.end())
+        iter = list.begin();
+    if (*iter == player->getRealName()) {
+        ++iter;
+        if (iter == list.end())
+            iter = list.begin();
+    }
+    player->sendText(tr("operation.check_next.hint", *iter));
+    return startCheckBag(player, fromNameOrUuid(*iter));
+}
+
+CheckBagManager::Result CheckBagManager::checkPrevious(Player* player) {
+    auto log = tryGetLog(player);
+    if (!log)
+        return Result::NotStart;
+    auto target = log->mTarget;
+    auto targetName = getNameOrUuid(target);
+    auto list = getPlayerList(log->mCategory);
+    auto iter = std::find(list.rbegin(), list.rend(), targetName);
+    ASSERT(iter != list.rend());
+    ++iter;
+    if (iter == list.rend())
+        iter = list.rbegin();
+    if (*iter == player->getRealName()) {
+        ++iter;
+        if (iter == list.rend())
+            iter = list.rbegin();
+    }
+    player->sendText(tr("operation.check_previous.hint", *iter));
+    return startCheckBag(player, fromNameOrUuid(*iter));
+}
+
 CheckBagManager::Result CheckBagManager::overwriteData(Player* player)
 {
     auto log = tryGetLog(player);

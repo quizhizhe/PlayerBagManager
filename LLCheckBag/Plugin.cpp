@@ -41,6 +41,8 @@ class LLCheckBagCommand : public Command {
         Export,
         Menu,
         ExportAll,
+        Next,
+        Previous,
         AddOp,
     } mOperation;
     std::string mPlayer;
@@ -133,7 +135,6 @@ class LLCheckBagCommand : public Command {
             break;
         }
         case LLCheckBagCommand::Operation::Import: {
-            //return output.error("暂不支持导入功能");
             auto player = GetPlayerOrReturn();
             if (!FormHelper::openImportScreen(player))
                 output.error(tr("screen.send.error"));
@@ -146,6 +147,18 @@ class LLCheckBagCommand : public Command {
                 output.success(tr("operation.export.success", count));
             else
                 output.error(tr("operation.export.no_target"));
+            break;
+        }
+        case LLCheckBagCommand::Operation::Next: {
+            auto player = GetPlayerOrReturn();
+            auto result = manager.checkNext(player);
+            CheckResultOutput(result, tr("operation.check_next"));
+            break;
+        }
+        case LLCheckBagCommand::Operation::Previous: {
+            auto player = GetPlayerOrReturn();
+            auto result = manager.checkPrevious(player);
+            CheckResultOutput(result, tr("operation.check_next"));
             break;
         }
         default:
@@ -232,6 +245,8 @@ public:
             {"menu",Operation::Menu},
             {"list",Operation::List},
             {"import",Operation::Import},
+            {"next",Operation::Next},
+            {"previous",Operation::Previous},
             {"rb",Operation::Rollback},
             {"ow",Operation::Overwrite},
             {"s",Operation::Stop},
