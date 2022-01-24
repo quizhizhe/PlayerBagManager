@@ -88,9 +88,9 @@ jobs:
       id: rel
       if: startsWith(github.ref, 'refs/tags/v')
       run: |
-        echo ::set-output name=tag::${GITHUB_REF}
-        Compress-Archive -Path output/* output/LLCheckBag-${GITHUB_REF}.zip
-      # shell: bash
+        echo ::set-output name=tag::${GITHUB_REF#refs/tags/*}
+        zip -r output/LLCheckBag-${GITHUB_REF#refs/tags/*}.zip output/*
+      shell: bash
       
     - name: Create New Release
       uses: softprops/action-gh-release@v1
