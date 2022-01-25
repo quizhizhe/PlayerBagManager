@@ -9,6 +9,7 @@ which can check the plug-ins of all players' inventory in the Level, and comes w
 
 ## Features
 * View a player's items, include Inventory, EnderChestInventory, Armor, Offhand items(Inventory below refers to these containers)
+    * Principle: Back up the data of the operating player, and set the Inventory data of the target player to the operating player
 * Export a player's data
 * Import a player's data
 * Delete all data of a player, **not just Inventory data**
