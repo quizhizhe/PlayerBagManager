@@ -10,20 +10,20 @@
 * 导出某玩家数据
 * 导入某玩家数据
 * 删除某玩家所有数据，注：**不只是背包数据**
-    * 注：以上功能均支持存档中所有玩家，理论上服务器安装 LiteLoader 2.0 后进入过服务器的玩家均能识别出玩家名，否则以uuid形式显示
+> 注：以上功能均支持存档中所有玩家，理论上服务器安装 LiteLoader 2.0 后进入过服务器的玩家均能识别出玩家名，否则以uuid形式显示
 
-## 编译
-使用
-``
-git clone --recursive https://github.com/quizhizhe/LLCheckBag.git
-``
-拉取项目，用 [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) 打开sln文件，选择，生成->生成LLCheckBag
+## 下载安装
+> *确保你已经正确安装[LiteLoader](https://github.com/LiteLDev/LiteLoaderBDS)加载器*
+* 二进制下载
+    * 可从 [MineBBS](https://www.minebbs.com/resources/llcheckbag.3367/) 或者 [Github Release](https://github.com/quizhizhe/LLCheckBag/releases) 下载，完成后解压压缩包内容到 plugins 目录下即可
+* 从源码编译
+    * 使用 `git clone --recursive https://github.com/quizhizhe/LLCheckBag.git` 拉取项目，用 [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) 打开sln文件，设置项目调试路径为bds路径，生成即可
 
 ## 用法
 * 指令（*可将 llcheckbag 替换成设置的指令别名，默认 llcb*）：
-* 注：如果目标玩家`[Target]`未设置则为打开对应 GUI
+> 注：如果目标玩家`[Target]`未设置则为打开对应 GUI
 ```
-llcheckbag
+llcheckbag                              // 打开默认GUI菜单（配置文件中 DefaultScreen 设置的GUI）
 llcheckbag check/c      [Target]        // 检查玩家背包
 llcheckbag remove/rm    [Target]        // 移除玩家数据
 llcheckbag op           [Target]        // 设置查包管理员
@@ -42,7 +42,7 @@ llcheckbag previous                     // 查看上一个玩家背包（相对�
 ## 部分 GUI 说明
 ### Import 导入玩家数据
 * 输入 `llcheckbag import` 或 `llcheckbag i` 可打开导入界面，选择需要导入的玩家数据，
-* 列表里文件为 **ExportDirectory** 设置的文件夹中的文件，仅支持后缀为 `.snbt` 或者 `.nbt` 的文件
+* 列表里文件为 **`ExportDirectory`** 设置的文件夹中的文件，仅支持后缀为 `.snbt` 或者 `.nbt` 的文件
 选择好后会弹出**导入数据界面**，
 * 第一行显示自动的是自动匹配的存档中已有的玩家名，
 * 导入模式分为仅背包和完整数据模式，
@@ -51,7 +51,7 @@ llcheckbag previous                     // 查看上一个玩家背包（相对�
 * 导入目标分为匹配的玩家，新玩家，选择玩家，**需要注意的是，新玩家模式需要玩家信息文件（后缀为`.nbt.json`或者`.snbt.json`）**
 
 ## 配置文件(plugins/LLCheckBag/config.json)
-```json
+```javascript
 {
     // 配置文件版本，为了转换旧版本的配置到最新版本，**别修改**
     "ConfigVersion": 1,
