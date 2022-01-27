@@ -331,10 +331,10 @@ namespace FormHelper {
                         }
                     }
                     else if (target == tr("screen.import.target.select")) {
-                        sendPlayerListForm(player, tr("screen.import.error.online"), tr("screen.import.select_target"),
+                        sendPlayerListForm(player, tr("operation.import"), tr("screen.import.select_target"),
                             [filePath, isBagOnly](Player* player, mce::UUID const& uuid) {
                                 auto result = CBMgr.importData(uuid, filePath, isBagOnly);
-                                SendCheckResult(result, tr("screen.import.error.online"));
+                                SendCheckResult(result, tr("operation.import"));
                             });
                     }
                 });
