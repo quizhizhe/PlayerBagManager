@@ -5,12 +5,12 @@
 #include <TranslationAPI.h>
 #include <PlayerInfoAPI.h>
 
-#define CaseEnumValue(type, value)\
-case type::value:\
-    return #value
-#define IfEnumValue(type, value)\
-if (name == toLowerCase(#value))\
-    return type::value;
+//#define CaseEnumValue(type, value)\
+//case type::value:\
+//    return #value
+//#define IfEnumValue(type, value)\
+//if (name == toLowerCase(#value))\
+//    return type::value;
 
 #define SerializeVaule(var) json[#var] = Config::var
 #define SerializeEnumVaule(var) json[#var] = toString(Config::var)
@@ -43,81 +43,46 @@ inline std::string toLowerCase(std::string const& name) {
 
 // =========== NbtDataType Converter ===========
 inline std::string toString(NbtDataType type) {
-    switch (type)
-    {
-        CaseEnumValue(NbtDataType, Snbt);
-        CaseEnumValue(NbtDataType, Binary);
-        CaseEnumValue(NbtDataType, Json);
-    default:
-        return "Binary";
-    }
+    auto typeStr = magic_enum::enum_name(type);
+    return std::string(typeStr);
 }
 
 template<>
 inline NbtDataType fromString(std::string const& value) {
-    std::string name = toLowerCase(value);
-
-    IfEnumValue(NbtDataType, Snbt);
-    IfEnumValue(NbtDataType, Binary);
-    IfEnumValue(NbtDataType, Json);
-
+    auto enumValue = magic_enum::enum_cast<NbtDataType>(value);
+    if (enumValue.has_value()) {
+        return enumValue.value();
+    }
     return NbtDataType::Binary;
 }
 
 // =========== ScreenCategory Converter ===========
 inline std::string toString(ScreenCategory type) {
-    switch (type)
-    {
-        CaseEnumValue(ScreenCategory, Check);
-        CaseEnumValue(ScreenCategory, Menu);
-        CaseEnumValue(ScreenCategory, Import);
-        CaseEnumValue(ScreenCategory, Export);
-        CaseEnumValue(ScreenCategory, Delete);
-        CaseEnumValue(ScreenCategory, ExportAll);
-    default:
-        return "Check";
-        break;
-    }
+    auto typeStr = magic_enum::enum_name(type);
+    return std::string(typeStr);
 }
 
 template<>
 inline ScreenCategory fromString(std::string const& value) {
-    std::string name = toLowerCase(value);
-
-    IfEnumValue(ScreenCategory, Check);
-    IfEnumValue(ScreenCategory, Menu);
-    IfEnumValue(ScreenCategory, Import);
-    IfEnumValue(ScreenCategory, Export);
-    IfEnumValue(ScreenCategory, Delete);
-    IfEnumValue(ScreenCategory, ExportAll);
-
+    auto enumValue = magic_enum::enum_cast<ScreenCategory>(value);
+    if (enumValue.has_value()) {
+        return enumValue.value();
+    }
     return ScreenCategory::Check;
 }
 
 // =========== PlayerCategory Converter ===========
 std::string toString(PlayerCategory type) {
-    switch (type)
-    {
-        CaseEnumValue(PlayerCategory, All);
-        CaseEnumValue(PlayerCategory, Normal);
-        CaseEnumValue(PlayerCategory, FakePlayer);
-        CaseEnumValue(PlayerCategory, Unnamed);
-    default:
-        return "Normal";
-        break;
-
-    }
+    auto typeStr = magic_enum::enum_name(type);
+    return std::string(typeStr);
 }
 
 template<>
 PlayerCategory fromString(std::string const& value) {
-    std::string name = toLowerCase(value);
-
-    IfEnumValue(PlayerCategory, All);
-    IfEnumValue(PlayerCategory, Normal);
-    IfEnumValue(PlayerCategory, FakePlayer);
-    IfEnumValue(PlayerCategory, Unnamed);
-
+    auto enumValue = magic_enum::enum_cast<PlayerCategory>(value);
+    if (enumValue.has_value()) {
+        return enumValue.value();
+    }
     return PlayerCategory::Normal;
 }
 
