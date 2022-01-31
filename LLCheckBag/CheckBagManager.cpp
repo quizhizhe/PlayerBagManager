@@ -84,7 +84,7 @@ void CheckBagManager::afterPlayerLeave(ServerPlayer* player)
     auto logPlayer = Level::getPlayer(uuidIter->second);
     mRemoveRequsets.erase(uuidIter);
     updateIsFree();
-    auto format = res ? "成功移除玩家 {} 数据" : "移除玩家 {} 数据时发生错误";
+    auto format = res ? tr("operation.remove.success").c_str() : tr("operation.remove.error").c_str();
     if (logPlayer)
         logPlayer->sendText(fmt::format(format, player->getRealName()));
     logger.info(format, player->getRealName());
@@ -103,7 +103,7 @@ void CheckBagManager::afterPlayerJoin(ServerPlayer* player) {
     auto uuid = player->getUuid();
     mIsFree = false;
     mCheckBagLogMap.emplace(uuid, CheckBagLog(mce::UUID::fromString(uuid), std::move(backupTag)));
-    player->sendText("发现有备份文件，建议先使用llcb stop指令恢复背包后在进行查包");
+    player->sendText(tr("plugin.warn.backup_found"));
 }
 
 mce::UUID CheckBagManager::fromNameOrUuid(std::string const& nameOrUuid) {
@@ -526,7 +526,7 @@ size_t CheckBagManager::exportAllData(NbtDataType type)
         if (result == CheckBagManager::Result::Success)
             count++;
         else {
-            logger.warn("导出 {} 数据失败，原因：{}", suuid, CheckBagManager::getResultString(result));
+            logger.warn(tr("operation.export.failed"), suuid, CheckBagManager::getResultString(result));
         }
     }
     return count;
