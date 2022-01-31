@@ -14,8 +14,11 @@ namespace FormHelper {
         Form::SimpleForm form(title, content);
         TestFuncTime(CBMgr.getPlayerList, category); // <0.5ms
         auto playerList = CBMgr.getPlayerList(category);
+        auto iter = std::find(playerList.begin(), playerList.end(), player->getRealName());
+        if(iter!=playerList.end())
+            playerList.erase(playerList.begin()+ distance(playerList.begin(), iter));
         for (auto& name : playerList) {
-            if (player->getRealName() == name) continue;
+            //if (player->getRealName() == name) continue;
             form.append(Form::Button(name));
         }
         return form.sendTo((ServerPlayer*)player, [player, playerList = std::move(playerList), callback](int index) {
