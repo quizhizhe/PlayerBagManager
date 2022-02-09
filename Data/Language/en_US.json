@@ -62,6 +62,7 @@
   "screen.import.target.select": "Select target Player",
   "screen.import.target.new": "New Player",
   "screen.import.error.online": "§c§lFull data import is not available when the Player is online§r",
+  "screen.import.error.target_not_allowed": "§c§lNew player cannot be selected as targets in Inventory-Only mode§r",
   "screen.import.error.no_impl": "§c§lUnrealized§r",
   "screen.check.menu.contet": "Current Player: §e{}§r\nPlease select the operation",
   "screen.check.menu.check_other": "Check other Player Inventory",

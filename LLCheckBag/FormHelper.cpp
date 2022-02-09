@@ -21,7 +21,7 @@ namespace FormHelper {
             //if (player->getRealName() == name) continue;
             form.append(Form::Button(name));
         }
-        return form.sendTo((ServerPlayer*)player, [player, playerList = std::move(playerList), callback](int index) {
+        return form.sendTo((ServerPlayer*)player, [playerList = std::move(playerList), callback](Player* player, int index) {
             if (index < 0)
                 return;
             auto& target = playerList[index];
@@ -45,10 +45,10 @@ namespace FormHelper {
         Form::SimpleForm form(title, tr("screen.player_category.content"));
 
         for (auto& btn : PlayerCategorys) {
-            form.append(Form::Button{ tr("player.category." + toString(btn)) });
+            form.append(Form::Button{ tr("player.category." + std::string(magic_enum::enum_name(btn))) });
         }
 
-        return form.sendTo((ServerPlayer*)player, [title, content, player, callback](int index) {
+        return form.sendTo((ServerPlayer*)player, [title, content, callback](Player* player, int index) {
             if (index < 0)
                 return;
             auto category = PlayerCategorys[index];
@@ -124,20 +124,20 @@ namespace FormHelper {
 
     bool sendDataTypeForm(Player* player, std::string const& title, std::string const& content, std::function<void(Player* player, NbtDataType type)>&& callback)
     {
-        static std::vector<std::string> DataTypes = {
-            toString(NbtDataType::Binary),
-            toString(NbtDataType::Snbt),
-            toString(NbtDataType::Json),
+        static std::vector<const char*> DataTypes = {
+            magic_enum::enum_name(NbtDataType::Binary).data(),
+            magic_enum::enum_name(NbtDataType::Snbt).data(),
+            magic_enum::enum_name(NbtDataType::Json).data(),
         };
 
         Form::SimpleForm form(title, content);
         for (auto& btn : DataTypes) {
             form.append(Form::Button{ btn });
         }
-        return form.sendTo((ServerPlayer*)player, [player, callback](int index) {
+        return form.sendTo((ServerPlayer*)player, [callback](Player* player, int index) {
             if (index < 0)
                 return;
-            auto dataType = fromString<NbtDataType>(DataTypes[index]);
+            auto dataType = magic_enum::enum_cast<NbtDataType>(DataTypes[index]).value_or(NbtDataType::Unknown);
             callback(player, dataType);
             });
     }
@@ -168,7 +168,7 @@ namespace FormHelper {
         for (auto& btn : CheckBagMenus) {
             form.append(Form::Button(tr(btn)));
         }
-        return form.sendTo((ServerPlayer*)player, [player](int index) {
+        return form.sendTo((ServerPlayer*)player, [](Player* player, int index) {
             if (index < 0)
                 return;
             CheckBagManager::Result result = CheckBagManager::Result::Error;
@@ -289,7 +289,7 @@ namespace FormHelper {
             form.append(Form::Button(btn));
         }
         return form.sendTo((ServerPlayer*)player,
-            [player, fileList = std::move(fileList)](int index) {
+            [fileList = std::move(fileList)](Player* player, int index) {
             if (index < 0)
                 return;
             std::string fileName = fileList[index];
@@ -308,11 +308,11 @@ namespace FormHelper {
                     tr("screen.import.target.select")
                 }));
             form.sendTo((ServerPlayer*)player,
-                [player, filePath, targetUuid](const std::map<string, std::shared_ptr<Form::CustomFormElement>>& data) {
+                [filePath, targetUuid](Player* player, const std::map<string, std::shared_ptr<Form::CustomFormElement>>& data) {
                     auto modeDW = std::dynamic_pointer_cast<Form::Dropdown>(data.at("importMode"));
-                    auto isBagOnly = modeDW->options[modeDW->getData()] == tr("screen.import.mode.bag_only");
+                    auto isBagOnly = modeDW->getString() == tr("screen.import.mode.bag_only");
                     auto targetDW = std::dynamic_pointer_cast<Form::Dropdown>(data.at("target"));
-                    auto& target = targetDW->options[targetDW->getData()];
+                    auto target = targetDW->getString();
                     if (target == tr("screen.import.target.match")) {
                         if (getPlayer(targetUuid) && !isBagOnly) {
                             player->sendText(tr("screen.import.error.online"));
@@ -326,7 +326,7 @@ namespace FormHelper {
                     else if (target == tr("screen.import.target.new")) {
                         if (isBagOnly)
                         {
-                            player->sendText("§c§l仅背包模式下不可选择新玩家作为目标§r");
+                            player->sendText(tr("screen.import.error.target_not_allowed"));
                         }
                         else {
                             auto result = CBMgr.importNewData(filePath);
@@ -373,9 +373,9 @@ namespace FormHelper {
         auto& manager = CBMgr;
         Form::SimpleForm form("LLCheckBag", tr("screen.menu.content"));
         for (auto& btn : MenuButtons) {
-            form.append(Form::Button{ tr("screen.category." + toString(btn)) });
+            form.append(Form::Button{ tr("screen.category." + std::string(magic_enum::enum_name(btn))) });
         }
-        return form.sendTo((ServerPlayer*)player, [player](int index) {
+        return form.sendTo((ServerPlayer*)player, [](Player* player, int index) {
             if (index < 0)
                 return;
             switch (MenuButtons[index])

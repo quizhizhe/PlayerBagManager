@@ -62,6 +62,7 @@
   "screen.import.target.select": "选择目标玩家",
   "screen.import.target.new": "新玩家",
   "screen.import.error.online": "§c§l玩家在线时不能进行完整数据导入§r",
+  "screen.import.error.target_not_allowed": "§c§l仅背包模式下不可选择新玩家作为目标§r",
   "screen.import.error.no_impl": "§c§l未实现§r",
   "screen.check.menu.contet": "当前玩家：§e{}§r\n请选择要执行的操作",
   "screen.check.menu.check_other": "查看其他玩家背包",

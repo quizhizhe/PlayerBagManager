@@ -5,85 +5,33 @@
 #include <TranslationAPI.h>
 #include <PlayerInfoAPI.h>
 
-//#define CaseEnumValue(type, value)\
-//case type::value:\
-//    return #value
-//#define IfEnumValue(type, value)\
-//if (name == toLowerCase(#value))\
-//    return type::value;
-
 #define SerializeVaule(var) json[#var] = Config::var
-#define SerializeEnumVaule(var) json[#var] = toString(Config::var)
+#define SerializeEnumVaule(var) json[#var] = magic_enum::enum_name(Config::var)
 
 #define DeserializeVaule(var)\
 if (json.find(#var) != json.end()){\
     Config::var = json.value(#var, Config::var);\
 }\
 else{\
-    logger.info("Missing Config {}, use default value ", #var/*, Config::var*/);\
+    logger.info("Missing config {}, use default value ", #var/*, Config::var*/);\
     needUpdate = true;\
 }
 
 #define DeserializeEnumVaule(var)\
 if (json.find(#var) != json.end()){\
-    auto svar = toString(Config::var);\
+    auto svar = magic_enum::enum_name(Config::var);\
     svar = json.value(#var, svar); \
-    Config::var = fromString<decltype(Config::var)>(svar);\
+    auto enumValue = magic_enum::enum_cast<decltype(Config::var)>(svar);\
+    if (enumValue.has_value())\
+        Config::var = enumValue.value();\
+    else{\
+        logger.warn("Unsupported config value {}, use default value {}", svar, magic_enum::enum_name(Config::var));\
+        needUpdate = true;\
+    }\
 }\
 else{\
-    logger.warn("Missing Config {}, use default value {}", #var, toString(Config::var));\
+    logger.warn("Missing config {}, use default value {}", #var, magic_enum::enum_name(Config::var));\
     needUpdate = true;\
-}
-
-inline std::string toLowerCase(std::string const& name) {
-    std::string lname = name;
-    std::transform(lname.begin(), lname.end(), lname.begin(), ::tolower);
-    return lname;
-}
-
-// =========== NbtDataType Converter ===========
-inline std::string toString(NbtDataType type) {
-    auto typeStr = magic_enum::enum_name(type);
-    return std::string(typeStr);
-}
-
-template<>
-inline NbtDataType fromString(std::string const& value) {
-    auto enumValue = magic_enum::enum_cast<NbtDataType>(value);
-    if (enumValue.has_value()) {
-        return enumValue.value();
-    }
-    return NbtDataType::Binary;
-}
-
-// =========== ScreenCategory Converter ===========
-inline std::string toString(ScreenCategory type) {
-    auto typeStr = magic_enum::enum_name(type);
-    return std::string(typeStr);
-}
-
-template<>
-inline ScreenCategory fromString(std::string const& value) {
-    auto enumValue = magic_enum::enum_cast<ScreenCategory>(value);
-    if (enumValue.has_value()) {
-        return enumValue.value();
-    }
-    return ScreenCategory::Check;
-}
-
-// =========== PlayerCategory Converter ===========
-std::string toString(PlayerCategory type) {
-    auto typeStr = magic_enum::enum_name(type);
-    return std::string(typeStr);
-}
-
-template<>
-PlayerCategory fromString(std::string const& value) {
-    auto enumValue = magic_enum::enum_cast<PlayerCategory>(value);
-    if (enumValue.has_value()) {
-        return enumValue.value();
-    }
-    return PlayerCategory::Normal;
 }
 
 namespace Config {
@@ -133,6 +81,7 @@ namespace Config {
         default:
             break;
         }
+        return false;
     }
 
     inline bool deserialize(std::string jsonStr) {

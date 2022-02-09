@@ -2,12 +2,12 @@
 #include "pch.h"
 
 #include "DebugHelper.h"
-#include "magic_enum.hpp"
+#include <third-party/magic_enum/magic_enum.hpp>
 
 // Version
 #define PLUGIN_VERSION_MAJOR 1
 #define PLUGIN_VERSION_MINOR 1
-#define PLUGIN_VERSION_REVISION 2
+#define PLUGIN_VERSION_REVISION 3
 #ifdef PLUGIN_DEV_MODE
 #define PLUGIN_VERSION_IS_BETA true
 #else
@@ -52,15 +52,6 @@ enum class PlayerCategory :int {
     FakePlayer,
     Unnamed,
 };
-
-template <typename T>
-inline T fromString(std::string const& name);
-std::string toString(NbtDataType type);
-std::string toString(ScreenCategory type);
-std::string toString(PlayerCategory type);
-//template NbtDataType fromString<NbtDataType>(std::string const& name);
-//template ScreenCategory fromString<ScreenCategory>(std::string const& name);
-//template PlayerCategory fromString<PlayerCategory>(std::string const& name);
 
 namespace Config {
     static int ConfigVersion = 1;
