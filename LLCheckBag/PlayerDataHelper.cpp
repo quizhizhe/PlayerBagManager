@@ -224,7 +224,8 @@ namespace PlayerDataHelper {
         switch (type)
         {
         case NbtDataType::Snbt:
-            return tag->toSNBT();
+            return tag->toSNBT(4, 
+                Config::FormattedSNBT ? SnbtFormat::PartialNewLine : SnbtFormat::Minimize);
         case NbtDataType::Binary:
             return tag->toBinaryNBT();
         case NbtDataType::Json:

@@ -43,6 +43,7 @@ namespace Config {
         SerializeVaule(MsaIdOnly);
         SerializeVaule(Language);
         SerializeVaule(CommandAlias);
+        SerializeVaule(FormattedSNBT);
         SerializeVaule(BackupDirectory);
         SerializeVaule(ExportDirectory);
         SerializeVaule(CustomOperator);
@@ -94,6 +95,7 @@ namespace Config {
         DeserializeVaule(MsaIdOnly);
         DeserializeVaule(Language);
         DeserializeVaule(CommandAlias);
+        DeserializeVaule(FormattedSNBT);
         DeserializeVaule(BackupDirectory);
         DeserializeVaule(ExportDirectory);
         DeserializeVaule(CustomOperator);

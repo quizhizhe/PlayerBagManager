@@ -70,6 +70,8 @@ After selecting, the **Import data screen** will pop up.
     "DefaultScreen": "Check",
     // The export directory is also the import directory
     "ExportDirectory": "plugins/LLCheckBag/Export/",
+    // Output formatted Snbt instead of minimized Snbt
+    "FormattedSNBT": true,
     // language, optional value: zh_CN, en_US
     "Language": "zh_CN",
     // If you don't understand, please choose the default value

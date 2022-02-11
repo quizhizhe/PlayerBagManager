@@ -68,6 +68,8 @@ llcheckbag previous                     // 查看上一个玩家背包（相对�
     "DefaultScreen": "Check",
     // 导出目录，同时也是导入目录
     "ExportDirectory": "plugins/LLCheckBag/Export/",
+    // 输出格式化 Snbt 而不是最小化 Snbt
+    "FormattedSNBT": true,
     // 语言，可选值：zh_CN, en_US
     "Language": "zh_CN",
     // 不懂请选择默认值

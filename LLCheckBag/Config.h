@@ -58,6 +58,7 @@ namespace Config {
     static bool PacketMode = false;
     static bool MsaIdOnly = false;
     static bool GuiWithCategory = true;
+    static bool FormattedSNBT = true;
     static std::string Language = "zh_CN";
     static std::string CommandAlias = "llcb";
     static std::string BackupDirectory = "plugins/LLCheckBag/Backup/";
