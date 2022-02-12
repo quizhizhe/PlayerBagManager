@@ -40,6 +40,7 @@
   "screen.category.Menu": "菜单",
   "screen.category.Import": "导入",
   "screen.category.Delete": "删除",
+  "screen.category.Export": "导出",
   "screen.category.ExportAll": "导出所有玩家数据",
   "player.category.All": "所有玩家",
   "player.category.Normal": "有玩家名记录的玩家",
