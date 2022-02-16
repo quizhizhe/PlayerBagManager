@@ -93,16 +93,15 @@ void CheckBagManager::afterPlayerLeave(ServerPlayer* player)
 
 void CheckBagManager::afterPlayerJoin(ServerPlayer* player) {
     auto suuid = player->getUuid();
-    if (mUuidNameMap.find(suuid) != mUuidNameMap.end()) {
+    if (mUuidNameMap.find(suuid) == mUuidNameMap.end()) {
         auto isFakePlayer = PlayerDataHelper::isFakePlayer_ddf8196(suuid);
         mUuidNameMap.emplace(suuid, std::pair{ player->getRealName(),isFakePlayer });
     }
     auto backupTag = getBackupBag(player);
     if (!backupTag)
         return;
-    auto uuid = player->getUuid();
     mIsFree = false;
-    mCheckBagLogMap.emplace(uuid, CheckBagLog(mce::UUID::fromString(uuid), std::move(backupTag)));
+    mCheckBagLogMap.emplace(suuid, CheckBagLog(mce::UUID::fromString(suuid), std::move(backupTag)));
     player->sendText(tr("plugin.warn.backup_found"));
 }
 
@@ -420,8 +419,8 @@ CheckBagManager::Result CheckBagManager::exportData(mce::UUID const& uuid, NbtDa
     auto infoStr = playerInfo.dump(4);
 
     auto dataPath = getExportPath(uuid, type);
-    std::filesystem::path infoPath(dataPath + ".json");
-    if (WriteAllFile(dataPath, data, true) && WriteAllFile(infoPath.string(), infoStr, false))
+    std::string infoPath = dataPath + ".json";
+    if (WriteAllFile(dataPath, data, true) && WriteAllFile(infoPath, infoStr, false))
         return Result::Success;
     return Result::Error;
 }
