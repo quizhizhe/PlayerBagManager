@@ -2,7 +2,7 @@
 #include "Config.h"
 #include <third-party/Nlohmann/json.hpp>
 #include <filesystem>
-#include <TranslationAPI.h>
+#include <I18nAPI.h>
 #include <PlayerInfoAPI.h>
 
 #define SerializeVaule(var) json[#var] = Config::var
@@ -132,7 +132,7 @@ namespace Config {
                 return false;
             }
         }
-        return Translation::load(languageFile.string());
+        return Translation::load(languageFile.u8string());
         
     }
     bool initConfig() {
@@ -156,8 +156,8 @@ namespace Config {
         if (!res) {
             res = saveConfig();
         }
-        std::filesystem::create_directories(Config::BackupDirectory);
-        std::filesystem::create_directories(Config::ExportDirectory);
+        std::filesystem::create_directories(str2wstr(Config::BackupDirectory));
+        std::filesystem::create_directories(str2wstr(Config::ExportDirectory));
         if (!loadLanguage(Config::Language)) {
             logger.error("Error loading language file!");
             throw("Error loading language file!");

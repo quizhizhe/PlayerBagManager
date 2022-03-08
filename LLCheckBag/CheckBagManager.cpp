@@ -283,7 +283,7 @@ CheckBagManager::Result CheckBagManager::restoreBagData(Player* player)
             return Result::BackupNotFound;
         PlayerDataHelper::setPlayerBag(player, *backupTag);
         player->refreshInventory();
-        std::filesystem::remove(backupPath);
+        std::filesystem::remove(str2wstr(backupPath));
         return Result::Success;
     }
 }
@@ -470,13 +470,13 @@ CheckBagManager::Result CheckBagManager::importData(std::string const& nameOrUui
 }
 
 CheckBagManager::Result CheckBagManager::importNewData(std::string filePath) {
-    if (!std::filesystem::exists(filePath + ".json")) {
+    if (!std::filesystem::exists(str2wstr(filePath + ".json"))) {
         logger.error("Failed to get player info file，file {} not exist", filePath + ".json");
         return Result::InfoDataNotFound;
     }
     auto infoData = ReadAllFile(filePath + ".json");
 
-    auto playerIds = nlohmann::json::parse(infoData.value_or(""));
+    auto playerIds = nlohmann::json::parse(infoData.value_or("{}"));
     auto idsTag = CompoundTag::create();
     std::string name;
     std::string suuid;

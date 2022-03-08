@@ -257,20 +257,20 @@ namespace FormHelper {
     }
 
     inline std::vector<std::string> listdir(std::string const& path) {
-        if (!std::filesystem::exists(path))
+        if (!std::filesystem::exists(str2wstr(path)))
             return {};
-        if (std::filesystem::directory_entry(path).status().type() != std::filesystem::file_type::directory)
+        if (std::filesystem::directory_entry(str2wstr(path)).status().type() != std::filesystem::file_type::directory)
             return {};
         std::vector<std::string> listUuid;
         std::vector<std::string> listName;
-        for (auto& file : std::filesystem::directory_iterator(path)) {
+        for (auto& file : std::filesystem::directory_iterator(str2wstr(path))) {
             auto& filePath = file.path();
             if (filePath.extension() == ".nbt"
                 || filePath.extension() == ".snbt") {
-                if (filePath.filename().string().find_last_of('.') == 36)
-                    listUuid.push_back(filePath.filename().string());
+                if (filePath.filename().u8string().find_last_of('.') == 36)
+                    listUuid.push_back(filePath.filename().u8string());
                 else
-                    listName.push_back(filePath.filename().string());
+                    listName.push_back(filePath.filename().u8string());
             }
         }
         std::sort(listUuid.begin(), listUuid.end());
@@ -293,7 +293,7 @@ namespace FormHelper {
             if (index < 0)
                 return;
             std::string fileName = fileList[index];
-            std::string filePath = std::filesystem::path(Config::ExportDirectory).append(fileName).string();
+            std::string filePath = std::filesystem::path(str2wstr(Config::ExportDirectory)).append(str2wstr(fileName)).u8string();
             auto nameOrUuid = fileName.substr(0, fileName.find_last_of('.'));
             auto targetUuid = CheckBagManager::fromNameOrUuid(nameOrUuid);
             auto exist = !PlayerDataHelper::getServerId(targetUuid).empty();

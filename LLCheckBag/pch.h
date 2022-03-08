@@ -24,6 +24,6 @@
 #include <RegCommandAPI.h>
 #include <LLAPI.h>
 #include "Config.h"
-#include <TranslationAPI.h>
+#include <I18nAPI.h>
 
 #endif //PCH_H
