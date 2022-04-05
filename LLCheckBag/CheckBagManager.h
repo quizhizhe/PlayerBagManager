@@ -116,16 +116,16 @@ public:
     static mce::UUID fromNameOrUuid(std::string const& nameOrUuid);
     inline static std::string getBackupPath(Player* player) {
         auto realName = player->getRealName();
-        auto path = std::filesystem::path(Config::BackupDirectory);
+        auto path = std::filesystem::path(Config::BackupDirectory).string();
         path.append(realName + "." + getSuffix(Config::BackupDataType));
-        return path.string();
+        return path;
     }
     inline std::string getExportPath(mce::UUID const& uuid, NbtDataType type) {
         auto fileName = getNameOrUuid(uuid);
         std::string suffix = getSuffix(type);
-        auto path = std::filesystem::path(Config::ExportDirectory);
+        auto path = std::filesystem::path(Config::ExportDirectory).string();
         path.append(fileName + "." + suffix);
-        return path.string();
+        return path;
     }
 
     std::vector<std::string> getPlayerList();
