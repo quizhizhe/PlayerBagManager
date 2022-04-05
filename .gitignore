@@ -2,7 +2,7 @@
 /cmake-build-debug
 /cmake-build-release
 /CMakeLists.txt
-/LLCheckBag.vcxproj.user
+/LLCheckBag/LLCheckBag.vcxproj*
 /Pdb
 /Tools
 /x64
