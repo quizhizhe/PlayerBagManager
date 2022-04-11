@@ -1,10 +1,8 @@
 import argparse
 import logging
+import os
 from typing import Tuple
-import urllib
-from urllib import request
-import ssl
-ssl._create_default_https_context = ssl._create_unverified_context
+import requests
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -23,10 +21,12 @@ class UpdateManager:
     def upload(self, file_path: str) -> str:
         with open(file_path, "rb") as f:
             data = f.read()
-            files = {
-                "upload": [data],
-            }
-            response = request.post(self.upload_url, files=files, headers=self.headers)
+            multiple_files  = [
+                ('upload[]', (os.path.basename(file_path), f))
+            ]
+            # send binary file data
+
+            response = requests.post(self.upload_url, files=multiple_files, headers=self.headers)
             if response.status_code == 200 and response.json()["success"] == True:
                 return response.json()["data"][0]
             else:
@@ -41,7 +41,7 @@ class UpdateManager:
             "new_version": self.new_version,
             "file_key": key,
         }
-        response = request.post(self.update_url, json=data, headers=self.headers)
+        response = requests.post(self.update_url, json=data, headers=self.headers)
         if response.status_code == 200 and response.json()["success"] == True:
             return response.json()["data"]
         else:
@@ -56,7 +56,7 @@ class UpdateManager:
             "new_version": self.new_version,
             "file_url": url,
         }
-        response = request.post(self.update_url, json=data, headers=self.headers)
+        response = requests.post(self.update_url, data=data, headers=self.headers)
         if response.status_code == 200 and response.json()["success"] == True:
             return response.json()["data"]
         else:
@@ -74,7 +74,7 @@ class UpdateManager:
             return title, description
     
     def getLatestVersion(self) -> str:
-        response = request.get(self.resource_url, headers=self.headers)
+        response = requests.get(self.resource_url)
         if response.status_code == 200 and response.json()["success"] == True:
             return response.json()["data"]["version"]
         else:
@@ -90,8 +90,10 @@ if __name__ == '__main__':
     parser.add_argument('-v', '--version', help='version', required=True)
     parser.add_argument('-t', '--token', help='MineBBS token', required=True)
     args = parser.parse_args()
+
     manager = UpdateManager(resource_id=1, token=args.token, new_version=args.version)
-    file_key = manager.upload(args.file)
+    current_version = manager.getLatestVersion()
+    file_key =  manager.upload(args.file)
     if file_key:
         manager.updateFile(args.change, file_key)
     else:
