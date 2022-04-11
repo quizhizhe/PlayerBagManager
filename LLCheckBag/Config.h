@@ -2,7 +2,6 @@
 #include "pch.h"
 
 #include "DebugHelper.h"
-#include <third-party/magic_enum/magic_enum.hpp>
 
 // Version
 #define PLUGIN_VERSION_MAJOR 1

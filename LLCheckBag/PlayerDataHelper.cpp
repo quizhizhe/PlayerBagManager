@@ -92,30 +92,42 @@ namespace PlayerDataHelper {
         try
         {
             auto& dbStorage = *Global<DBStorage>;
-            auto tag = getPlayerIdsTag(uuid);
-            if (!tag) {
-                //logger.error("key \"player_{}\" not found in storage", uuid.asString());
+            auto serverId = getServerId(uuid);
+            if (serverId.empty())
+                return false;
+            if (!dbStorage.hasKey(serverId, playerCategory)) {
+                logger.warn("Failed to find key {} when deleting player({})'s data", serverId, uuid.asString());
                 return false;
             }
-            for (auto& [key, idTagVariant] : *tag) {
-                auto idTag = const_cast<CompoundTagVariant&>(idTagVariant).asStringTag();
-                std::string id = idTag->value();
-                id = key == PLAYER_KEY_SERVER_ID ? id : "player_" + id;
-                if (!dbStorage.hasKey(id, playerCategory)) {
-                    logger.warn("Failed to find key {} when deleting player({})'s data", id, uuid.asString());
-                    continue;
-                }
-                auto res = dbStorage.deleteData(id, playerCategory);
-                //res->addOnComplete([id](Bedrock::Threading::IAsyncResult<void> const& result) {
-                //    if (result.getStatus() == 1)
-                //        dbLogger.warn("Remove {} Success", id);
-                //    else
-                //    {
-                //        auto code = result.getError();
-                //        dbLogger.error("Remove {} Failed, cause: {}", id, code.message());
-                //    }
-                //    });
-            }
+            auto res = dbStorage.deleteData(serverId, playerCategory);
+            return true;
+
+            //auto tag = getPlayerIdsTag(uuid);
+            //if (!tag) {
+            //    //logger.error("key \"player_{}\" not found in storage", uuid.asString());
+            //    return false;
+            //}
+            // 
+            // Remove all player keys
+            //for (auto& [key, idTagVariant] : *tag) {
+            //    auto idTag = const_cast<CompoundTagVariant&>(idTagVariant).asStringTag();
+            //    std::string id = idTag->value();
+            //    id = key == PLAYER_KEY_SERVER_ID ? id : "player_" + id;
+            //    if (!dbStorage.hasKey(id, playerCategory)) {
+            //        logger.warn("Failed to find key {} when deleting player({})'s data", id, uuid.asString());
+            //        continue;
+            //    }
+            //    auto res = dbStorage.deleteData(id, playerCategory);
+            //    //res->addOnComplete([id](Bedrock::Threading::IAsyncResult<void> const& result) {
+            //    //    if (result.getStatus() == 1)
+            //    //        dbLogger.warn("Remove {} Success", id);
+            //    //    else
+            //    //    {
+            //    //        auto code = result.getError();
+            //    //        dbLogger.error("Remove {} Failed, cause: {}", id, code.message());
+            //    //    }
+            //    //    });
+            //}
             return true;
         }
         catch (const std::exception&)

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Config.h"
 #include <third-party/Nlohmann/json.hpp>
+#include <third-party/magic_enum/magic_enum.hpp>
 #include <filesystem>
 #include <I18nAPI.h>
 #include <PlayerInfoAPI.h>
@@ -13,7 +14,7 @@ if (json.find(#var) != json.end()){\
     Config::var = json.value(#var, Config::var);\
 }\
 else{\
-    logger.info("Missing config {}, use default value ", #var/*, Config::var*/);\
+    logger.info("Missing config {}, use default value.", #var/*, Config::var*/);\
     needUpdate = true;\
 }
 
