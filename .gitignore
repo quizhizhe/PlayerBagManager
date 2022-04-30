@@ -9,6 +9,7 @@
 /Tools
 /x64
 /.vs
+/.venv
 /LLCheckBag/x64
 **/*.vcxproj.user
 /.venv
