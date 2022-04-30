@@ -11,3 +11,4 @@
 /.vs
 /LLCheckBag/x64
 **/*.vcxproj.user
+/.venv
