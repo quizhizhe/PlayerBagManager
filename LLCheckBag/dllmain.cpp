@@ -1,10 +1,11 @@
 ﻿// dllmain.cpp : 定义 DLL 应用程序的入口点。
 #include "pch.h"
+#include <LLAPI.h>
+#include "Version.h"
 #pragma comment(lib, "../LiteLoaderSDK/Lib/bedrock_server_api.lib")
 #pragma comment(lib, "../LiteLoaderSDK/Lib/bedrock_server_var.lib")
 #pragma comment(lib, "../LiteLoaderSDK/Lib/SymDBHelper.lib")
 #pragma comment(lib, "../LiteLoaderSDK/Lib/LiteLoader.lib")
-#include <HookAPI.h>
 
 BOOL APIENTRY DllMain(HMODULE hModule,
     DWORD  ul_reason_for_call,
@@ -14,17 +15,17 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
-        LL::registerPlugin("LLCheckBag", "Inventory check plugin that depends on LiteLoader",
-            LL::Version(
-                PLUGIN_VERSION_MAJOR,
-                PLUGIN_VERSION_MINOR,
-                PLUGIN_VERSION_REVISION,
-                PLUGIN_VERSION_IS_BETA ? LL::Version::Beta : LL::Version::Release
-            ), {
-                    { "Git", "https://github.com/quizhizhe/LLCheckBag" },
-                    //{ "License", PLUGIN_LICENCE },
-                    //{ "Website", PLUGIN_WEBSIDE },
-            });
+        LL::registerPlugin(
+            PLUGIN_NAME,
+            PLUGIN_INTRODUCTION,
+            LL::Version(PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR, PLUGIN_VERSION_REVISION, PLUGIN_LLVERSION_STATUS),
+            std::map<std::string, std::string> {
+#ifdef PLUGIN_AUTOHR
+                { "Author", PLUGIN_AUTOHR },
+#endif // PLUGIN_AUTOHR
+                    //{ "Key", "Value" }
+        }
+        );
         break;
     case DLL_THREAD_ATTACH:
     case DLL_THREAD_DETACH:
@@ -32,11 +33,12 @@ BOOL APIENTRY DllMain(HMODULE hModule,
         break;
     }
     return TRUE;
-};
+}
 
 void PluginInit();
 
 extern "C" {
+    // Do something after all the plugins loaded
     _declspec(dllexport) void onPostInit() {
         std::ios::sync_with_stdio(false);
         PluginInit();

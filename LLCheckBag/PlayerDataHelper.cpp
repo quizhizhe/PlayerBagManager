@@ -13,10 +13,10 @@ namespace PlayerDataHelper {
     {
         static size_t count;
         count = 0;
-#ifdef PLUGIN_DEV_MODE
+#ifdef DEBUG
         static size_t serverCount;
         serverCount = 0;
-#endif // PLUGIN_DEV_MODE
+#endif // DEBUG
         Global<DBStorage>->forEachKeyWithPrefix("player_", playerCategory,
             [&callback, includeSelfSignedId](gsl::cstring_span<-1> key_left, gsl::cstring_span<-1> data) {
                 if (key_left.size() == 36) {
@@ -40,7 +40,7 @@ namespace PlayerDataHelper {
                         return;
                     }
                 }
-#ifdef PLUGIN_DEV_MODE
+#ifdef DEBUG
                 else if (key_left.size() == 36 + 7) {
                     serverCount++;
                 }
@@ -50,7 +50,7 @@ namespace PlayerDataHelper {
         }
 #else
     });
-#endif // PLUGIN_DEV_MODE
+#endif // DEBUG
     }
 
     std::vector<string> getAllUuid(bool includeSelfSignedId)
@@ -60,7 +60,7 @@ namespace PlayerDataHelper {
         forEachUuid(includeSelfSignedId, [&uuids](std::string_view uuid) {
             uuids.push_back(std::string(uuid));
             });
-#ifdef PLUGIN_DEV_MODE
+#ifdef DEBUG
         std::unordered_map<std::string, std::string> serverIds;
         for (auto& uuid : uuids) {
             auto serverId = getServerId(mce::UUID::fromString(uuid));
@@ -76,7 +76,7 @@ namespace PlayerDataHelper {
             }
             serverIds.emplace(serverId, uuid);
         }
-#endif // PLUGIN_DEV_MODE
+#endif // DEBUG
         return uuids;
     }
     std::unique_ptr<CompoundTag> getPlayerIdsTag(mce::UUID const& uuid) {

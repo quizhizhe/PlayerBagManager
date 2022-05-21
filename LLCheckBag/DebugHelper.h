@@ -1,6 +1,6 @@
 ﻿#pragma once
 extern class Logger logger;
-#ifdef PLUGIN_DEV_MODE
+#ifdef DEBUG
 
 inline double ns_time(LARGE_INTEGER begin_time, LARGE_INTEGER end_time, LARGE_INTEGER freq_) {
     return (end_time.QuadPart - begin_time.QuadPart) * 1000000.0 / freq_.QuadPart;
@@ -34,4 +34,4 @@ inline void _WASSERT(
 #else
 #define TestFuncTime(func, ...) ((void)0)
 #define ASSERT(var) ((void)0)
-#endif // PLUGIN_DEV_MODE
+#endif // DEBUG

@@ -42,11 +42,14 @@
     <ClInclude Include="DebugHelper.h">
       <Filter>源文件</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="magic_enum.hpp">
       <Filter>Base\header</Filter>
+    </ClInclude>
+    <ClInclude Include="Version.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>资源文件</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -85,5 +88,10 @@
     <None Include="..\Data\Language\zh_CN.json">
       <Filter>资源文件</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LLCheckBag.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

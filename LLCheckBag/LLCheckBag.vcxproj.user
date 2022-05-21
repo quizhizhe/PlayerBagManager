@@ -5,9 +5,9 @@
     <LocalDebuggerWorkingDirectory>..\..\bedrock-server-1.18.32.02</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='development|x64'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerCommand>bedrock_server_mod.exe</LocalDebuggerCommand>
-    <LocalDebuggerWorkingDirectory>D:\bds\bedrock-server-1.18.11.01\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>D:\bds\bedrock-server-1.18.31.04\</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup>
