@@ -98,7 +98,7 @@ jobs:
         run: |
           mkdir output/
           mkdir output/${{env.PLUGIN_NAME}}/
-          cp -f x64/Release/*.dll output/${{env.PLUGIN_NAME}}/
+          cp -f x64/Release/*.dll output/
           cp -f x64/Release/*.pdb output/${{env.PLUGIN_NAME}}/
           cp -r Data/* output/${{env.PLUGIN_NAME}}/
         shell: bash
