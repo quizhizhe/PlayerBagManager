@@ -3,6 +3,7 @@ import logging
 import os
 from typing import Tuple
 import requests
+import json
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -12,8 +13,12 @@ class UpdateManager:
         self.resource_url = f"https://api.minebbs.com/api/openapi/v1/resources/{resource_id}"
         self.upload_url = f"https://api.minebbs.com/api/openapi/v1/upload/"
         self.update_url = f"https://api.minebbs.com/api/openapi/v1/resources/{resource_id}/update"
-        self.headers = {
+        self.file_headers = {
             "Authorization": f"Bearer {token}",
+        }
+        self.json_headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
         }
         # v1.2.3 -> 1.2.3
         self.new_version = new_version.replace("v", "").strip()
@@ -26,42 +31,42 @@ class UpdateManager:
             ]
             # send binary file data
 
-            response = requests.post(self.upload_url, files=multiple_files, headers=self.headers)
+            response = requests.post(self.update_url, json={data}, headers=self.json_headers)
             if response.status_code == 200 and response.json()["success"] == True:
                 return response.json()["data"][0]
             else:
-                message = response.status_code if response.status_code != 200 else response.json()["message"]
-                raise Exception(f"Get latest version failed: {message}")
+                message = response.json()["message"]
+                raise Exception(f"Upload file failed: {response.status_code} - {message}")
     
     def updateFile(self, change_log: str, key: str) -> None:
         title, description = self.parseChangelog(change_log)
         data = {
             "title": title,
             "description": description,
-            "new_version": self.new_version,
+            "new_version": f"v{self.new_version}",
             "file_key": key,
         }
-        response = requests.post(self.update_url, json=data, headers=self.headers)
+        response = requests.post(self.update_url, json={data}, headers=self.json_headers)
         if response.status_code == 200 and response.json()["success"] == True:
             return response.json()["data"]
         else:
-            message = response.status_code if response.status_code != 200 else response.json()["message"]
-            raise Exception(f"Get latest version failed: {message}")
+            message = response.json()["message"]
+            raise Exception(f"Update file failed: {response.status_code} - {message}")
 
     def updateUrl(self, change_log: str, url: str) -> None:
         title, description = self.parseChangelog(change_log)
         data = {
             "title": title,
             "description": description,
-            "new_version": self.new_version,
+            "new_version": f"v{self.new_version}",
             "file_url": url,
         }
-        response = requests.post(self.update_url, data=data, headers=self.headers)
+        response = requests.post(self.update_url, json=json.dumps(data), headers=self.json_headers)
         if response.status_code == 200 and response.json()["success"] == True:
             return response.json()["data"]
         else:
-            message = response.status_code if response.status_code != 200 else response.json()["message"]
-            raise Exception(f"Get latest version failed: {message}")
+            message = response.json()["message"]
+            raise Exception(f"Upload url failed: {response.status_code} - {message}")
 
     def parseChangelog(self, file_path: str) -> Tuple[str, str]:
         with open(file_path, "r", encoding= "utf-8") as f:
@@ -76,10 +81,11 @@ class UpdateManager:
     def getLatestVersion(self) -> str:
         response = requests.get(self.resource_url)
         if response.status_code == 200 and response.json()["success"] == True:
-            return response.json()["data"]["version"]
+            version = response.json()["data"]["version"]
+            return version.replace("v", "").strip()
         else:
-            message = response.status_code if response.status_code != 200 else response.json()["message"]
-            raise Exception(f"Get latest version failed: {message}")
+            message = response.json()["message"]
+            raise Exception(f"Upload file failed: {response.status_code} - {message}")
     
 
 
@@ -91,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--token', help='MineBBS token', required=True)
     args = parser.parse_args()
 
-    manager = UpdateManager(resource_id=1, token=args.token, new_version=args.version)
+    manager = UpdateManager(resource_id=3367, token=args.token, new_version=args.version)
     current_version = manager.getLatestVersion()
     file_key =  manager.upload(args.file)
     if file_key:
@@ -100,3 +106,4 @@ if __name__ == '__main__':
         raise Exception("Upload failed")
     if not manager.getLatestVersion() == manager.new_version:
         raise Exception(f"Publish failed, expected version: {manager.new_version}, actual version: {manager.getLatestVersion()}")
+    print("Publish Success")

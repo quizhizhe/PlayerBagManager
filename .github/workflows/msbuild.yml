@@ -3,119 +3,148 @@ name: Build Plugin
 on: [push]
 
 env:
-  # Path to the solution file relative to the root of the project.
-  SOLUTION_FILE_PATH: ./LLCheckBag.sln
 
+  PLUGIN_NAME: LLCheckBag
+  SOLUTION_FILE_PATH: ./LLCheckBag.sln
+  VERSION_FILE_PATH: LLCheckBag/Version.h
   # Configuration type to build.
   # You can convert this to a build matrix if you need coverage of multiple configuration types.
   # https://docs.github.com/actions/learn-github-actions/managing-complex-workflows#using-a-build-matrix
   BUILD_CONFIGURATION: Release
   Platform: X64
+  SDK_DIR: ./LiteLoaderSDK
+  BDS_VERSION: 1.18.33.02
 
 jobs:
-  pre-process:
+  build:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: 'true'
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
 
-    - name: Download BDS
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        mkdir LiteLoaderSDK/Tools/bedrock_server
-        curl -L -o LiteLoaderSDK/Tools/bedrock_server/bedrock_server.zip https://minecraft.azureedge.net/bin-win/bedrock-server-1.18.33.02.zip
-        unzip -q LiteLoaderSDK/Tools/bedrock_server/bedrock_server.zip -d LiteLoaderSDK/Tools/bedrock_server/
-      shell: bash
-      
-    - name: Build Library
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        cd LiteLoaderSDK/Tools
-        LibraryBuilder.exe -o ../Lib ./bedrock_server
-      shell: cmd
-      
-#     - name: Cache Libs
-#       uses: actions/cache@v2.1.7
-#       with:
-#         # A list of files, directories, and wildcard patterns to cache and restore
-#         path: LiteLoaderSDK/Tools/bedrock_server/
-#         # An explicit key for restoring and saving the cache
-#         key: https://minecraft.azureedge.net/bin-win/bedrock-server-1.18.2.03.zip
-#         # An ordered list of keys to use for restoring the cache if no cache hit occurred for key
-#         #restore-keys:  optional
-#         # The chunk size used to split up large files during upload, in bytes
-#         #upload-chunk-size:  optional
-
-    
+      # - name: Get information from Version.h file (TODO)
+      #   working-directory: ${{env.GITHUB_WORKSPACE}}
+      #   id: ver
+      #   run: |
+      #     pwd
+      #   shell: bash
 
       
-    - name: Add MSBuild to PATH
-      uses: microsoft/setup-msbuild@v1.1
+      - name: Cache Library
+        uses: actions/cache@v3
+        id: cache_libs
+        with:
+          path: ${{ env.SDK_DIR }}\CachedLibs
+          key: ${{ env.BDS_VERSION }}
 
-#     - name: Restore NuGet packages
-#       working-directory: ${{env.GITHUB_WORKSPACE}}
-#       run: nuget restore ${{env.SOLUTION_FILE_PATH}}
+      - name: Download Server
+        if: steps.cache_libs.outputs.cache-hit != 'true'
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: |
+          mkdir -p ${{ env.SDK_DIR }}/Tools/Server
+          # ServerLink=$(cat 'Scripts/LINK.txt')
+          ServerLink=https://minecraft.azureedge.net/bin-win/bedrock-server-${{ env.BDS_VERSION }}.zip
+          curl -L -o ${{ env.SDK_DIR }}/Tools/Server/server.zip "$ServerLink"
+          unzip ${{ env.SDK_DIR }}/Tools/Server/server.zip -d ${{ env.SDK_DIR }}/Tools/Server/ > /dev/null
+        shell: bash
 
-    - name: Build Plugin
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      # Add additional options to the MSBuild command line here (like platform or verbosity level).
-      # See https://docs.microsoft.com/visualstudio/msbuild/msbuild-command-line-reference
-      run: |
-        MSBuild.exe ${{env.SOLUTION_FILE_PATH}} -property:Configuration=${{env.BUILD_CONFIGURATION}}
-      shell: bash
-    
-    - name: copy dll and pdb files
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      run: |
-        mkdir output/
-        mkdir output/LLCheckBag/
-        cp -f x64/Release/*.dll output/
-        mkdir output/lib/
-        cp -f x64/Release/*.pdb output/LLCheckBag/
-        cp -r Data/* output/LLCheckBag/
-      shell: bash
-    
-    - name: upload files
-      uses: actions/upload-artifact@v2
-      with:
-        name: LLCheckBag
-        path: ${{ github.workspace }}/output/
-    
-    - name: Archive
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      if: startsWith(github.ref, 'refs/tags/v')
-      run: Compress-Archive -Path output/* output/LLCheckBag.zip
+      - name: Build Library
+        if: steps.cache_libs.outputs.cache-hit != 'true'
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: |
+          cd ${{ env.SDK_DIR }}
+          mkdir CachedLibs
+          cd Tools
+          LibraryBuilder.exe -o ..\CachedLibs .\Server
+        shell: cmd
+
+      - name: Restore cached libs
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: |
+          cp ${{ env.SDK_DIR }}/CachedLibs/* ${{ env.SDK_DIR }}/Lib
+        shell: bash
         
-    - name: Prepare for creating Release
-      working-directory: ${{env.GITHUB_WORKSPACE}}
-      id: rel
-      if: startsWith(github.ref, 'refs/tags/v')
-      run: |
-        echo ::set-output name=tag::${GITHUB_REF#refs/tags/*}
-        mv output/LLCheckBag.zip output/LLCheckBag-${GITHUB_REF#refs/tags/*}.zip
-      shell: bash
-      
-    - name: Create New Release
-      uses: softprops/action-gh-release@v1
-      if: startsWith(github.ref, 'refs/tags/v')
-      with:
-        token: ${{ secrets.ACTIONS_TOKEN }}
-        body_path: ${{ github.workspace }}/CHANGELOG.txt
-        files: ${{ github.workspace }}\output\LLCheckBag-${{ steps.rel.outputs.tag }}.zip
-      env:
-          GITHUB_REPOSITORY: quizhizhe/LLCheckBag 
 
-    - name: Set up Python 3.10
-      if: startsWith(github.ref, 'refs/tags/v')
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.10
-    
-    - name: Publish to MineBBS
-      if: startsWith(github.ref, 'refs/tags/v')
-      run: |
-        python ${{ github.workspace }}/scripts/publish_minebbs.py -f ${{ github.workspace }}\output\LLCheckBag-${{ steps.rel.outputs.tag }}.zip -c ${{ github.workspace }}/CHANGELOG.md -t ${{ secrets.MINEBBS_TOKEN }}
-      shell: bash
+      - name: Add MSBuild to PATH
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Change PLUGIN_VERSION_STATUS_BETA
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: false == startsWith(github.ref, 'refs/tags/')
+        run: |
+          sed -r -i 's/#define\s+PLUGIN_VERSION_STATUS\s+PLUGIN_VERSION_\w+/#define PLUGIN_VERSION_STATUS   PLUGIN_VERSION_BETA/' ${{env.VERSION_FILE_PATH}}
+          sed -r -i 's/#define\s+PLUGIN_VERSION_BUILD\s+.*/#define PLUGIN_VERSION_BUILD  ${{ github.run_number }}\r/' ${{env.VERSION_FILE_PATH}}
+        shell: bash
+
+      - name: Change PLUGIN_VERSION_STATUS_RELEASE
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          sed -r -i 's/#define\s+PLUGIN_VERSION_STATUS\s+PLUGIN_VERSION_\w+/#define PLUGIN_VERSION_STATUS   PLUGIN_VERSION_RELEASE/' ${{env.VERSION_FILE_PATH}}
+          sed -r -i 's/#define\s+PLUGIN_VERSION_BUILD\s+.*/#define PLUGIN_VERSION_BUILD  ${{ github.run_number }}\r/' ${{env.VERSION_FILE_PATH}}
+        shell: bash
+
+      - name: Build
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        id: build
+        run: |
+          MSBuild.exe ${{env.SOLUTION_FILE_PATH}} -property:Configuration=${{env.BUILD_CONFIGURATION}}
+        shell: bash
+        
+      - name: copy dll and pdb files
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: |
+          mkdir output/
+          mkdir output/${{env.PLUGIN_NAME}}/
+          cp -f x64/Release/*.dll output/${{env.PLUGIN_NAME}}/
+          cp -f x64/Release/*.pdb output/${{env.PLUGIN_NAME}}/
+          cp -r Data/* output/${{env.PLUGIN_NAME}}/
+        shell: bash
+
+      - name: upload files
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{env.PLUGIN_NAME}}-actions-${{ github.run_number }}
+          path: ${{ github.workspace }}/output/
+        
+      - name: Pack Release
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: Compress-Archive -Path output/* output/${{env.PLUGIN_NAME}}.zip
+
+      - name: Prepare for creating Release
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        id: rel
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo ::set-output name=tag::${GITHUB_REF#refs/tags/*}
+          mv output/${{env.PLUGIN_NAME}}.zip output/${{env.PLUGIN_NAME}}-${GITHUB_REF#refs/tags/*}.zip
+        shell: bash
+
+      - name: Set up Python 3.10
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.10.4 
+
+      - name: Publish to MineBBS
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          pip install requests
+          # python scripts/publish_minebbs.py -v ${{ steps.rel.outputs.tag }} -f ./output/${{env.PLUGIN_NAME}}-${{ steps.rel.outputs.tag }}.zip -c ./CHANGELOG.md -t ${{ secrets.MINEBBS_TOKEN }}
+        shell: bash
+            
+      - name: Create New Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          token: ${{ secrets.ACTIONS_TOKEN }}
+          body_path: ${{ github.workspace }}\CHANGELOG.md
+          files: ${{ github.workspace }}\output\${{env.PLUGIN_NAME}}-${{ steps.rel.outputs.tag }}.zip
+        env:
+          GITHUB_REPOSITORY: ${{env.GITHUB_ACTION_REPOSITORY}}
+          
 
