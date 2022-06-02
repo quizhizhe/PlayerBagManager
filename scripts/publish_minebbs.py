@@ -31,8 +31,9 @@ class UpdateManager:
             ]
             # send binary file data
 
-            response = requests.post(self.update_url, json={data}, headers=self.json_headers)
+            response = requests.post(self.upload_url, files=multiple_files, headers=self.file_headers)
             if response.status_code == 200 and response.json()["success"] == True:
+                print(response.json())
                 return response.json()["data"][0]
             else:
                 message = response.json()["message"]
@@ -46,7 +47,7 @@ class UpdateManager:
             "new_version": f"v{self.new_version}",
             "file_key": key,
         }
-        response = requests.post(self.update_url, json={data}, headers=self.json_headers)
+        response = requests.post(self.update_url, data=json.dumps(data), headers=self.json_headers)
         if response.status_code == 200 and response.json()["success"] == True:
             return response.json()["data"]
         else:
@@ -61,7 +62,7 @@ class UpdateManager:
             "new_version": f"v{self.new_version}",
             "file_url": url,
         }
-        response = requests.post(self.update_url, json=json.dumps(data), headers=self.json_headers)
+        response = requests.post(self.update_url, json={data}, headers=self.json_headers)
         if response.status_code == 200 and response.json()["success"] == True:
             return response.json()["data"]
         else:
