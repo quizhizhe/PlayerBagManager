@@ -81,7 +81,7 @@ void CheckBagManager::afterPlayerLeave(ServerPlayer* player)
     if (uuidIter == mRemoveRequsets.end())
         return;
     auto res = PlayerDataHelper::removeData(uuid);
-    auto logPlayer = Level::getPlayer(uuidIter->second);
+    auto logPlayer = Global<Level>->getPlayer(uuidIter->second);
     mRemoveRequsets.erase(uuidIter);
     updateIsFree();
     auto format = res ? tr("operation.remove.success").c_str() : tr("operation.remove.error").c_str();
