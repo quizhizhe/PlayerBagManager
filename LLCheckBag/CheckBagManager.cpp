@@ -165,7 +165,23 @@ std::vector<std::string> CheckBagManager::getPlayerList(PlayerCategory category)
         }
     }
     //TestFuncTime(std::sort, playerList.begin(), playerList.end(), nameSortFunc); //  100 - 200
-    std::sort(playerList.begin(), playerList.end(), nameSortFunc);
+    //std::sort(playerList.begin(), playerList.end(), nameSortFunc);
+    std::sort(playerList.begin(), playerList.end(), [](std::string const& _Left, std::string const& _Right) {
+        if (_Left.size() == 36)
+        {
+            if (_Right.size() == 36)
+                return nameSortFunc(_Left, _Right);
+            else
+                return false;
+        }
+        else
+        {
+            if (_Right.size() == 36)
+                return true;
+            else
+                return nameSortFunc(_Left, _Right);
+        }
+        });
     return playerList;
 }
 

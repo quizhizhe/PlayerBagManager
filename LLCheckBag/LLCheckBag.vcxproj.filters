@@ -19,6 +19,9 @@
     <Filter Include="Base\header">
       <UniqueIdentifier>{ad0e411f-9a39-4fc3-a713-07a9eb33e04f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Other">
+      <UniqueIdentifier>{a5761b65-84e5-427d-8742-0164ce22209b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -79,17 +82,29 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\README.md">
-      <Filter>资源文件</Filter>
+    <None Include="..\CHANGELOG.md">
+      <Filter>Other</Filter>
     </None>
-    <None Include="..\README_en.md">
-      <Filter>资源文件</Filter>
+    <None Include="..\CHANGELOG_en.md">
+      <Filter>Other</Filter>
     </None>
     <None Include="..\Data\Language\en_US.json">
-      <Filter>资源文件</Filter>
+      <Filter>Other</Filter>
+    </None>
+    <None Include="..\.github\workflows\msbuild.yml">
+      <Filter>Other</Filter>
+    </None>
+    <None Include="..\README.md">
+      <Filter>Other</Filter>
+    </None>
+    <None Include="..\README_en.md">
+      <Filter>Other</Filter>
     </None>
     <None Include="..\Data\Language\zh_CN.json">
-      <Filter>资源文件</Filter>
+      <Filter>Other</Filter>
+    </None>
+    <None Include="..\scripts\publish_minebbs.py">
+      <Filter>Other</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

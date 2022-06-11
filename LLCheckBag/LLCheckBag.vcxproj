@@ -169,10 +169,14 @@ xcopy /Y /E $(SolutionDir)\Data\ $(LocalDebuggerWorkingDirectory)\plugins\LLChec
     <ClCompile Include="PlayerDataHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\.github\workflows\msbuild.yml" />
+    <None Include="..\CHANGELOG.md" />
+    <None Include="..\CHANGELOG_en.md" />
     <None Include="..\Data\Language\en_US.json" />
     <None Include="..\Data\Language\zh_CN.json" />
     <None Include="..\README.md" />
     <None Include="..\README_en.md" />
+    <None Include="..\scripts\publish_minebbs.py" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="LLCheckBag.rc" />
