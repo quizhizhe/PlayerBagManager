@@ -3,6 +3,7 @@
 #include <third-party/magic_enum/magic_enum.hpp>
 #include "FormHelper.h"
 #include <MC/Packet.hpp>
+#include "Utils.h"
 
 namespace FormHelper {
     bool sendPlayerListForm(
@@ -17,7 +18,7 @@ namespace FormHelper {
         auto playerList = CBMgr.getPlayerList(category);
         auto iter = std::find(playerList.begin(), playerList.end(), player->getRealName());
         if(iter!=playerList.end())
-            playerList.erase(playerList.begin()+ distance(playerList.begin(), iter));
+            playerList.erase(iter);
         for (auto& name : playerList) {
             //if (player->getRealName() == name) continue;
             form.append(Form::Button(name));
@@ -26,11 +27,7 @@ namespace FormHelper {
             if (index < 0)
                 return;
             auto& target = playerList[index];
-            auto uuid = mce::UUID::fromString(target);
-            if (!uuid) {
-                auto suuid = PlayerInfo::getUUID(target);
-                uuid = mce::UUID::fromString(suuid);
-            }
+            auto uuid = UuidFromNameOrUuid(target);
             callback(player, uuid);
         });
     }

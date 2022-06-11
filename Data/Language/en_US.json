@@ -26,6 +26,7 @@
   "operation.op.failed.not_found": "Player {} not found, please make sure the player is online and enter the player's XboxID correctly (not alias)",
   "plugin.warn.backup_found": "Backup file was found, Please use llcb stop command to restore Inventory, and then check Inventory again",
   "plugin.error.reason": "Reason: {}",
+  "plugin.error.version_not_match": "Server protocol version {} is not compatible with this plugin {}. Please install the matching version of the plugin.",
   "manager.result.success": "Success",
   "manager.result.error": "Unkonw error",
   "manager.result.player_online": "Operation conflict, change to request operation",

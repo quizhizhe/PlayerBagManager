@@ -4,6 +4,7 @@
 #include <PlayerInfoAPI.h>
 #include <FormUI.h>
 #include "FormHelper.h"
+#include "Utils.h"
 
 using namespace RegisterCommandHelper;
 
@@ -52,12 +53,7 @@ class LLCheckBagCommand : public Command {
     bool mDataType_isSet = false;
 
     mce::UUID getTargetUuid() const {
-        auto uuid = mce::UUID::fromString(mPlayer);
-        if (!uuid) {
-            auto uuidStr = PlayerInfo::getUUID(mPlayer);
-            uuid = mce::UUID::fromString(uuidStr);
-        }
-        return uuid;
+        return UuidFromNameOrUuid(mPlayer);
     }
 
     void checkBagCli(CommandOrigin const& origin, CommandOutput& output) const {
@@ -300,18 +296,29 @@ public:
     }
 };
 
+void UpdatePlayerLstSoftEnum() {
+    if(Global<CommandRegistry>)
+        Global<CommandRegistry>->setSoftEnumValues("LLCheckBag_PlayerList", CBMgr.getPlayerList());
+}
+
+#include <ServerAPI.h>
 void PluginInit()
 {
     logger.setFile(PLUGIN_LOG_PATH);
     Config::initConfig();
+    
+    if (LL::getServerProtocolVersion() != TARGET_BDS_PROTOCOL_VERSION)
+        logger.error(tr("plugin.error.version_not_match", LL::getServerProtocolVersion(), TARGET_BDS_PROTOCOL_VERSION));
 
     Event::RegCmdEvent::subscribe([](Event::RegCmdEvent ev) { // Register commands Event
         LLCheckBagCommand::setup(ev.mCommandRegistry);
         return true;
         });
+    
     Event::PlayerJoinEvent::subscribe([](Event::PlayerJoinEvent ev) {
         CBMgr.afterPlayerJoin((ServerPlayer*)ev.mPlayer);
         return true;
         });
+    
     logger.info("LLCheckBag Loaded, version: {}", PLUGIN_VERSION_STRING);
 }

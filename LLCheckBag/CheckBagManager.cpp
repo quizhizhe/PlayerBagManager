@@ -4,6 +4,7 @@
 #include <PlayerInfoAPI.h>
 #include <FormUI.h>
 #include <MC/StringTag.hpp>
+#include "Utils.h"
 
 bool CheckBagManager::mIsFree = true;
 
@@ -63,11 +64,20 @@ NbtDataType CheckBagManager::fromSuffix(std::string const& suffix)
         return NbtDataType::Json;
     return NbtDataType::Unknown;
 }
+extern void UpdatePlayerLstSoftEnum();
 
 void CheckBagManager::beforePlayerLeave(ServerPlayer* player)
 {
     if (isCheckingBag(player)) {
         stopCheckBag(player);
+    }
+    if (player->isSimulatedPlayer()) {
+        auto iter = mCheckBagLogMap.find(player->getUuid());
+        if (iter != mCheckBagLogMap.end() && iter->second.getTarget()) {
+            stopCheckBag(iter->second.getTarget());
+        }
+        mCheckBagLogMap.erase(iter);
+        UpdatePlayerLstSoftEnum();
     }
 }
 
@@ -94,8 +104,9 @@ void CheckBagManager::afterPlayerLeave(ServerPlayer* player)
 void CheckBagManager::afterPlayerJoin(ServerPlayer* player) {
     auto suuid = player->getUuid();
     if (mUuidNameMap.find(suuid) == mUuidNameMap.end()) {
-        auto isFakePlayer = PlayerDataHelper::isFakePlayer_ddf8196(suuid);
+        auto isFakePlayer = PlayerDataHelper::isFakePlayer_ddf8196(suuid) || player->isSimulatedPlayer();
         mUuidNameMap.emplace(suuid, std::pair{ player->getRealName(),isFakePlayer });
+        UpdatePlayerLstSoftEnum();
     }
     auto backupTag = getBackupBag(player);
     if (!backupTag)
@@ -106,9 +117,7 @@ void CheckBagManager::afterPlayerJoin(ServerPlayer* player) {
 }
 
 mce::UUID CheckBagManager::fromNameOrUuid(std::string const& nameOrUuid) {
-    auto uuid = mce::UUID::fromString(nameOrUuid);
-    if (!uuid)
-        return mce::UUID::fromString(PlayerInfo::getUUID(nameOrUuid));
+    auto uuid = UuidFromNameOrUuid(nameOrUuid);
     return uuid;
 }
 

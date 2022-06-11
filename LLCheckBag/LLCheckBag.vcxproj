@@ -153,6 +153,7 @@ xcopy /Y /E $(SolutionDir)\Data\ $(LocalDebuggerWorkingDirectory)\plugins\LLChec
     <ClInclude Include="pch.h" />
     <ClInclude Include="PlayerDataHelper.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="Utils.h" />
     <ClInclude Include="Version.h" />
   </ItemGroup>
   <ItemGroup>

@@ -2,6 +2,8 @@
 #include "PlayerDataHelper.h"
 #define CBMgr CheckBagManager::getManager()
 // BidirectionalUnorderedMap<UuidString, name>
+
+
 class CheckBagManager
 {
     CheckBagManager();
