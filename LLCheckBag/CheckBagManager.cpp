@@ -438,9 +438,13 @@ CheckBagManager::Result CheckBagManager::exportData(mce::UUID const& uuid, NbtDa
     nlohmann::json playerInfo;
     playerInfo["name"] = playerName;
     playerInfo["uuid"] = uuid.asString();
-    for (auto& [type, idTag] : *idsTag) {
-        playerInfo[type] = const_cast<CompoundTagVariant&>(idTag).asStringTag()->value();
+    if (idsTag)
+    {
+        for (auto& [type, idTag] : *idsTag) {
+            playerInfo[type] = const_cast<CompoundTagVariant&>(idTag).asStringTag()->value();
+        }
     }
+    
     auto infoStr = playerInfo.dump(4);
 
     auto dataPath = getExportPath(uuid, type);
