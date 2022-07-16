@@ -125,15 +125,15 @@ namespace Config {
     }
     bool loadLanguage(std::string language) {
         auto languageFile = std::filesystem::path(PLUGIN_LANGUAGE_DIR);
-        languageFile.append(Config::Language + ".json");
+        languageFile.append("lang.json");
         if (!std::filesystem::exists(languageFile)) {
             languageFile = std::filesystem::path(PLUGIN_LANGUAGE_DIR);
-            languageFile.append("zh_CN.json");
+            languageFile.append("lang.json");
             if (!std::filesystem::exists(languageFile)) {
                 return false;
             }
         }
-        return Translation::load(languageFile.u8string());
+        return Translation::load(languageFile.u8string(),Config::Language);
         
     }
     bool initConfig() {
