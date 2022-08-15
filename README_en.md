@@ -24,6 +24,7 @@ which can check the plug-ins of all players' inventory in the Level, and comes w
 
 ## Usage
 * Command(*You can replace llcheckbag with the set command alias, the default is llcb*)
+**For the first time, please use the `llcheckbag op your xboxid` command in the BDS console to set you as OP, otherwise you will be prompted that you do not have permission**
 > Note: If the target player `[Target]` is not set, it will open the corresponding GUI
 ```
 llcheckbag                              // Open the default GUI screen (the GUI set by DefaultScreen in the configuration file)

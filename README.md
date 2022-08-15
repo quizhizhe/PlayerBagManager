@@ -22,6 +22,7 @@
 
 ## 用法
 * 指令（*可将 llcheckbag 替换成设置的指令别名，默认 llcb*）：
+**初次使用的，请在后台使用  `llcheckbag op 你的xboxid`  指令将你添加至op，否则会提示你没有权限**
 > 注：如果目标玩家`[Target]`未设置则为打开对应 GUI
 ```
 llcheckbag                              // 打开默认GUI菜单（配置文件中 DefaultScreen 设置的GUI）
