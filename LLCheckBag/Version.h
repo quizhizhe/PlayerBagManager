@@ -10,10 +10,10 @@
 #define PLUGIN_AUTOHR               "quizhizhe, xiaoqch"
 #define PLUGIN_VERSION_MAJOR        1
 #define PLUGIN_VERSION_MINOR        3
-#define PLUGIN_VERSION_REVISION     4
+#define PLUGIN_VERSION_REVISION     5
 #define PLUGIN_VERSION_BUILD        0
 #define PLUGIN_VERSION_STATUS       PLUGIN_VERSION_DEV
-#define TARGET_BDS_PROTOCOL_VERSION 544
+#define TARGET_BDS_PROTOCOL_VERSION 545
 
 // File Version Information, used in Resource.rc
 #define __TO_VERSION_STRING(ver) #ver
