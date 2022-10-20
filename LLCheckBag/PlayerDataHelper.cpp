@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "PlayerDataHelper.h"
-#include <MC/DBStorage.hpp>
-#include <MC/StringTag.hpp>
+#include <mc/DBStorage.hpp>
+#include <mc/StringTag.hpp>
 
 namespace PlayerDataHelper {
     DBHelpers::Category const playerCategory = (DBHelpers::Category)7;

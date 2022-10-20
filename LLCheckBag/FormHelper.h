@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include <MC/Types.hpp>
-#include <MC/Player.hpp>
+#include <mc/Types.hpp>
+#include <mc/Player.hpp>
 #include <FormUI.h>
 #include "CheckBagManager.h"
 #include <PlayerInfoAPI.h>

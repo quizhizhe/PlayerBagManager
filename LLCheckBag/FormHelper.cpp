@@ -1,8 +1,8 @@
 #include "pch.h"
 #include <map>
-#include <third-party/magic_enum/magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include "FormHelper.h"
-#include <MC/Packet.hpp>
+#include <mc/Packet.hpp>
 #include "Utils.h"
 
 namespace FormHelper {

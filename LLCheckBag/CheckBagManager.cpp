@@ -3,7 +3,7 @@
 #include "PlayerDataHelper.h"
 #include <PlayerInfoAPI.h>
 #include <FormUI.h>
-#include <MC/StringTag.hpp>
+#include <mc/StringTag.hpp>
 #include "Utils.h"
 
 bool CheckBagManager::mIsFree = true;
