@@ -23,24 +23,17 @@ jobs:
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('scripts/LINK.txt') }}
 
       - name: Download Server
-        if: steps.cache-bds-lib.outputs.cache-hit != 'true'
-        working-directory: ${{ env.GITHUB_WORKSPACE }}
         run: |
-          mkdir Tools/Server
-          ServerLink=$(cat 'scripts/LINK.txt')
-          curl -L -o Tools/Server/server.zip "$ServerLink"
-          unzip Tools/Server/server.zip -d Tools/Server/ > /dev/null
+          mkdir D:/BDS
+          ServerLink=$(cat 'LINK.txt')
+          curl -L -o D:/BDS/server.zip "$ServerLink"
+          unzip D:/BDS/server.zip -d D:/BDS > /dev/null
         shell: bash
 
-      - name: Build Library
-        if: steps.cache-bds-lib.outputs.cache-hit != 'true'
-        working-directory: ${{ env.GITHUB_WORKSPACE }}
+      - name: Build Bedrock Library
         run: |
-          cd Tools
-          LibraryBuilder.exe Server
-          mkdir ..\LiteLoader\lib
-          move bedrock_server_api.lib ..\LiteLoader\lib
-          move bedrock_server_var.lib ..\LiteLoader\lib
+          cd SDK/Tools
+          LibraryBuilder.exe -o ..\Lib D:\BDS
         shell: cmd
 
       - name: Change PLUGIN_VERSION_STATUS_BETA
