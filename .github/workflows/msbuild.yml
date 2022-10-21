@@ -134,7 +134,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
           pip install requests
-          # python scripts/publish_minebbs.py -v ${{ steps.rel.outputs.tag }} -f ./output/${{env.PLUGIN_NAME}}-${{ steps.rel.outputs.tag }}.zip -c ./CHANGELOG.md -t ${{ secrets.MINEBBS_TOKEN }}
+           python scripts/publish_minebbs.py -v ${{ steps.rel.outputs.tag }} -f ./output/${{env.PLUGIN_NAME}}-${{ steps.rel.outputs.tag }}.zip -c ./CHANGELOG.md -t ${{ secrets.MINEBBS_TOKEN }}
         shell: bash
             
       - name: Create New Release
