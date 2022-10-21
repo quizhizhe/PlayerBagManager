@@ -42,14 +42,10 @@ jobs:
         shell: bash
 
       - name: Configure CMake(MSVC)
-        run: |
-          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
-        shell: cmd
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build
-        run: |
-          cmake --build ${{github.workspace}}/build --config Release
-        shell: cmd
+        run: cmake --build ${{github.workspace}}/build --config Release
         
       - name: copy dll and pdb files
         working-directory: ${{env.GITHUB_WORKSPACE}}
