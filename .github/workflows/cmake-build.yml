@@ -1,0 +1,124 @@
+name: "Build Plugin"
+on: [push]
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          submodules: 'true'
+
+      - name: Cache Bedrock Dedicated Server Library
+          id: cache-bds-lib
+          uses: actions/cache@v3
+          env:
+            cache-name: cache-bds-lib
+          with:
+            path: |
+              ${{ env.GITHUB_WORKSPACE }}LiteLoader/Lib/bedrock_server_api.lib
+              ${{ env.GITHUB_WORKSPACE }}LiteLoader/Lib/bedrock_server_var.lib
+            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('scripts/LINK.txt') }}
+
+      - name: Download Server
+          if: steps.cache-bds-lib.outputs.cache-hit != 'true'
+          working-directory: ${{ env.GITHUB_WORKSPACE }}
+          run: |
+            mkdir Tools/Server
+            ServerLink=$(cat 'scripts/LINK.txt')
+            curl -L -o Tools/Server/server.zip "$ServerLink"
+            unzip Tools/Server/server.zip -d Tools/Server/ > /dev/null
+          shell: bash
+
+      - name: Build Library
+          if: steps.cache-bds-lib.outputs.cache-hit != 'true'
+          working-directory: ${{ env.GITHUB_WORKSPACE }}
+          run: |
+            cd Tools
+            LibraryBuilder.exe Server
+            mkdir ..\LiteLoader\lib
+            move bedrock_server_api.lib ..\LiteLoader\lib
+            move bedrock_server_var.lib ..\LiteLoader\lib
+          shell: cmd
+
+      - name: Change PLUGIN_VERSION_STATUS_BETA
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: false == startsWith(github.ref, 'refs/tags/')
+        run: |
+          sed -r -i 's/#define\s+PLUGIN_VERSION_STATUS\s+PLUGIN_VERSION_\w+/#define PLUGIN_VERSION_STATUS   PLUGIN_VERSION_BETA/' LLCheckBag/Version.h
+          sed -r -i 's/#define\s+PLUGIN_VERSION_BUILD\s+.*/#define PLUGIN_VERSION_BUILD  ${{ github.run_number }}\r/' LLCheckBag/Version.h
+        shell: bash
+
+      - name: Change PLUGIN_VERSION_STATUS_RELEASE
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          sed -r -i 's/#define\s+PLUGIN_VERSION_STATUS\s+PLUGIN_VERSION_\w+/#define PLUGIN_VERSION_STATUS   PLUGIN_VERSION_RELEASE/' LLCheckBag/Version.h
+          sed -r -i 's/#define\s+PLUGIN_VERSION_BUILD\s+.*/#define PLUGIN_VERSION_BUILD  ${{ github.run_number }}\r/' LLCheckBag/Version.h
+        shell: bash
+
+      - name: Configure CMake(MSVC)
+          run: |
+            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
+          shell: cmd
+
+      - name: Build
+          run: |
+            cmake --build ${{github.workspace}}/build --config Release
+          shell: cmd
+        
+      - name: copy dll and pdb files
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: |
+          mkdir output/
+          mkdir output/LLCheckBag/
+          cp -f ./build/Release/*.dll output/
+          cp -f ./build/Release/*.pdb output/LLCheckBag/
+          cp -r Data/* output/LLCheckBag/
+        shell: bash
+
+      - name: upload files
+        uses: actions/upload-artifact@v2
+        with:
+          name: LLCheckBag-actions-${{ github.run_number }}
+          path: ${{ github.workspace }}/output/
+        
+      - name: Pack Release
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: Compress-Archive -Path output/* output/LLCheckBag.zip
+
+      - name: Prepare for creating Release
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        id: rel
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo ::set-output name=tag::${GITHUB_REF#refs/tags/*}
+          mv output/LLCheckBag.zip output/LLCheckBag-${GITHUB_REF#refs/tags/*}.zip
+        shell: bash
+
+      - name: Set up Python 3.10
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.10.4 
+
+      - name: Publish to MineBBS
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          pip install requests
+           python scripts/publish_minebbs.py -v ${{ steps.rel.outputs.tag }} -f ./output/LLCheckBag-${{ steps.rel.outputs.tag }}.zip -c ./CHANGELOG.md -t ${{ secrets.MINEBBS_TOKEN }}
+        shell: bash
+            
+      - name: Create New Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          token: ${{ secrets.ACTIONS_TOKEN }}
+          body_path: ${{ github.workspace }}\CHANGELOG.md
+          files: ${{ github.workspace }}\output\LLCheckBag-${{ steps.rel.outputs.tag }}.zip
+        env:
+          GITHUB_REPOSITORY: ${{env.GITHUB_ACTION_REPOSITORY}}
