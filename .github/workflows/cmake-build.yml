@@ -11,17 +11,6 @@ jobs:
           fetch-depth: 1
           submodules: 'true'
 
-      - name: Cache Bedrock Dedicated Server Library
-        id: cache-bds-lib
-        uses: actions/cache@v3
-        env:
-          cache-name: cache-bds-lib
-        with:
-          path: |
-            ${{ env.GITHUB_WORKSPACE }}LiteLoader/Lib/bedrock_server_api.lib
-            ${{ env.GITHUB_WORKSPACE }}LiteLoader/Lib/bedrock_server_var.lib
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('scripts/LINK.txt') }}
-
       - name: Download Server
         run: |
           mkdir D:/BDS
@@ -32,7 +21,7 @@ jobs:
 
       - name: Build Bedrock Library
         run: |
-          cd SDK/Tools
+          cd LiteLoaderSDK/Tools
           LibraryBuilder.exe -o ..\Lib D:\BDS
         shell: cmd
 
