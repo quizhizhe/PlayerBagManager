@@ -266,9 +266,9 @@ namespace FormHelper {
             if (filePath.extension() == ".nbt"
                 || filePath.extension() == ".snbt") {
                 if (filePath.filename().u8string().find_last_of('.') == 36)
-                    listUuid.push_back(filePath.filename().u8string());
+                    listUuid.push_back(filePath.filename().string());
                 else
-                    listName.push_back(filePath.filename().u8string());
+                    listName.push_back(filePath.filename().string());
             }
         }
         std::sort(listUuid.begin(), listUuid.end());
@@ -291,7 +291,7 @@ namespace FormHelper {
             if (index < 0)
                 return;
             std::string fileName = fileList[index];
-            std::string filePath = std::filesystem::path(str2wstr(Config::ExportDirectory)).append(str2wstr(fileName)).u8string();
+            std::string filePath = std::filesystem::path(str2wstr(Config::ExportDirectory)).append(str2wstr(fileName)).string();
             auto nameOrUuid = fileName.substr(0, fileName.find_last_of('.'));
             auto targetUuid = CheckBagManager::fromNameOrUuid(nameOrUuid);
             auto exist = !PlayerDataHelper::getServerId(targetUuid).empty();

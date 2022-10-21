@@ -133,7 +133,7 @@ namespace Config {
                 return false;
             }
         }
-        return Translation::load(languageFile.u8string(),Config::Language);
+        return Translation::load(languageFile.string(),Config::Language);
         
     }
     bool initConfig() {

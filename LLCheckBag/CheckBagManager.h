@@ -120,14 +120,14 @@ public:
         auto realName = player->getRealName();
         auto path = std::filesystem::path(str2wstr(Config::BackupDirectory));
         path.append(str2wstr(realName + "." + getSuffix(Config::BackupDataType)));
-        return path.u8string();
+        return path.string();
     }
     inline std::string getExportPath(mce::UUID const& uuid, NbtDataType type) {
         auto fileName = getNameOrUuid(uuid);
         std::string suffix = getSuffix(type);
         auto path = std::filesystem::path(str2wstr(Config::ExportDirectory));
         path.append(str2wstr(fileName + "." + suffix));
-        return path.u8string();
+        return path.string();
     }
 
     std::vector<std::string> getPlayerList();
