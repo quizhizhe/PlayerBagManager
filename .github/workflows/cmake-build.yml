@@ -12,36 +12,36 @@ jobs:
           submodules: 'true'
 
       - name: Cache Bedrock Dedicated Server Library
-          id: cache-bds-lib
-          uses: actions/cache@v3
-          env:
-            cache-name: cache-bds-lib
-          with:
-            path: |
-              ${{ env.GITHUB_WORKSPACE }}LiteLoader/Lib/bedrock_server_api.lib
-              ${{ env.GITHUB_WORKSPACE }}LiteLoader/Lib/bedrock_server_var.lib
-            key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('scripts/LINK.txt') }}
+        id: cache-bds-lib
+        uses: actions/cache@v3
+        env:
+          cache-name: cache-bds-lib
+        with:
+          path: |
+            ${{ env.GITHUB_WORKSPACE }}LiteLoader/Lib/bedrock_server_api.lib
+            ${{ env.GITHUB_WORKSPACE }}LiteLoader/Lib/bedrock_server_var.lib
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('scripts/LINK.txt') }}
 
       - name: Download Server
-          if: steps.cache-bds-lib.outputs.cache-hit != 'true'
-          working-directory: ${{ env.GITHUB_WORKSPACE }}
-          run: |
-            mkdir Tools/Server
-            ServerLink=$(cat 'scripts/LINK.txt')
-            curl -L -o Tools/Server/server.zip "$ServerLink"
-            unzip Tools/Server/server.zip -d Tools/Server/ > /dev/null
-          shell: bash
+        if: steps.cache-bds-lib.outputs.cache-hit != 'true'
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: |
+          mkdir Tools/Server
+          ServerLink=$(cat 'scripts/LINK.txt')
+          curl -L -o Tools/Server/server.zip "$ServerLink"
+          unzip Tools/Server/server.zip -d Tools/Server/ > /dev/null
+        shell: bash
 
       - name: Build Library
-          if: steps.cache-bds-lib.outputs.cache-hit != 'true'
-          working-directory: ${{ env.GITHUB_WORKSPACE }}
-          run: |
-            cd Tools
-            LibraryBuilder.exe Server
-            mkdir ..\LiteLoader\lib
-            move bedrock_server_api.lib ..\LiteLoader\lib
-            move bedrock_server_var.lib ..\LiteLoader\lib
-          shell: cmd
+        if: steps.cache-bds-lib.outputs.cache-hit != 'true'
+        working-directory: ${{ env.GITHUB_WORKSPACE }}
+        run: |
+          cd Tools
+          LibraryBuilder.exe Server
+          mkdir ..\LiteLoader\lib
+          move bedrock_server_api.lib ..\LiteLoader\lib
+          move bedrock_server_var.lib ..\LiteLoader\lib
+        shell: cmd
 
       - name: Change PLUGIN_VERSION_STATUS_BETA
         working-directory: ${{env.GITHUB_WORKSPACE}}
@@ -60,14 +60,14 @@ jobs:
         shell: bash
 
       - name: Configure CMake(MSVC)
-          run: |
-            cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
-          shell: cmd
+        run: |
+          cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
+        shell: cmd
 
       - name: Build
-          run: |
-            cmake --build ${{github.workspace}}/build --config Release
-          shell: cmd
+        run: |
+          cmake --build ${{github.workspace}}/build --config Release
+        shell: cmd
         
       - name: copy dll and pdb files
         working-directory: ${{env.GITHUB_WORKSPACE}}
