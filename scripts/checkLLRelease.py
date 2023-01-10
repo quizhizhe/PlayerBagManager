@@ -89,12 +89,15 @@ def commitChange():
     print("Commit Change")
     version = getllcheckbagVersion()
     repo = git.Repo("../")
+
     commitmsg = "Support "+BDSVersion
     modify_file_list = repo.index.diff(None)
     #print([m.a_path for m in modify_file_list])
     repo.index.add([m.a_path for m in modify_file_list])
     repo.index.commit(commitmsg)
     repo.create_tag(version)
+    origin = repo.remote()
+    origin.push()
     print("Commit Change Success")
 
 if __name__ == '__main__':

@@ -1,0 +1,31 @@
+#name: "auto check and update"
+#
+#on:
+#  schedule:
+#    - cron: "0 9 * * 6"
+#
+#jobs:
+#  build:
+#    runs-on: windows-latest
+#
+#    steps:
+#      - uses: actions/checkout@v3
+#        with:
+#          submodules: 'true'
+#      - name: Set up Python 3.10
+#          uses: actions/setup-python@v3
+#          with:
+#            python-version: 3.10.4
+#      - name: Check and Update
+#          working-directory: ${{env.GITHUB_WORKSPACE}}
+#          run: |
+#            pip install requests gitpython
+#            python scripts/checkLLRelease.py
+#            git config --global user.name "github-actions[bot]"
+#            git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+#          shell: bash
+#      - name: Push changes
+#          uses: ad-m/github-push-action@master
+#          with:
+#            github_token: ${{ secrets.GITHUB_TOKEN }}
+#            branch: ${{ github.ref }}
