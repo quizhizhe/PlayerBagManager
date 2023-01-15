@@ -1,11 +1,11 @@
 name: "auto check and update"
 
 on:
-  push:
-    branches:
-      - 'test-autoRelease'
-#  schedule:
-#    - cron: "10 1 * * *"
+#  push:
+#    branches:
+#      - 'test-autoRelease'
+  schedule:
+    - cron: "30 18 * * *"
 
 jobs:
   build:

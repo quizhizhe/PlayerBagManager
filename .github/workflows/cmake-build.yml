@@ -2,7 +2,7 @@ name: "Build Plugin"
 on:
   push:
     branches:
-      - 'test-autoRelease'
+      - 'master'
 
 jobs:
   build:
