@@ -52,6 +52,12 @@ def modifyVersionInfo(oldProtocol,newProtocol):
     protocolline = versionInfo[15]
     protocolline.replace(oldProtocol,newProtocol)
 
+    with open(VERSION_PATH, "r+",encoding='utf8') as file:
+        file.seek(0)
+        file.truncate()
+        file.writelines(versionInfo)
+    file.close()
+
     print("Change version Info Success")
 
 def modifyChangelog():
@@ -107,12 +113,6 @@ if __name__ == '__main__':
     else:
         print("Need Update\nNow Start Auto Update")
         modifyVersionInfo(protocol,llprotocol)
-
-        with open(VERSION_PATH, "r+") as file:
-            file.seek(0)
-            file.truncate()
-            file.writelines(versionInfo)
-        file.close()
 
         modifyChangelog()
         modifyBDSLink()
