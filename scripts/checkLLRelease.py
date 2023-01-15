@@ -43,14 +43,12 @@ def modifyVersionInfo(oldProtocol,newProtocol):
     print("Change version Info")
     #修改小版本号
     revisionline = versionInfo[12]
-    versionRevision = int(revisionline[36:len(revisionline)-1]) + 1
-
-    revisionline.replace(str(versionRevision),str(versionRevision+1))
-    versionInfo[12] = revisionline
+    versionRevision = int(revisionline[36:len(revisionline)-1])
+    versionInfo[12] = revisionline.replace(str(versionRevision),str(versionRevision+1))
 
     #修改协议号
     protocolline = versionInfo[15]
-    protocolline.replace(oldProtocol,newProtocol)
+    versionInfo[15] = protocolline.replace(oldProtocol,newProtocol)
 
     with open(VERSION_PATH, "r+",encoding='utf8') as file:
         file.seek(0)
@@ -116,5 +114,5 @@ if __name__ == '__main__':
 
         modifyChangelog()
         modifyBDSLink()
-        commitChange()
+        # commitChange()
         print("Auto modify files Success")
