@@ -68,7 +68,7 @@ def modifyChangelog():
     with open('CHANGELOG_en.md', "r+") as fileen:
         fileen.seek(0)
         fileen.truncate()
-        fileen.write(changlogzh)
+        fileen.writelines(changlogzh)
     fileen.close()
     print("Change Changelog Success")
 
