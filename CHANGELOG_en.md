@@ -1,3 +1,3 @@
-# v1.3.6 supports 1.19.31.01 (554 protocol)
+# v1.3.7(560 Protocol)
 
-- Support 1.19.30.04 and 1.19.31.01
+- Support 1.19.50 & 1.19.51
