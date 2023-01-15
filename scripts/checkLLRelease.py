@@ -89,7 +89,7 @@ def modifyBDSLink():
 def commitChange():
     print("Commit Change")
     version = getllcheckbagVersion()
-    repo = git.Repo("../")
+    repo = git.Repo("./")
 
     commitmsg = "Support "+BDSVersion
     modify_file_list = repo.index.diff(None)
