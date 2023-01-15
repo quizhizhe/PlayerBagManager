@@ -63,8 +63,8 @@ def modifyChangelog():
     #以下变量需要在修改后获取，否则是旧版本号
     version = getllcheckbagVersion()
     protocol = getllcheckbagProtocol()
-    changlogzh = "# "+version+ "（"+protocol+"协议）\n\n- 支持"+BDSVersion
-    changlogen = "# "+version+ "("+protocol+" Protocol)\n\n- Support "+BDSVersion
+    changlogzh = "# "+version+ "（"+protocol+"协议）\n\n- 支持"+BDSVersion + "\n- 此为自动更新，可能会有问题"
+    changlogen = "# "+version+ "("+protocol+" Protocol)\n\n- Support "+BDSVersion + "\n- This is auto update,maybe have error"
     with open('CHANGELOG.md', "r+",encoding='utf8') as filezh:
         filezh.seek(0)
         filezh.truncate()
