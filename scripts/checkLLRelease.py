@@ -61,12 +61,12 @@ def modifyChangelog():
     protocol = getllcheckbagProtocol()
     changlogzh = "# "+version+ "（"+protocol+"协议）\n\n- 支持"+BDSVersion
     changlogen = "# "+version+ "("+protocol+"Protocol)\n\n- Support "+BDSVersion
-    with open('CHANGELOG.md', "r+") as filezh:
+    with open('CHANGELOG.md', "r+",encoding='utf8') as filezh:
         filezh.seek(0)
         filezh.truncate()
         filezh.write(changlogzh)
     filezh.close()
-    with open('CHANGELOG_en.md', "r+") as fileen:
+    with open('CHANGELOG_en.md', "r+",encoding='utf8') as fileen:
         fileen.seek(0)
         fileen.truncate()
         fileen.write(changlogen)
@@ -79,7 +79,7 @@ def modifyBDSLink():
     response = requests.get("https://api.github.com/repos/LiteLDev/LiteLoaderBDS/contents/scripts/LINK.txt",headers=header)
     linkinfo = response.json()["content"]
     link =  str(base64.b64decode(linkinfo),"utf8")
-    with open('../LINK.txt', "r+") as file:
+    with open('./LINK.txt', "r+") as file:
         file.seek(0)
         file.truncate()
         file.write(link)
