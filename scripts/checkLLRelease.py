@@ -91,7 +91,7 @@ def commitChange():
     version = getllcheckbagVersion()
     repo = git.Repo("./")
 
-    commitmsg = "Support "+BDSVersion
+    commitmsg = "Auto Support "+BDSVersion
     modify_file_list = repo.index.diff(None)
     #print([m.a_path for m in modify_file_list])
     repo.index.add([m.a_path for m in modify_file_list])
