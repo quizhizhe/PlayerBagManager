@@ -12,9 +12,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: 'true'
+      - name: Check out
+        uses: actions/checkout@v3
+
       - name: Set up Python 3.10
         uses: actions/setup-python@v3
         with:
@@ -26,13 +26,13 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           python scripts/checkLLRelease.py
-          rm -rf ./LiteLoaderSDK
-          git submodule update --remote
-        shell: bash
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.ref }}
-          force: true
-          tags: true
+          git submodule update --init --recursive --remote
+          git push || exit 0
+#        shell: bash
+#      - name: Push changes
+#        uses: ad-m/github-push-action@master
+#        with:
+#          github_token: ${{ secrets.GITHUB_TOKEN }}
+#          branch: ${{ github.ref }}
+#          force: true
+#          tags: true
