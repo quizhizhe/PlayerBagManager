@@ -43,7 +43,7 @@ def modifyVersionInfo(oldProtocol,newProtocol):
     print("Change version Info")
     #修改小版本号
     revisionline = versionInfo[12]
-    versionRevision = int(revisionline[36:len(revisionline)-1])+1
+    versionRevision = int(revisionline[36:len(revisionline)-1]) + 1
 
     revisionline.replace(str(versionRevision),str(versionRevision+1))
     versionInfo[12] = revisionline
