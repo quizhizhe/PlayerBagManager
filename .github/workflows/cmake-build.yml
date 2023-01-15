@@ -1,6 +1,6 @@
 name: "Build Plugin"
 on:
-push:
+  push:
     branches:
       - 'master'
 
