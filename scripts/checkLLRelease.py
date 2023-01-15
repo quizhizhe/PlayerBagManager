@@ -60,7 +60,7 @@ def modifyChangelog():
     version = getllcheckbagVersion()
     protocol = getllcheckbagProtocol()
     changlogzh = "# "+version+ "（"+protocol+"协议）\n\n- 支持"+BDSVersion
-    changlogen = "# "+version+ "("+protocol+"Protocol)\n\n- Support "+BDSVersion
+    changlogen = "# "+version+ "("+protocol+" Protocol)\n\n- Support "+BDSVersion
     with open('CHANGELOG.md', "r+",encoding='utf8') as filezh:
         filezh.seek(0)
         filezh.truncate()
