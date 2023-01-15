@@ -110,7 +110,7 @@ if __name__ == '__main__':
         with open(VERSION_PATH, "r+") as file:
             file.seek(0)
             file.truncate()
-            file.write(versionInfo)
+            file.writelines(versionInfo)
         file.close()
 
         modifyChangelog()
