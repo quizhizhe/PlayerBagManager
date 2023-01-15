@@ -64,7 +64,7 @@ def modifyChangelog():
     with open('CHANGELOG.md', "r+") as filezh:
         filezh.seek(0)
         filezh.truncate()
-        filezh.write(changlogzh)
+        filezh.writelines(changlogzh)
     filezh.close()
     with open('CHANGELOG_en.md', "r+") as fileen:
         fileen.seek(0)
