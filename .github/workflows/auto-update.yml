@@ -19,7 +19,7 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: 3.10.4
-      - run: pip install requests gitpython base64
+      - run: pip install requests gitpython
       - name: Check and Update
         working-directory: ${{env.GITHUB_WORKSPACE}}
         run: |
