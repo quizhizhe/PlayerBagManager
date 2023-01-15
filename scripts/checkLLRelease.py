@@ -96,8 +96,6 @@ def commitChange():
     repo.index.add([m.a_path for m in modify_file_list])
     repo.index.commit(commitmsg)
     repo.create_tag(version)
-    origin = repo.remote()
-    origin.push()
     print("Commit Change Success")
 
 if __name__ == '__main__':
@@ -118,4 +116,4 @@ if __name__ == '__main__':
         modifyChangelog()
         modifyBDSLink()
         commitChange()
-        print("Update Success")
+        print("Auto modify files Success")
