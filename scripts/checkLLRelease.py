@@ -114,5 +114,5 @@ if __name__ == '__main__':
 
         modifyChangelog()
         modifyBDSLink()
-        # commitChange()
+        commitChange()
         print("Auto modify files Success")
