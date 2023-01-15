@@ -2,7 +2,7 @@ name: "auto check and update"
 
 on:
   schedule:
-    - cron: "0 9 * * 6"
+    - cron: "3 20 * * *"
 
 jobs:
   build:
