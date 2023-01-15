@@ -15,6 +15,7 @@ def getLiteLoaderProtocol():
     global LLVersion
     global BDSVersion
     response = requests.get("https://api.github.com/repos/LiteLDev/LiteLoaderBDS/releases/latest")
+    response.raise_for_status() #如果得到404或者502抛出错误
     LLVersion = response.json()["tag_name"]
     bodyinfo = response.json()["body"]
     index = bodyinfo.find("ProtocolVersion")
