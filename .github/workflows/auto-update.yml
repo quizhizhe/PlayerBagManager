@@ -23,6 +23,7 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           pip install requests gitpython base64
           python scripts/checkLLRelease.py
+          git submodule update --remote
           shell: bash
       - name: Push changes
         uses: ad-m/github-push-action@master
