@@ -1,7 +1,7 @@
 name: "auto check and update"
 
 on:
-  push:
+#  push:
 #    branches:
 #      - 'master'
   schedule:
@@ -28,4 +28,4 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           python scripts/checkLLRelease.py
           git submodule update --init --recursive --remote
-          git push -o ci.skip && git push --tags || exit 0
+          git push && git push --tags || exit 0
