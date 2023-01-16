@@ -5,7 +5,7 @@ on:
 #    branches:
 #      - 'master'
   schedule:
-    - cron: "45 10 * * 1"
+    - cron: "10 13 * * 1"
 
 jobs:
   checkUpdate:

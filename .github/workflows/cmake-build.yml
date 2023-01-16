@@ -75,7 +75,6 @@ jobs:
         run: |
           echo ::set-output name=tag::${GITHUB_REF#refs/tags/*}
           mv output/LLCheckBag.zip output/LLCheckBag-${GITHUB_REF#refs/tags/*}.zip
-          ls output/
         shell: bash
 
 #      - name: Set up Python 3.10
@@ -98,6 +97,6 @@ jobs:
         with:
           token: ${{ secrets.ACTIONS_TOKEN }}
           body_path: ${{ github.workspace }}\CHANGELOG.md
-          files: ${{ github.workspace }}\output\LLCheckBag-${{ steps.rel.outputs.tag }}.zip
+          files: ./output/LLCheckBag-${{ steps.rel.outputs.tag }}.zip
         env:
           GITHUB_REPOSITORY: ${{env.GITHUB_ACTION_REPOSITORY}}
