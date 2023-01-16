@@ -75,6 +75,7 @@ jobs:
         run: |
           echo ::set-output name=tag::${GITHUB_REF#refs/tags/*}
           mv output/LLCheckBag.zip output/LLCheckBag-${GITHUB_REF#refs/tags/*}.zip
+          ls output/
         shell: bash
 
 #      - name: Set up Python 3.10
