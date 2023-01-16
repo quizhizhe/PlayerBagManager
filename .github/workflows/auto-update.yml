@@ -26,8 +26,6 @@ jobs:
           git config --global user.name "quizhizhe"
           git config --global user.email "42761326+quizhizhe@users.noreply.github.com"
           python scripts/checkLLRelease.py
-#          git submodule update --init --recursive --remote
-#          git commit -am "fetch upstream SDK" || exit 0
           git push || exit 0
           git push origin --tags
 #      - name: Push changes
