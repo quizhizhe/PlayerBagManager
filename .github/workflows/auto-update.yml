@@ -12,8 +12,9 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Check out
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'true'
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v3
@@ -26,6 +27,7 @@ jobs:
           git config --global user.name "quizhizhe"
           git config --global user.email "42761326+quizhizhe@users.noreply.github.com"
           python scripts/checkLLRelease.py
+          git submodule update --init --recursive --remote
           git push || exit 0
           git push origin --tags || exit 0
       - name: Download Server
