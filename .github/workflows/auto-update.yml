@@ -28,4 +28,4 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           python scripts/checkLLRelease.py
           git submodule update --init --recursive --remote
-          git push --follow-tags || exit 0
+          git push -o ci.skip && git push --tags || exit 0

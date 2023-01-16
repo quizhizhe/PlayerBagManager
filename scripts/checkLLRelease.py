@@ -100,7 +100,7 @@ def commitChange():
     #print([m.a_path for m in modify_file_list])
     repo.index.add([m.a_path for m in modify_file_list])
     repo.index.commit(commitmsg)
-    repo.create_tag(version)
+    repo.create_tag(version,"HEAD","Auto Support")
     print("Commit Change Success")
 
 if __name__ == '__main__':
