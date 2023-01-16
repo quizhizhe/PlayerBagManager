@@ -73,7 +73,7 @@ jobs:
         id: rel
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          echo ::set-output name=tag::${GITHUB_REF#refs/tags/*}
+          echo tag::${GITHUB_REF#refs/tags/*}  >>$GITHUB_OUTPUT
           mv output/LLCheckBag.zip output/LLCheckBag-${GITHUB_REF#refs/tags/*}.zip
         shell: bash
 
