@@ -5,7 +5,7 @@ on:
 #    branches:
 #      - 'test-autoRelease'
   schedule:
-    - cron: "0 19 * * 0"
+    - cron: "0 2 * * 1"
 
 jobs:
   build:
@@ -27,5 +27,6 @@ jobs:
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           python scripts/checkLLRelease.py
           git submodule update --init --recursive --remote
+          git commit -am "fetch upstream SDK" || exit 0
           git push || exit 0
           git push origin --tags
