@@ -2,10 +2,10 @@ name: "auto check and update"
 
 on:
   push:
-    branches:
-      - 'master'
-#  schedule:
-#    - cron: "0 2 * * 1"
+#    branches:
+#      - 'master'
+  schedule:
+    - cron: "30 6 * * 1"
 
 jobs:
   checkUpdate:
