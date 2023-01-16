@@ -1,11 +1,11 @@
 name: "auto check and update"
 
 on:
-#  push:
-#    branches:
-#      - 'master'
-  schedule:
-    - cron: "45 10 * * 1"
+  push:
+    branches:
+      - 'master'
+#  schedule:
+#    - cron: "45 10 * * 1"
 
 jobs:
   checkUpdate:
