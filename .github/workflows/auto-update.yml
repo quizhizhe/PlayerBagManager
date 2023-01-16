@@ -27,11 +27,93 @@ jobs:
           git config --global user.email "42761326+quizhizhe@users.noreply.github.com"
           python scripts/checkLLRelease.py
           git push || exit 0
-          git push origin --tags
-#      - name: Push changes
-#        uses: ad-m/github-push-action@master
-#        with:
-#          github_token: ${{ secrets.GITHUB_TOKEN }}
-#          branch: ${{ github.ref }}
-#          force: true
-#          tags: true
+          git push origin --tags || exit 0
+      - name: Download Server
+        run: |
+          mkdir D:/BDS
+          ServerLink=$(cat 'LINK.txt')
+          curl -L -o D:/BDS/server.zip "$ServerLink"
+          unzip D:/BDS/server.zip -d D:/BDS > /dev/null
+        shell: bash
+
+      - name: Build Bedrock Library
+        run: |
+          cd LiteLoaderSDK/Tools
+          LibraryBuilder.exe -o ..\Lib D:\BDS
+        shell: cmd
+
+      - name: Change PLUGIN_VERSION_STATUS_BETA
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: false == startsWith(github.ref, 'refs/tags/')
+        run: |
+          sed -r -i 's/#define\s+PLUGIN_VERSION_STATUS\s+PLUGIN_VERSION_\w+/#define PLUGIN_VERSION_STATUS   PLUGIN_VERSION_BETA/' LLCheckBag/Version.h
+          sed -r -i 's/#define\s+PLUGIN_VERSION_BUILD\s+.*/#define PLUGIN_VERSION_BUILD  ${{ github.run_number }}\r/' LLCheckBag/Version.h
+        shell: bash
+
+      - name: Change PLUGIN_VERSION_STATUS_RELEASE
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          sed -r -i 's/#define\s+PLUGIN_VERSION_STATUS\s+PLUGIN_VERSION_\w+/#define PLUGIN_VERSION_STATUS   PLUGIN_VERSION_RELEASE/' LLCheckBag/Version.h
+          sed -r -i 's/#define\s+PLUGIN_VERSION_BUILD\s+.*/#define PLUGIN_VERSION_BUILD  ${{ github.run_number }}\r/' LLCheckBag/Version.h
+        shell: bash
+
+      - name: Configure CMake(MSVC)
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/build --config Release
+
+      - name: copy dll and pdb files
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        run: |
+          mkdir output/
+          mkdir output/LLCheckBag/
+          cp -f ./build/Release/*.dll output/
+          cp -f ./build/Release/*.pdb output/LLCheckBag/
+          cp -r Data/* output/LLCheckBag/
+        shell: bash
+
+      - name: upload files
+        uses: actions/upload-artifact@v2
+        with:
+          name: LLCheckBag-actions-${{ github.run_number }}
+          path: ${{ github.workspace }}/output/
+
+      - name: Pack Release
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: Compress-Archive -Path output/* output/LLCheckBag.zip
+
+      - name: Prepare for creating Release
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        id: rel
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo ::set-output name=tag::${GITHUB_REF#refs/tags/*}
+          mv output/LLCheckBag.zip output/LLCheckBag-${GITHUB_REF#refs/tags/*}.zip
+        shell: bash
+
+      - name: Set up Python 3.10
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.10.4
+
+      - name: Publish to MineBBS
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          pip install requests
+          # python scripts/publish_minebbs.py -v ${{ steps.rel.outputs.tag }} -f ./output/LLCheckBag-${{ steps.rel.outputs.tag }}.zip -c ./CHANGELOG.md -t ${{ secrets.MINEBBS_TOKEN }}
+        shell: bash
+
+      - name: Create New Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          token: ${{ secrets.ACTIONS_TOKEN }}
+          body_path: ${{ github.workspace }}\CHANGELOG.md
+          files: ${{ github.workspace }}\output\LLCheckBag-${{ steps.rel.outputs.tag }}.zip
+        env:
+          GITHUB_REPOSITORY: ${{env.GITHUB_ACTION_REPOSITORY}}
