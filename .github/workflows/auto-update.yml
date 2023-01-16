@@ -30,4 +30,3 @@ jobs:
           python scripts/checkLLRelease.py
           git submodule update --init --recursive --remote
           git push || exit 0
-          git push origin --tags || exit 0
