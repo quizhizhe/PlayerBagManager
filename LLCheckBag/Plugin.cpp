@@ -307,8 +307,8 @@ void PluginInit()
     logger.setFile(PLUGIN_LOG_PATH);
     Config::initConfig();
     
-    if (ll::getServerProtocolVersion() != TARGET_BDS_PROTOCOL_VERSION)
-        logger.error(tr("plugin.error.version_not_match", ll::getServerProtocolVersion(), TARGET_BDS_PROTOCOL_VERSION));
+    if (LL::getServerProtocolVersion() != TARGET_BDS_PROTOCOL_VERSION)
+        logger.error(tr("plugin.error.version_not_match", LL::getServerProtocolVersion(), TARGET_BDS_PROTOCOL_VERSION));
 
     Event::RegCmdEvent::subscribe([](Event::RegCmdEvent ev) { // Register commands Event
         LLCheckBagCommand::setup(ev.mCommandRegistry);

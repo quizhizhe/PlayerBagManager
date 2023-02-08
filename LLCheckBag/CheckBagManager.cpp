@@ -3,7 +3,7 @@
 #include "PlayerDataHelper.h"
 #include <PlayerInfoAPI.h>
 #include <FormUI.h>
-#include <mc/StringTag.hpp>
+#include <MC/StringTag.hpp>
 #include "Utils.h"
 
 bool CheckBagManager::mIsFree = true;
@@ -71,14 +71,14 @@ void CheckBagManager::beforePlayerLeave(ServerPlayer* player)
     if (isCheckingBag(player)) {
         stopCheckBag(player);
     }
-    if (player->isSimulatedPlayer()) {
-        auto iter = mCheckBagLogMap.find(player->getUuid());
-        if (iter != mCheckBagLogMap.end() && iter->second.getTarget()) {
-            stopCheckBag(iter->second.getTarget());
-        }
-        mCheckBagLogMap.erase(iter);
-        UpdatePlayerLstSoftEnum();
-    }
+//    if (player->isSimulatedPlayer()) {
+//        auto iter = mCheckBagLogMap.find(player->getUuid());
+//        if (iter != mCheckBagLogMap.end() && iter->second.getTarget()) {
+//            stopCheckBag(iter->second.getTarget());
+//        }
+//        mCheckBagLogMap.erase(iter);
+//        UpdatePlayerLstSoftEnum();
+//    }
 }
 
 void CheckBagManager::afterPlayerLeave(ServerPlayer* player)
@@ -104,7 +104,7 @@ void CheckBagManager::afterPlayerLeave(ServerPlayer* player)
 void CheckBagManager::afterPlayerJoin(ServerPlayer* player) {
     auto suuid = player->getUuid();
     if (mUuidNameMap.find(suuid) == mUuidNameMap.end()) {
-        auto isFakePlayer = PlayerDataHelper::isFakePlayer_ddf8196(suuid) || player->isSimulatedPlayer();
+        auto isFakePlayer = PlayerDataHelper::isFakePlayer_ddf8196(suuid) /*|| player->isSimulatedPlayer()*/;
         mUuidNameMap.emplace(suuid, std::pair{ player->getRealName(),isFakePlayer });
         UpdatePlayerLstSoftEnum();
     }

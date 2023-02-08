@@ -1,5 +1,5 @@
 #pragma once
-#include <mc/Level.hpp>
+#include <MC/Level.hpp>
 
 inline bool nameSortFunc(std::string const& left, std::string const& right) {
     size_t maxSize = std::max(left.size(), right.size());
@@ -18,9 +18,10 @@ inline bool nameSortFunc(std::string const& left, std::string const& right) {
     return right.size() - left.size();
 }
 inline class Player* getPlayer(class mce::UUID const& a0) {
-    class Player* (Level:: * rv)(class mce::UUID const&);
-    *((void**)&rv) = dlsym("?getPlayer@Level@@UEBAPEAVPlayer@@AEBVUUID@mce@@@Z");
-    return (Global<Level>->*rv)(std::forward<class mce::UUID const&>(a0));
+//    class Player* (Level:: * rv)(class mce::UUID const&);
+//    *((void**)&rv) = dlsym("?getPlayer@Level@@UEBAPEAVPlayer@@AEBVUUID@mce@@@Z");
+//    return (Global<Level>->*rv)(std::forward<class mce::UUID const&>(a0));
+    return Global<Level>->getPlayer(a0);
 }
 
 namespace PlayerDataHelper {

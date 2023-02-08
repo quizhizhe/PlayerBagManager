@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "Config.h"
-#include <Nlohmann/json.hpp>
-#include <magic_enum/magic_enum.hpp>
+#include <third-party/Nlohmann/json.hpp>
+#include <third-party/magic_enum/magic_enum.hpp>
 #include <filesystem>
 #include <I18nAPI.h>
 #include <PlayerInfoAPI.h>

@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "PlayerDataHelper.h"
-#include <mc/DBStorage.hpp>
-#include <mc/StringTag.hpp>
+#include <MC/DBStorage.hpp>
+#include <MC/StringTag.hpp>
 
 namespace PlayerDataHelper {
     DBHelpers::Category const playerCategory = (DBHelpers::Category)7;
@@ -17,7 +17,7 @@ namespace PlayerDataHelper {
         static size_t serverCount;
         serverCount = 0;
 #endif // DEBUG
-        Global<DBStorage>->forEachKeyWithPrefix("player_", playerCategory,
+        Global<DBStorage>->forEachKeyWithPrefix("player_", /*playerCategory,*/
             [&callback, includeSelfSignedId](gsl::cstring_span<-1> key_left, gsl::cstring_span<-1> data) {
                 if (key_left.size() == 36) {
                     auto tag = CompoundTag::fromBinaryNBT((void*)data.data(), data.size());
@@ -82,8 +82,8 @@ namespace PlayerDataHelper {
     std::unique_ptr<CompoundTag> getPlayerIdsTag(mce::UUID const& uuid) {
         auto& dbStorage = *Global<DBStorage>;
         auto playerKey = "player_" + uuid.asString();
-        if (dbStorage.hasKey(playerKey, playerCategory)) {
-            return dbStorage.getCompoundTag(playerKey, playerCategory);
+        if (dbStorage.hasKey(playerKey/*, playerCategory*/)) {
+            return dbStorage.getCompoundTag(playerKey/*, playerCategory*/);
         }
         return {};
     }
@@ -95,11 +95,11 @@ namespace PlayerDataHelper {
             auto serverId = getServerId(uuid);
             if (serverId.empty())
                 return false;
-            if (!dbStorage.hasKey(serverId, playerCategory)) {
+            if (!dbStorage.hasKey(serverId/*, playerCategory*/)) {
                 logger.warn("Failed to find key {} when deleting player({})'s data", serverId, uuid.asString());
                 return false;
             }
-            auto res = dbStorage.deleteData(serverId, playerCategory);
+            auto res = dbStorage.deleteData(serverId/*, playerCategory*/);
             return true;
 
             //auto tag = getPlayerIdsTag(uuid);
@@ -147,10 +147,10 @@ namespace PlayerDataHelper {
         auto serverId = getServerId(uuid);
         if (serverId.empty())
             return {};
-        if (!Global<DBStorage>->hasKey(serverId, playerCategory))
+        if (!Global<DBStorage>->hasKey(serverId/*, playerCategory*/))
             return {};
         std::string data = "";
-        if (Global<DBStorage>->loadData(serverId, data, playerCategory))
+        if (Global<DBStorage>->loadData(serverId, data/*, playerCategory*/))
             return data;
         else
             return "";
@@ -160,9 +160,9 @@ namespace PlayerDataHelper {
         auto serverId = getServerId(uuid);
         if (serverId.empty())
             return {};
-        if (!Global<DBStorage>->hasKey(serverId, playerCategory))
+        if (!Global<DBStorage>->hasKey(serverId/*, playerCategory*/))
             return {};
-        return Global<DBStorage>->getCompoundTag(serverId, playerCategory);
+        return Global<DBStorage>->getCompoundTag(serverId/*, playerCategory*/);
     }
     std::unique_ptr<CompoundTag> getExpectedPlayerTag(mce::UUID const& uuid)
     {
@@ -177,7 +177,7 @@ namespace PlayerDataHelper {
             auto serverId = getServerId(uuid);
             if (serverId.empty())
                 return false;
-            Global<DBStorage>->saveData(serverId, data.toBinaryNBT(), playerCategory);
+            Global<DBStorage>->saveData(serverId, data.toBinaryNBT()/*, playerCategory*/);
             return true;
         }
         catch (const std::exception&)
@@ -300,7 +300,7 @@ namespace PlayerDataHelper {
                 case do_hash("PlatformOfflineId"):
                 case do_hash("PlatformOnlineId"):
                 case do_hash("SelfSignedId"):
-                    Global<DBStorage>->saveData("player_" + id, std::string(idsData), playerCategory);
+                    Global<DBStorage>->saveData("player_" + id, std::string(idsData)/*, playerCategory*/);
                     break;
                 case do_hash("ServerId"):
                     serverId = id;
@@ -309,7 +309,7 @@ namespace PlayerDataHelper {
                     break;
                 }
             }
-            Global<DBStorage>->saveData(serverId, std::move(data), playerCategory);
+            Global<DBStorage>->saveData(serverId, std::move(data)/*, playerCategory*/);
             return true;
         }
         catch (const std::exception&)
