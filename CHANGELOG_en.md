@@ -1,5 +1,4 @@
-# v1.3.7(560 Protocol)
+# v1.3.7-1.16.40(408 Protocol)
 
-- Support 1.19.50 & 1.19.51
-- Support LiteLoader v2.9.1
-- This is auto update, maybe have error. Please submit issue, If have error
+- Support 1.16.40
+- Support LiteLoaderBDS-1.16.40

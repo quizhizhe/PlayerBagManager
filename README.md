@@ -1,4 +1,4 @@
-# LLCheckBag
+# LLCheckBag-1.16.40
 这是 [Bedrock Minecraft Server](https://www.minecraft.net/en-us/download/server/bedrock) 的背包检查插件，
 可以查看存档中所有玩家背包的插件，并附带多种玩家数据操作用于确认玩家数据是否异常
 需要 [LiteLoader](https://github.com/LiteLDev/LiteLoaderBDS) 的前置
@@ -14,11 +14,11 @@
 > 注：以上功能均支持存档中所有玩家，理论上服务器安装 LiteLoader 2.0 后进入过服务器的玩家均能识别出玩家名，否则以uuid形式显示
 
 ## 下载安装
-> *确保你已经正确安装[LiteLoader](https://github.com/LiteLDev/LiteLoaderBDS)加载器*
+> *确保你已经正确安装[LiteLoader-1.16.40](https://github.com/quizhizhe/LiteLoaderBDS-1.16.40)加载器*
 * 二进制下载
-    * 可从 [MineBBS](https://www.minebbs.com/resources/llcheckbag.3367/) 或者 [Github Release](https://github.com/quizhizhe/LLCheckBag/releases) 下载，完成后解压压缩包内容到 plugins 目录下即可
+    * 可从 [Github Release](https://github.com/quizhizhe/LLCheckBag/releases) 下载，完成后解压压缩包内容到 plugins 目录下即可
 * 从源码编译
-    * 使用 `git clone --recursive https://github.com/quizhizhe/LLCheckBag.git` 拉取项目，用 [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) 打开sln文件，设置项目调试路径为bds路径，生成即可
+    * 使用 `git clone -b 1.16.40 https://github.com/quizhizhe/LLCheckBag.git` 拉取项目，用 [Visual Studio 2022](https://visualstudio.microsoft.com/vs/) 打开sln文件，设置项目调试路径为bds路径，生成即可
 
 ## 用法
 * 指令（*可将 llcheckbag 替换成设置的指令别名，默认 llcb*）：
