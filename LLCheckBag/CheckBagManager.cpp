@@ -143,8 +143,6 @@ std::vector<std::string> CheckBagManager::getPlayerList(PlayerCategory category)
     if (category == PlayerCategory::All)
         return getPlayerList();
     std::vector<std::string> playerList;
-    size_t index = 0;
-    size_t rindex = mUuidNameMap.size() - 1;
     for (auto& [suuid, value] : mUuidNameMap) {
         auto& name = value.first;
         //TestFuncTime(mUuidNameMap.isFakePlayer, suuid); // <=1
@@ -470,7 +468,8 @@ CheckBagManager::Result CheckBagManager::importData(mce::UUID const& uuid, std::
         return Result::Error;
     if (isBagOnly) {
         if (auto player = getPlayer(uuid)) {
-            PlayerDataHelper::setPlayerBag(player, *newTag);
+            if(PlayerDataHelper::setPlayerBag(player, *newTag))
+                return Result::Success;
         }
         else {
             auto oldTag = PlayerDataHelper::getExpectedPlayerTag(uuid);
