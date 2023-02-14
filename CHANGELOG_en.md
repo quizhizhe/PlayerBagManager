@@ -1,5 +1,5 @@
-# v1.3.7(560 Protocol)
+# v1.3.8(567 Protocol)
 
-- Support 1.19.50 & 1.19.51
-- Support LiteLoader v2.9.1
+- Support 1.19.61.01
+- Support LiteLoader v2.10.0
 - This is auto update, maybe have error. Please submit issue, If have error
