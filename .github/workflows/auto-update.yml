@@ -27,6 +27,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          python scripts/checkLLRelease.py
           git submodule update --init --recursive --remote
+          git commit -am "fetch upstream SDK" || exit 0
+          python scripts/checkLLRelease.py
           git push && git push --tags || exit 0
