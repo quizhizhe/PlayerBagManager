@@ -4,8 +4,9 @@ on:
 #  push:
 #    branches:
 #      - 'master'
+  workflow_dispatch:
   schedule:
-    - cron: "30 17 * * 1"
+    - cron: "30 17 * * *"
 
 jobs:
   checkUpdate:
