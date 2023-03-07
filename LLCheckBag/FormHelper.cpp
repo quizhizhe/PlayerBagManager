@@ -307,6 +307,8 @@ namespace FormHelper {
                 }));
             form.sendTo((ServerPlayer*)player,
                 [filePath, targetUuid](Player* player, const std::map<string, std::shared_ptr<Form::CustomFormElement>>& data) {
+                    if(data.empty())
+                        return;
                     auto modeDW = std::dynamic_pointer_cast<Form::Dropdown>(data.at("importMode"));
                     auto isBagOnly = modeDW->getString() == tr("screen.import.mode.bag_only");
                     auto targetDW = std::dynamic_pointer_cast<Form::Dropdown>(data.at("target"));

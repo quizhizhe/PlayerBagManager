@@ -1,4 +1,4 @@
-# LLCheckBag
+# LLCheckBag-1.16.40
 This is the inventory check plug-in for [Bedrock Minecraft Server](https://www.minecraft.net/en-us/download/server/bedrock), 
 which can check the plug-ins of all players' inventory in the Level, and comes with a variety of player data operations to confirm whether the player data is abnormal. 
 [LiteLoader](https://github.com/LiteLDev/LiteLoaderBDS) is required beforehand.
@@ -16,11 +16,11 @@ which can check the plug-ins of all players' inventory in the Level, and comes w
 > Note: The above functions support all players in the Level. In theory, the name of players who have entered the server after installing LiteLoader 2.0 on the server can be recognized , otherwise it will be displayed in the form of uuid
 
 ## Download and install
-> *Make sure you have the [LiteLoader](https://github.com/LiteLDev/LiteLoaderBDS) installed correctly*
+> *Make sure you have the [LiteLoader-1.16.40](https://github.com/quizhizhe/LiteLoaderBDS-1.16.40) installed correctly*
 * Download binary
-     * It can be downloaded from [MineBBS](https://www.minebbs.com/resources/llcheckbag.3367/) or [Github Release](https://github.com/quizhizhe/LLCheckBag/releases). After completion, unzip the contents of the compressed package to the plugins directory.
+     * It can be downloaded [Github Release](https://github.com/quizhizhe/LLCheckBag/releases). After completion, unzip the contents of the compressed package to the plugins directory.
 * Compile from source
-     * Use `git clone --recursive https://github.com/quizhizhe/LLCheckBag.git` to pull the project, open the sln file with [Visual Studio 2022](https://visualstudio.microsoft.com/vs/), Set the project debug path to the bds path and generate it
+     * Use `git clone -b 1.16.40 https://github.com/quizhizhe/LLCheckBag.git` to pull the project, open the sln file with [Visual Studio 2022](https://visualstudio.microsoft.com/vs/), Set the project debug path to the bds path and generate it
 
 ## Usage
 * Command(*You can replace llcheckbag with the set command alias, the default is llcb*)
