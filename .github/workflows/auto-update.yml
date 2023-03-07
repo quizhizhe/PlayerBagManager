@@ -3,17 +3,19 @@ name: "auto check and update"
 on:
 #  push:
 #    branches:
-#      - 'test-autoRelease'
+#      - 'master'
+  workflow_dispatch:
   schedule:
-    - cron: "30 18 * * *"
+    - cron: "30 17 * * *"
 
 jobs:
-  build:
+  checkUpdate:
     runs-on: windows-latest
 
     steps:
-      - name: Check out
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+        with:
+          token: ${{secrets.ACTIONS_TOKEN}}
 
       - name: Set up Python 3.10
         uses: actions/setup-python@v3
@@ -25,7 +27,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          python scripts/checkLLRelease.py
           git submodule update --init --recursive --remote
-          git push || exit 0
-          git push origin --tags
+          git commit -am "fetch upstream SDK"
+          python scripts/checkLLRelease.py
+          git push && git push --tags || exit 0

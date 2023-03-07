@@ -18,10 +18,10 @@ def getLiteLoaderProtocol():
     response.raise_for_status() #如果得到404或者502抛出错误
     LLVersion = response.json()["tag_name"]
     bodyinfo = response.json()["body"]
-    index = bodyinfo.find("ProtocolVersion")
-    BDSindex = bodyinfo.find("Support BDS")
-    BDSVersion = bodyinfo[BDSindex+12:index-3]
-    return bodyinfo[index+16:index+19]
+    index = bodyinfo.find("Protocol")
+    BDSindex = bodyinfo.find("BDS")
+    BDSVersion = bodyinfo[BDSindex+4:BDSindex+14]
+    return bodyinfo[index+9:index+12]
 
 def getllcheckbagVersion():
     versionline = versionInfo[10]
@@ -63,8 +63,12 @@ def modifyChangelog():
     #以下变量需要在修改后获取，否则是旧版本号
     version = getllcheckbagVersion()
     protocol = getllcheckbagProtocol()
-    changlogzh = "# "+version+ "（"+protocol+"协议）\n\n- 支持"+BDSVersion + "\n- 此为自动更新，可能会有问题"
-    changlogen = "# "+version+ "("+protocol+" Protocol)\n\n- Support "+BDSVersion + "\n- This is auto update,maybe have error"
+    changlogzh = "# "+version+ "（"+protocol+"协议）\n\n- 支持"+BDSVersion + \
+                 "\n- 适配LiteLoader v"+ LLVersion + \
+                 "\n- 此为自动更新，可能会有问题；如有问题提交issue"
+    changlogen = "# "+version+ "("+protocol+" Protocol)\n\n- Support "+BDSVersion + \
+                 "\n- Support LiteLoader v"+ LLVersion +\
+                 "\n- This is auto update, maybe have error. Please submit issue, If have error"
     with open('CHANGELOG.md', "r+",encoding='utf8') as filezh:
         filezh.seek(0)
         filezh.truncate()
@@ -100,7 +104,7 @@ def commitChange():
     #print([m.a_path for m in modify_file_list])
     repo.index.add([m.a_path for m in modify_file_list])
     repo.index.commit(commitmsg)
-    repo.create_tag(version)
+    repo.create_tag(version,"HEAD","Auto Support")
     print("Commit Change Success")
 
 if __name__ == '__main__':
