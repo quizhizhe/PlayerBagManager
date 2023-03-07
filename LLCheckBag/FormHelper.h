@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include <mc/Types.hpp>
-#include <mc/Player.hpp>
-#include <FormUI.h>
+#include <llapi/mc/Types.hpp>
+#include <llapi/mc/Player.hpp>
+#include <llapi/FormUI.h>
 #include "CheckBagManager.h"
-#include <PlayerInfoAPI.h>
+#include <llapi/PlayerInfoAPI.h>
 
 #define SendCheckResult(result, operation)\
 if (result == CheckBagManager::Result::Success)\

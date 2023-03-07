@@ -12,12 +12,11 @@ file(GLOB_RECURSE SRC_FILES_DIR
         )
 
 include_directories(
-        ${CMAKE_SOURCE_DIR}/LiteLoaderSDK/Header
-        ${CMAKE_SOURCE_DIR}/LiteLoaderSDK/Header/MC
+        ${CMAKE_SOURCE_DIR}/SDK-1.16.40/include
 )
 
 link_directories(
-        ${CMAKE_SOURCE_DIR}/LiteLoaderSDK/Lib
+        ${CMAKE_SOURCE_DIR}/SDK-1.16.40/lib
 )
 
 add_definitions(
@@ -66,10 +65,10 @@ add_link_options(
 add_library(LLCheckBag SHARED ${SRC_FILES_DIR})
 
 target_link_libraries(LLCheckBag
-        "${CMAKE_SOURCE_DIR}/LiteLoaderSDK/Lib/LiteLoader.lib"
-        "${CMAKE_SOURCE_DIR}/LiteLoaderSDK/Lib/bedrock_server_api.lib"
-        "${CMAKE_SOURCE_DIR}/LiteLoaderSDK/Lib/bedrock_server_var.lib"
-        "${CMAKE_SOURCE_DIR}/LiteLoaderSDK/Lib/SymDBHelper.lib"
+        "${CMAKE_SOURCE_DIR}/SDK-1.16.40/lib/LiteLoader.lib"
+        "${CMAKE_SOURCE_DIR}/SDK-1.16.40/lib/bedrock_server_api.lib"
+        "${CMAKE_SOURCE_DIR}/SDK-1.16.40/lib/bedrock_server_var.lib"
+        "${CMAKE_SOURCE_DIR}/SDK-1.16.40/lib/SymDBHelper.lib"
         )
 
 add_custom_command(TARGET LLCheckBag PRE_BUILD

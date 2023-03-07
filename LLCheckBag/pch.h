@@ -9,21 +9,21 @@
 
 // 添加要在此处预编译的标头
 #include <iostream>
-#include <Global.h>
-#include <EventAPI.h>
-#include <LoggerAPI.h>
-#include <Utils/PluginOwnData.h>
-#include <MC/Level.hpp>
-#include <MC/BlockInstance.hpp>
-#include <MC/Block.hpp>
-#include <MC/BlockSource.hpp>
-#include <MC/Actor.hpp>
-#include <MC/Player.hpp>
-#include <MC/ServerPlayer.hpp>
-#include <MC/ItemStack.hpp>
-#include <RegCommandAPI.h>
-#include <LLAPI.h>
+#include <llapi/Global.h>
+#include <llapi/EventAPI.h>
+#include <llapi/LoggerAPI.h>
+#include <llapi/utils/PluginOwnData.h>
+#include <llapi/mc/Level.hpp>
+#include <llapi/mc/BlockInstance.hpp>
+#include <llapi/mc/Block.hpp>
+#include <llapi/mc/BlockSource.hpp>
+#include <llapi/mc/Actor.hpp>
+#include <llapi/mc/Player.hpp>
+#include <llapi/mc/ServerPlayer.hpp>
+#include <llapi/mc/ItemStack.hpp>
+#include <llapi/RegCommandAPI.h>
+#include <llapi/LLAPI.h>
 #include "Config.h"
-#include <I18nAPI.h>
+#include <llapi/I18nAPI.h>
 
 #endif //PCH_H

@@ -1,4 +1,3 @@
-[submodule "LiteLoaderSDK"]
-	path = LiteLoaderSDK
-	url = https://github.com/LiteLDev/SDK-cpp.git
-	branch = beta
+[submodule "SDK-1.16.40"]
+	path = SDK-1.16.40
+	url = https://github.com/quizhizhe/LL-SDK-cpp-1.16.40.git

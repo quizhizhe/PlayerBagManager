@@ -1,9 +1,9 @@
 ﻿#include "pch.h"
 #include "CheckBagManager.h"
 #include "PlayerDataHelper.h"
-#include <PlayerInfoAPI.h>
-#include <FormUI.h>
-#include <MC/StringTag.hpp>
+#include <llapi/PlayerInfoAPI.h>
+#include <llapi/FormUI.h>
+#include <llapi/mc/StringTag.hpp>
 #include "Utils.h"
 
 bool CheckBagManager::mIsFree = true;

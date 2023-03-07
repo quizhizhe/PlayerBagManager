@@ -1,8 +1,8 @@
 #pragma once
-#include <Global.h>
-#include <PlayerInfoAPI.h>
-#include <mc/Level.hpp>
-#include <mc/Player.hpp>
+#include <llapi/Global.h>
+#include <llapi/PlayerInfoAPI.h>
+#include <llapi/mc/Level.hpp>
+#include <llapi/mc/Player.hpp>
 
 inline mce::UUID UuidFromNameOrUuid(std::string const& name) {
     auto uuid = mce::UUID::fromString(name);

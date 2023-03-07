@@ -1,10 +1,10 @@
 #include "pch.h"
 #include "Config.h"
-#include <third-party/Nlohmann/json.hpp>
-#include <third-party/magic_enum/magic_enum.hpp>
+#include <Nlohmann/json.hpp>
+#include <magic_enum/magic_enum.hpp>
 #include <filesystem>
-#include <I18nAPI.h>
-#include <PlayerInfoAPI.h>
+#include <llapi/I18nAPI.h>
+#include <llapi/PlayerInfoAPI.h>
 
 #define SerializeVaule(var) json[#var] = Config::var
 #define SerializeEnumVaule(var) json[#var] = magic_enum::enum_name(Config::var)

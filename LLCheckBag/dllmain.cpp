@@ -1,11 +1,11 @@
 ﻿// dllmain.cpp : 定义 DLL 应用程序的入口点。
 #include "pch.h"
-#include <LLAPI.h>
+#include <llapi/LLAPI.h>
 #include "Version.h"
-#pragma comment(lib, "../LiteLoaderSDK/Lib/bedrock_server_api.lib")
-#pragma comment(lib, "../LiteLoaderSDK/Lib/bedrock_server_var.lib")
-#pragma comment(lib, "../LiteLoaderSDK/Lib/SymDBHelper.lib")
-#pragma comment(lib, "../LiteLoaderSDK/Lib/LiteLoader.lib")
+#pragma comment(lib, "../SDK-1.16.40/lib/bedrock_server_api.lib")
+#pragma comment(lib, "../SDK-1.16.40/lib/bedrock_server_var.lib")
+#pragma comment(lib, "../SDK-1.16.40/lib/SymDBHelper.lib")
+#pragma comment(lib, "../SDK-1.16.40/lib/LiteLoader.lib")
 
 BOOL APIENTRY DllMain(HMODULE hModule,
     DWORD  ul_reason_for_call,
@@ -15,10 +15,10 @@ BOOL APIENTRY DllMain(HMODULE hModule,
     switch (ul_reason_for_call)
     {
     case DLL_PROCESS_ATTACH:
-        LL::registerPlugin(
+        ll::registerPlugin(
             PLUGIN_NAME,
             PLUGIN_INTRODUCTION,
-            LL::Version(PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR, PLUGIN_VERSION_REVISION, PLUGIN_LLVERSION_STATUS),
+            ll::Version(PLUGIN_VERSION_MAJOR, PLUGIN_VERSION_MINOR, PLUGIN_VERSION_REVISION, PLUGIN_LLVERSION_STATUS),
             std::map<std::string, std::string> {
                 { "Author", PLUGIN_AUTOHR },
         });
