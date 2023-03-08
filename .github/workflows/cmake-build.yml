@@ -21,7 +21,7 @@ jobs:
 
       - name: Build Bedrock Library
         run: |
-          cd LiteLoaderSDK/Tools
+          cd SDK-1.16.40/tools
           LibraryBuilder.exe -o ..\Lib D:\BDS
         shell: cmd
 

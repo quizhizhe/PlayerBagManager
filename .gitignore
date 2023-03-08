@@ -11,3 +11,5 @@
 /LLCheckBag/x64
 **/*.vcxproj.user
 /.venv
+/SDK-1.16.40/lib/bedrock_server_api.lib
+/SDK-1.16.40/lib/bedrock_server_var.lib
