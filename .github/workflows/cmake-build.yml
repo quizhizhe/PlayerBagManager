@@ -1,5 +1,8 @@
 name: "Build Plugin"
-on: [push]
+on:
+  push:
+    branches:
+      - 'master'
 
 jobs:
   build:
@@ -57,6 +60,19 @@ jobs:
           cp -r Data/* output/LLCheckBag/
         shell: bash
 
+      - name: Push Tooth
+        working-directory: ${{env.GITHUB_WORKSPACE}}
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cd scripts
+          ./UploadTooth.cmd ${GITHUB_REF#refs/tags/*} action
+        env:
+          REPO_KEY: ${{secrets.ACTIONS_TOKEN}}
+          USERNAME: github-actions[bot]
+        shell: cmd
+
       - name: upload files
         uses: actions/upload-artifact@v2
         with:
@@ -73,7 +89,6 @@ jobs:
         id: rel
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          echo ::set-output name=tag::${GITHUB_REF#refs/tags/*}
           mv output/LLCheckBag.zip output/LLCheckBag-${GITHUB_REF#refs/tags/*}.zip
         shell: bash
 
