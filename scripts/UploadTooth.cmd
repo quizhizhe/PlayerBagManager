@@ -10,7 +10,7 @@ echo [INFO] Fetching LLCheckBag Tooth to GitHub ...
 echo.
 
 
-for /f "delims=-" %%i in ('git describe --tags --always') do set LLCHECKBAG_NOW_TAG=%%i
+for /f "tokens=3 delims=-" %%i in ('git describe --tags --always') do set LLCHECKBAG_NOW_TAG=%%i
 
 
 echo LLCHECKBAG_NOW_TAG %LLCHECKBAG_NOW_TAG%
@@ -38,7 +38,7 @@ echo.
 @REM copy all from build/sdk to LiteLoaderSDK
 xcopy /e /y /i /q output\* Tooth-LLCheckBag
 
-set LLCHECKBAG_VERSION=[%1]
+set LLCHECKBAG_VERSION=%1
 
 @REM Get LL Version for CHANGELOG.md file
 set /a n=0
