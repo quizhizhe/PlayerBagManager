@@ -82,8 +82,8 @@ if "%TOOTH_NOW_STATUS%" neq "" (
     echo [INFO] Pushing to origin...
     echo.
 
-    git push origin main
-    git push --tags origin main
+    git push https://%USERNAME%:%REPO_KEY%@github.com/quizhizhe/Tooth-LLCheckBag.git main
+    git push --tags https://%USERNAME%:%REPO_KEY%@github.com/quizhizhe/Tooth-LLCheckBag.git main
 
     cd ..
     echo.
