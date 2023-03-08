@@ -67,7 +67,7 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           cd scripts
-          UploadSDK.cmd v1234 action
+          .\UploadSDK.cmd v1234 action
         env:
           REPO_KEY: ${{secrets.ACTIONS_TOKEN}}
           USERNAME: github-actions[bot]
