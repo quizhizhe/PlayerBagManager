@@ -42,7 +42,7 @@ set LLCHECKBAG_VERSION=[%1]
 
 @REM Get LL Version for CHANGELOG.md file
 set /a n=0
-for /f "tokens=2 delims=v" %%i in (..\CHANGELOG.md) do (
+for /f "tokens=2 delims=v" %%i in (CHANGELOG.md) do (
     if !n!==1 (
         set LLVERSION=%%i
     )
