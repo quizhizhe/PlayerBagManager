@@ -246,7 +246,7 @@ CheckBagManager::Result CheckBagManager::removePlayerData(ServerPlayer* player)
 {
     auto uuid = player->getUuid();
     mIsFree = false;
-    mRemoveRequsets.emplace(uuid, player->getUniqueID().id);
+    mRemoveRequsets.emplace(uuid, player->getOrCreateUniqueID().id);
     return Result::Request;
 }
 
@@ -256,7 +256,7 @@ CheckBagManager::Result CheckBagManager::removePlayerData(mce::UUID const& uuid)
         return Result::Error;
     if (auto player = getPlayer(uuid)) {
         mIsFree = false;
-        mRemoveRequsets.emplace(uuid.asString(), player->getUniqueID().id);
+        mRemoveRequsets.emplace(uuid.asString(), player->getOrCreateUniqueID().id);
         return Result::Success;
     }
     if (PlayerDataHelper::removeData(uuid)) {
