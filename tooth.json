@@ -1,0 +1,26 @@
+{
+    "format_version": 2,
+    "tooth": "github.com/quizhizhe/PlayerBagManager",
+    "version": "2.0.0",
+    "info": {
+        "name": "PlayerBagManager(LLCheckBag)",
+        "description": "Player Data Management",
+        "author": "xiaoqch, Qiuzhizhe",
+        "tags": [
+            "levilamina",
+            "plugin"
+        ]
+    },
+    "asset_url": "https://github.com/quizhizhe/PlayerBagManager/releases/download/v0.2.0/player-bag-manager-windows-x64-v0.2.0.zip",
+    "prerequisites": {
+        "github.com/LiteLDev/LeviLamina": "0.9x"
+    },
+    "files": {
+        "place": [
+            {
+                "src": "player-bag-manager/*",
+                "dest": "plugins/player-bag-manager/"
+            }
+        ]
+    }
+}
