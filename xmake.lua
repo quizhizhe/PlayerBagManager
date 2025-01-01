@@ -2,16 +2,18 @@ add_rules("mode.debug", "mode.release")
 
 add_repositories("liteldev-repo https://github.com/LiteLDev/xmake-repo.git")
 
--- add_requires("levilamina x.x.x") for a specific version
--- add_requires("levilamina develop") to use develop version
--- please note that you should add bdslibrary yourself if using dev version
-add_requires("levilamina")
+add_requires("levilamina develop")
+add_requires("fmt 10.2.1")
+add_requires("nlohmann_json v3.11.3")
+add_requires("levibuildscript")
 
 if not has_config("vs_runtime") then
     set_runtimes("MD")
 end
 
-target("player-bag-manager") -- Change this to your plugin name.
+target("player-bag-manager")
+    add_rules("@levibuildscript/linkrule")
+    add_rules("@levibuildscript/modpacker")
     add_cxflags(
         "/EHa",
         "/utf-8",
@@ -24,29 +26,30 @@ target("player-bag-manager") -- Change this to your plugin name.
         "/w45204"
     )
     add_defines("NOMINMAX", "UNICODE")
+    -- add_files("src/player-bag-manager/PlayerBagManager.cpp")
     add_files("src/**.cpp")
     add_includedirs("src")
-    add_packages("levilamina")
+    add_packages("levilamina","fmt","nlohmann_json")
     add_shflags("/DELAYLOAD:bedrock_server.dll") -- To use symbols provided by SymbolProvider.
     set_exceptions("none") -- To avoid conflicts with /EHa.
     set_kind("shared")
     set_languages("c++20")
     set_symbols("debug")
 
-    after_build(function (target)
-        local plugin_packer = import("scripts.after_build")
+    -- after_build(function (target)
+    --     local mod_packer = import("scripts.after_build")
 
-        local tag = os.iorun("git describe --tags --abbrev=0 --always")
-        local major, minor, patch, suffix = tag:match("v(%d+)%.(%d+)%.(%d+)(.*)")
-        if not major then
-            print("Failed to parse version tag, using 0.0.0")
-            major, minor, patch = 0, 0, 0
-        end
-        local plugin_define = {
-            pluginName = target:name(),
-            pluginFile = path.filename(target:targetfile()),
-            pluginVersion = major .. "." .. minor .. "." .. patch,
-        }
+    --     local tag = os.iorun("git describe --tags --abbrev=0 --always")
+    --     local major, minor, patch, suffix = tag:match("v(%d+)%.(%d+)%.(%d+)(.*)")
+    --     if not major then
+    --         print("Failed to parse version tag, using 0.0.0")
+    --         major, minor, patch = 0, 0, 0
+    --     end
+    --     local mod_define = {
+    --         modName = target:name(),
+    --         modFile = path.filename(target:targetfile()),
+    --         modVersion = major .. "." .. minor .. "." .. patch,
+    --     }
         
-        plugin_packer.pack_plugin(target,plugin_define)
-    end)
+    --     mod_packer.pack_mod(target,mod_define)
+    -- end)
