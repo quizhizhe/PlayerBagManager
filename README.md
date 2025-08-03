@@ -1,3 +1,5 @@
+# There are already many substitutes on minebbs, and the new version will no longer be adapted.
+
 # LeviLamina Plugin Template
 
 A LeviLamina plugin template
